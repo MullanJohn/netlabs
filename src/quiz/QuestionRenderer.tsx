@@ -28,7 +28,7 @@ const QuestionRenderer = ({
     switch (question.question_type) {
         case "mcq-single": {
             const selectedOptionId =
-                answer?.type === "single" ? answer.optionId : undefined;
+                answer?.type === "mcq-single" ? answer.optionId : undefined;
 
             return (
                 <MultipleChoiceQuestionView
@@ -43,7 +43,7 @@ const QuestionRenderer = ({
 
         case "mcq-multi": {
             const selectedOptionIds =
-                answer?.type === "multi" ? answer.optionIds : [];
+                answer?.type === "mcq-multi" ? answer.optionIds : [];
 
             return (
                 <MultipleSelectQuestionView

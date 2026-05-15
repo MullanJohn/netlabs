@@ -62,3 +62,15 @@ type QuizAnswer =
     | { type: "dragDrop"; pairs: Partial<Record<string, string>> };
 
 export type QuizAnswers = Record<string, QuizAnswer>;
+
+export type SubmissionResult = {
+    isCorrect: boolean;
+    explanation: string;
+    correctOptionIds?: string[];
+    correctPairs?: Record<string, string>;
+};
+
+export type SubmitAnswerResponse = {
+    result: SubmissionResult;
+    nextQuestion: QuizQuestion | null;
+};
