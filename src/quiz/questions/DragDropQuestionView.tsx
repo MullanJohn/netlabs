@@ -1,4 +1,3 @@
-import { useMemo, useState, useEffect, type ReactNode } from "react";
 import { DragDropProvider, useDraggable, useDroppable } from "@dnd-kit/react";
 import type { DragDropQuestion, QuestionOption } from "./types/quiz-types";
 
@@ -9,12 +8,6 @@ type Props = {
 };
 
 const DragDropQuestionView = ({ question, pairs, onSelect }: Props) => {
-    const [drops, setDrops] = useState<Partial<Record<string, string>>>({});
-
-    useEffect(() => {
-        onSelect(drops);
-    }, [drops]);
-
     return (
         <div>
             <h2>{question.stem}</h2>
@@ -33,35 +26,36 @@ const DragDropQuestionView = ({ question, pairs, onSelect }: Props) => {
                     if (
                         targetId !== "options" &&
                         !targetId.startsWith("answer-")
-                    )
+                    ) {
                         return;
+                    }
 
-                    setDrops((prev) => {
-                        if (
-                            targetId !== "options" &&
-                            prev[targetId] !== undefined &&
-                            prev[targetId] !== optionId
-                        )
-                            return prev;
+                    if (
+                        targetId !== "options" &&
+                        pairs[targetId] !== undefined &&
+                        pairs[targetId] !== optionId
+                    ) {
+                        return;
+                    }
 
-                        const next = { ...prev };
+                    const next = { ...pairs };
 
-                        for (const key in next) {
-                            if (next[key] === optionId) {
-                                delete next[key];
-                            }
+                    for (const key in next) {
+                        if (next[key] === optionId) {
+                            delete next[key];
                         }
+                    }
 
-                        if (targetId !== "options") {
-                            next[targetId] = optionId;
-                        }
-                        return next;
-                    });
+                    if (targetId !== "options") {
+                        next[targetId] = optionId;
+                    }
+
+                    onSelect(next);
                 }}
             >
                 <Droppable id="options">
                     {question.options.map((option) => {
-                        const isDropped = Object.values(drops).includes(
+                        const isDropped = Object.values(pairs).includes(
                             option.id,
                         );
 
@@ -79,7 +73,7 @@ const DragDropQuestionView = ({ question, pairs, onSelect }: Props) => {
                     {question.options.map((_, index) => {
                         const boxId = `answer-${index}`;
                         const droppedOption = question.options.find(
-                            (option) => option.id === drops[boxId],
+                            (option) => option.id === pairs[boxId],
                         );
 
                         return (
