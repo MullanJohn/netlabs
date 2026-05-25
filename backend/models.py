@@ -61,4 +61,4 @@ class Quiz(BaseModel):
     name: str
     kind: str
     bank: str
-    time_limit_minutes: int
+    time_limit_minutes: int | None = None
