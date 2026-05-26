@@ -1,0 +1,21 @@
+---
+import BrandLogo from "./BrandLogo.astro";
+import GitHubStarButton from "./GitHubStarButton.astro";
+import ThemeSwitch from "./ThemeSwitch.astro";
+---
+
+<div class="nav-row">
+    <BrandLogo />
+
+    <div class="nav-items" aria-label="Sections">
+        <a href="/select-ccna">CCNA</a>
+        <a href="/select-ccnp">CCNP</a>
+        <a href="/labs">Labs <small>soon</small></a>
+    </div>
+
+    <div class="nav-cta">
+        <ThemeSwitch />
+        <GitHubStarButton />
+        <!-- <a class="btn primary">View</a> -->
+    </div>
+</div>
