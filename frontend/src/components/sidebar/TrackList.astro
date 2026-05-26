@@ -1,0 +1,29 @@
+---
+import { tracks } from "../../data/tracks";
+---
+
+<div class="track-list">
+    {
+        tracks.map((track) =>
+            track.href ? (
+                <a class={`track-row ${track.status === "soon" ? "soon" : ""}`} href={track.href}>
+                    <span class="dot"></span>
+                    <span class="name">
+                        {track.name}
+                        <small>{track.subtitle}</small>
+                    </span>
+                    <span class="count">{track.count}</span>
+                </a>
+            ) : (
+                <div class={`track-row ${track.status === "soon" ? "soon" : ""}`}>
+                    <span class="dot"></span>
+                    <span class="name">
+                        {track.name}
+                        <small>{track.subtitle}</small>
+                    </span>
+                    <span class="count">{track.count}</span>
+                </div>
+            ),
+        )
+    }
+</div>
