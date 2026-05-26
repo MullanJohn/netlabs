@@ -1,0 +1,260 @@
+:root {
+    --bg: #0e0f12;
+    --bg-2: #131419;
+    --surface: #16181f;
+    --surface-2: #1b1e26;
+    --line: #23262e;
+    --line-2: #2c2f38;
+
+    --fg: #e6e7ea;
+    --fg-2: #b6b8c0;
+    --fg-3: #8c8e96;
+    --fg-4: #5b5e67;
+    --fg-5: #3a3d44;
+
+    --accent: #7c8cff;
+    --accent-2: #5566d6;
+    --accent-bg: rgba(124, 140, 255, 0.1);
+    --accent-ln: rgba(124, 140, 255, 0.3);
+    --on-accent: #0a0b0e;
+
+    --ok: #7fd99a;
+    --ok-bg: rgba(127, 217, 154, 0.1);
+    --err: #ff7a85;
+    --err-bg: rgba(255, 122, 133, 0.1);
+    --warn: #f0c674;
+
+    --mono:
+        "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+        monospace;
+
+    --page-pad: clamp(20px, 5vw, 56px);
+    --sidebar-width: 280px;
+    --nav-height: 60px;
+    --status-height: 22px;
+
+    color-scheme: dark;
+}
+
+[data-theme="light"] {
+    --bg: #f7f5ef;
+    --bg-2: #efede5;
+    --surface: #e8e5db;
+    --surface-2: #ddd9cc;
+    --line: #d7d3c5;
+    --line-2: #c4bfae;
+
+    --fg: #181a1f;
+    --fg-2: #3a3e46;
+    --fg-3: #686c75;
+    --fg-4: #989aa3;
+    --fg-5: #c0c4cd;
+
+    --accent: #4554c4;
+    --accent-2: #3340a8;
+    --accent-bg: rgba(69, 84, 196, 0.08);
+    --accent-ln: rgba(69, 84, 196, 0.32);
+    --on-accent: #ffffff;
+
+    --ok: #29794a;
+    --ok-bg: rgba(41, 121, 74, 0.08);
+    --err: #c44a55;
+    --err-bg: rgba(196, 74, 85, 0.08);
+    --warn: #a87a1a;
+
+    color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--mono);
+    font-feature-settings:
+        "calt" 1,
+        "liga" 0,
+        "ss01" 1;
+    font-variant-ligatures: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+body {
+    min-height: 100vh;
+}
+
+::selection {
+    background: var(--accent-bg);
+    color: var(--fg);
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    border: 0;
+    padding: 0;
+    color: inherit;
+    background: none;
+    cursor: pointer;
+}
+
+.cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    background: var(--accent);
+    animation: blink 1.05s steps(2, end) infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.kbd {
+    display: inline-block;
+    padding: 1px 6px;
+    border: 1px solid var(--line-2);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--fg-2);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.q-opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--fg-2);
+    text-align: left;
+    font-size: 13px;
+    line-height: 1.45;
+    transition:
+        background 90ms,
+        border-color 90ms,
+        color 90ms;
+}
+
+.q-opt:hover:not(:disabled) {
+    border-color: var(--line-2);
+    background: var(--surface);
+    color: var(--fg);
+}
+
+.q-opt:disabled {
+    cursor: default;
+}
+
+.q-opt .k {
+    flex: 0 0 1.2em;
+    color: var(--fg-3);
+    font-weight: 600;
+}
+
+.q-opt.is-correct {
+    border-color: var(--ok);
+    background: var(--ok-bg);
+    color: var(--fg);
+}
+
+.q-opt.is-correct .k {
+    color: var(--ok);
+}
+
+.q-opt.is-wrong {
+    border-color: var(--err);
+    background: var(--err-bg);
+    color: var(--fg);
+}
+
+.q-opt.is-wrong .k {
+    color: var(--err);
+}
+
+.q-opt.is-muted {
+    opacity: 0.55;
+}
+
+.muted {
+    color: var(--fg-3);
+}
+
+.muted-2 {
+    color: var(--fg-4);
+}
+
+.accent {
+    color: var(--accent);
+}
+
+.ok {
+    color: var(--ok);
+}
+
+.err {
+    color: var(--err);
+}
+
+.dim {
+    opacity: 0.6;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.gap-3 {
+    gap: 12px;
+}
+
+.gap-4 {
+    gap: 16px;
+}
+
+.gap-6 {
+    gap: 24px;
+}
+
+hr.rule {
+    border: 0;
+    border-top: 1px dashed var(--line-2);
+    margin: 24px 0;
+}

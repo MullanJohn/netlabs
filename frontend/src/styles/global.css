@@ -1,1 +1,125 @@
-@import "tailwindcss";
+@import "./tokens.css";
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    overflow: hidden;
+    font-size: 13px;
+}
+
+.win {
+    min-height: 100vh;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: var(--nav-height) minmax(0, 1fr) var(--status-height);
+    background: var(--bg);
+}
+
+.top {
+    min-width: 0;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10;
+}
+
+.main {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+}
+
+.pane {
+    min-height: 0;
+    overflow: auto;
+}
+
+.sidebar {
+    border-right: 1px solid var(--line);
+    background: var(--bg-2);
+}
+
+.editor {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+.editor-body {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 32px var(--page-pad) 56px;
+}
+
+.status {
+    min-width: 0;
+    border-top: 1px solid var(--line);
+    background: var(--bg-2);
+}
+
+@media (max-width: 980px) {
+    :root {
+        --nav-height: 56px;
+        --status-height: 0px;
+    }
+
+    body {
+        overflow: auto;
+    }
+
+    .win {
+        min-height: 100vh;
+        height: auto;
+        grid-template-rows: auto auto;
+    }
+
+    .main {
+        grid-template-columns: 1fr;
+    }
+
+    .pane {
+        overflow: visible;
+    }
+
+    .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .editor-body {
+        overflow: visible;
+        padding-top: 28px;
+        padding-bottom: 40px;
+    }
+
+    .status {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    :root {
+        --page-pad: 16px;
+    }
+
+    body {
+        font-size: 12px;
+    }
+
+    .editor {
+        font-size: 13px;
+    }
+
+    .editor-body {
+        padding-top: 24px;
+        padding-bottom: 32px;
+    }
+}
