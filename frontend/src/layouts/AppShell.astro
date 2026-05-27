@@ -1,0 +1,23 @@
+---
+import "../styles/global.css";
+---
+
+<div class="win">
+    <nav class="top" aria-label="Primary">
+        <slot name="nav" />
+    </nav>
+
+    <div class="main">
+        <aside class="pane sidebar">
+            <slot name="sidebar" />
+        </aside>
+
+        <section class="pane editor">
+            <slot />
+        </section>
+    </div>
+
+    <footer class="status">
+        <slot name="status" />
+    </footer>
+</div>

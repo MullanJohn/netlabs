@@ -1,0 +1,17 @@
+---
+interface Props {
+    title: string;
+    meta?: string;
+}
+
+const { title, meta } = Astro.props;
+---
+
+<div class="sb-block">
+    <div class="sb-h">
+        <span>{title}</span>
+        {meta ? <span class="more">{meta}</span> : null}
+    </div>
+
+    <slot />
+</div>

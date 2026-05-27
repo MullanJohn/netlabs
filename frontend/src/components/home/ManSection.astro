@@ -1,0 +1,14 @@
+---
+interface Props {
+    title: string;
+    flush?: boolean;
+}
+
+const { title, flush = false } = Astro.props;
+---
+
+<section class="man-section" aria-labelledby={`section-${title.replaceAll(" ", "-")}`}>
+    <h2 class="sec" id={`section-${title.replaceAll(" ", "-")}`}>{title}</h2>
+
+    {flush ? <slot /> : <div class="body"><slot /></div>}
+</section>
