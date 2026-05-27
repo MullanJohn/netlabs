@@ -1,0 +1,41 @@
+---
+const options = [
+    {
+        key: "--track",
+        flag: "<exam>",
+        description:
+            "Choose CCNA 200-301, CCNP ENCOR 350-401, or the lab track as it comes online.",
+        note: "Start broad, then narrow by topic or domain.",
+    },
+    {
+        key: "--explain",
+        description:
+            "Every answer includes the reasoning behind the correct choice and why the distractors fail.",
+        note: "Corrections are diff-tracked so updates are visible.",
+    },
+    {
+        key: "--domain",
+        flag: "<id>",
+        description:
+            "Quizzes contain filtered sets of questions based on blueprint sections or templates, covering topics from fundamentals through automation.",
+        note: "Use after choosing a track to focus the quiz scope.",
+    },
+] as const;
+---
+
+<dl class="opt-grid">
+    {
+        options.map((option) => (
+            <>
+                <dt>
+                    {option.key}
+                    {option.flag ? <span>{option.flag}</span> : null}
+                </dt>
+                <dd>
+                    {option.description}
+                    <small>{option.note}</small>
+                </dd>
+            </>
+        ))
+    }
+</dl>

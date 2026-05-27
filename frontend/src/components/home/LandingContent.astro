@@ -1,0 +1,64 @@
+---
+import ManSection from "./ManSection.astro";
+import OptionsList from "./OptionsList.astro";
+import TopBar from "./TopBar.astro";
+import TrackCards from "./TrackCards.astro";
+---
+
+<TopBar />
+
+<div class="editor-body">
+    <ManSection title="name">
+        <div class="name-block">
+            <div class="name-line">
+                netlabs
+            </div>
+
+            <div class="name-sub">
+                <span>Exam questions and hands-on labs that respect your time.</span>
+                <span class="terminal-cmd">
+                    <span class="accent">$ netlabs start</span><span class="cursor"></span>
+                </span>
+            </div>
+        </div>
+    </ManSection>
+
+    <ManSection title="synopsis">
+        <pre class="syn"><span class="cmd">netlabs</span> <span class="flag">[--track</span> <span class="arg">ccna</span><span class="flag">|</span><span class="arg">ccnp</span><span class="flag">]</span> <span class="flag">[--topic</span> <span class="arg">subnetting|routing|switching|services|...</span><span class="flag">]</span> <span class="flag">[--domain</span> <span class="arg">1.0</span><span class="flag">|</span><span class="arg">...</span><span class="flag">|</span><span class="arg">6.0</span><span class="flag">]</span></pre>
+    </ManSection>
+
+    <ManSection title="description">
+        <p class="lede">
+            netlabs pairs exam-style questions with hands-on networking labs, so you can drill the blueprint and practice the behavior behind it.
+        </p>
+
+        <p>
+            Questions are terse, carefully reviewed, and mapped to the official exam domains. Labs turn the same topics into CLI practice, packet interpretation, and topology reasoning.
+        </p>
+
+        <p>
+            The question banks are live now. Labs are being built next.
+            <span class="muted-2">See <span class="accent">labs</span>.</span>
+        </p>
+    </ManSection>
+
+    <ManSection title="options" flush>
+        <OptionsList />
+    </ManSection>
+
+    <ManSection title="examples">
+        <p>
+            A sample quiz will load from the question API.
+        </p>
+    </ManSection>
+
+    <ManSection title="sections" flush>
+        <TrackCards />
+    </ManSection>
+
+    <ManSection title="authors">
+        <p>
+            Maintained by network engineers building the practice tool they wanted while studying.
+        </p>
+    </ManSection>
+</div>

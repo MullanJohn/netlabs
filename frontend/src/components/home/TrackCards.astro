@@ -1,0 +1,38 @@
+---
+const cards = [
+    {
+        label: "200-301",
+        name: "CCNA",
+        meta: "6 domains",
+        body: "Blueprint-aligned questions covering fundamentals, access, IP connectivity, services, security, and automation.",
+        upcoming: false,
+    },
+    {
+        label: "350-401",
+        name: "CCNP ENCOR",
+        meta: "6 domains",
+        body: "Blueprint-aligned questions covering architecture, virtualization, infrastructure, assurance, security, and automation.",
+        upcoming: false,
+    },
+    {
+        label: "Labs",
+        name: "Labs",
+        meta: "in progress",
+        body: "Browser-native practice covering packet captures, route tables, subnetting, configuration, and topology reasoning.",
+        upcoming: true,
+    },
+] as const;
+---
+
+<div class="tracks">
+    {
+        cards.map((card) => (
+            <article class={`track ${card.upcoming ? "upcoming" : ""}`}>
+                <div class="label">{card.label}</div>
+                <h3>{card.name}</h3>
+                <div class="count">{card.meta}</div>
+                <p>{card.body}</p>
+            </article>
+        ))
+    }
+</div>
