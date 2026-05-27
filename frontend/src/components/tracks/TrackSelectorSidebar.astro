@@ -1,0 +1,56 @@
+---
+import { trackSelectors } from "../../data/track-selectors";
+import type { TrackSelector } from "../../data/track-selectors";
+
+interface Props {
+    track: TrackSelector;
+}
+
+const { track } = Astro.props;
+const tracks = Object.values(trackSelectors);
+---
+
+<div class="sb-block">
+    <div class="sb-h">
+        <span>Track</span>
+        <span class="more">practice bank</span>
+    </div>
+
+    <div class="track-switch">
+        {
+            tracks.map((item) => (
+                <a class={item.slug === track.slug ? "active" : ""} href={`/${item.slug}`}>
+                    <span class="ts-name">{item.switchName}</span>
+                    <span class="ts-meta">{item.switchMeta}</span>
+                </a>
+            ))
+        }
+    </div>
+
+    <div class="track-name">{track.summaryName}</div>
+    <div class="track-sub">{track.summary}</div>
+</div>
+
+<div class="sb-block">
+    <div class="sb-h">
+        <span>Domains</span>
+        <span class="more">exam weight</span>
+    </div>
+
+    <div class="domain-list">
+        {
+            track.domains.map((domain) => (
+                <div class="dom-row">
+                    <span class="dom-num">{domain.number}</span>
+                    <span class="dom-name">{domain.name}</span>
+                    <span class="dom-bar" style={`--domain-share: ${domain.width}%`}>
+                        <i></i>
+                    </span>
+                    <span class="dom-count">{domain.share}</span>
+                </div>
+            ))
+        }
+    </div>
+</div>
+
+<div class="sb-spacer"></div>

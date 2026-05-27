@@ -1,0 +1,157 @@
+---
+import { selectorCategories } from "../../data/track-selectors";
+import type { TrackSelector } from "../../data/track-selectors";
+import TrackSelectorCategoryCard from "./TrackSelectorCategoryCard.astro";
+
+interface Props {
+    track: TrackSelector;
+}
+
+const { track } = Astro.props;
+const heroLabel = `${track.slug === "ccnp-encor" ? "ccnp encor" : track.slug} ${track.exam} · pick a drill`;
+---
+
+<div class="top-bar">
+    <div class="breadcrumb">
+        netlabs <span class="chev">/</span> tracks <span class="chev">/</span>
+        <b>{track.statusLabel}</b>
+    </div>
+
+    <div class="right">
+        <span
+            >jump to section <span class="kbd">1</span>-<span class="kbd"
+                >6</span
+            ></span
+        >
+    </div>
+</div>
+
+<div class="editor-body selector-page">
+    <section class="selector-hero">
+        <div>
+            <div class="label"><span class="live"></span>{heroLabel}</div>
+            <h1>
+                {track.title}
+                <span>/</span>
+                <b>{track.tag}</b>
+            </h1>
+            <p>{track.description}</p>
+        </div>
+
+        <div class="selector-facts">
+            <div>
+                <span>mode</span>
+                <b>practice</b>
+            </div>
+        </div>
+    </section>
+
+    <h2 class="sec">
+        drills
+        <span class="sec-meta"
+            >six kinds · each opens to the drills inside it</span
+        >
+    </h2>
+
+    <div class="selector-grid">
+        {
+            selectorCategories.map((category) => (
+                <TrackSelectorCategoryCard category={category} track={track} />
+            ))
+        }
+    </div>
+</div>
+
+<script>
+    import { fetchCatalogCategoryPreview } from "../../data/catalog-client";
+
+    const previews = document.querySelectorAll<HTMLElement>(
+        "[data-category-preview]",
+    );
+    const scroller = document.querySelector<HTMLElement>(".editor-body")!;
+
+    for (const preview of previews) {
+        const trackSlug = preview.dataset.trackSlug!;
+        const categorySlug = preview.dataset.categorySlug!;
+
+        fetchCatalogCategoryPreview(trackSlug, categorySlug)
+            .then((data) => {
+                preview.replaceChildren();
+
+                if (data.items.length === 0) {
+                    const empty = document.createElement("span");
+                    empty.className = "selector-preview-state";
+                    empty.textContent = "no drills yet";
+                    preview.append(empty);
+                    return;
+                }
+
+                data.items.forEach((item, index) => {
+                    const link = document.createElement("a");
+                    link.className = "selector-preview-row";
+                    link.href = item.href;
+
+                    const id = document.createElement("span");
+                    id.className = "selector-preview-id";
+                    id.textContent = String(index + 1).padStart(2, "0");
+
+                    const name = document.createElement("span");
+                    name.className = "selector-preview-name";
+                    name.textContent = item.name;
+
+                    const count = document.createElement("b");
+                    count.textContent =
+                        item.item_count === null
+                            ? ""
+                            : `${item.item_count} items`;
+
+                    link.append(id, name, count);
+                    preview.append(link);
+                });
+            })
+            .catch(() => {
+                const error = document.createElement("span");
+                error.className = "selector-preview-state error";
+                error.textContent = "preview unavailable";
+                preview.replaceChildren(error);
+            });
+    }
+
+    document.addEventListener("keydown", (event) => {
+        const target = event.target;
+
+        if (
+            target instanceof HTMLElement &&
+            target.matches("input, textarea, select, [contenteditable='true']")
+        ) {
+            return;
+        }
+
+        if (event.altKey || event.ctrlKey || event.metaKey) {
+            return;
+        }
+
+        if (!/^[1-6]$/.test(event.key)) {
+            return;
+        }
+
+        const category = document.querySelector<HTMLElement>(
+            `[data-category-shortcut="${event.key}"]`,
+        )!;
+
+        event.preventDefault();
+
+        const top =
+            category.getBoundingClientRect().top -
+            scroller.getBoundingClientRect().top +
+            scroller.scrollTop -
+            12;
+
+        scroller.scrollTo({ top, behavior: "smooth" });
+        category.classList.add("shortcut-hit");
+
+        window.setTimeout(() => {
+            category.classList.remove("shortcut-hit");
+        }, 700);
+    });
+</script>

@@ -1,0 +1,77 @@
+---
+import type {
+    SelectorCategory,
+    TrackSelector,
+} from "../../data/track-selectors";
+
+interface Props {
+    category: SelectorCategory;
+    track: TrackSelector;
+}
+
+const { category, track } = Astro.props;
+const href = `/${track.slug}/${category.slug}`;
+const shortcut = category.label.slice(1);
+
+const taglines = {
+    "domain-drills": ["good for ", "learning", " a domain end-to-end"],
+    "section-drills": ["good for ", "cleaning up", " a weak spot"],
+    "topic-drills": ["good for ", "connecting ideas", " across domains"],
+    "skill-sets": ["good for ", "getting fast", " at a single move"],
+    "mixed-reviews": ["good for a ", "daily habit", ""],
+    exams: ["scored ", "0-1000", ""],
+} as const;
+
+const tagline = taglines[category.slug];
+
+const moreLabels = {
+    "domain-drills": "view all domains →",
+    "section-drills": "view all sections →",
+    "topic-drills": "view all topics →",
+    "skill-sets": "view all skill-sets →",
+    "mixed-reviews": "view all reviews →",
+    exams: "view all exams →",
+} as const;
+
+const moreLabel = moreLabels[category.slug];
+---
+
+<article
+    class={`selector-card ${category.slug === "exams" ? "feature" : ""}`}
+    id={`cat-${shortcut}`}
+    data-category-shortcut={shortcut}
+>
+    <div class="selector-card-head">
+        <div>
+            <div class="selector-card-kicker">
+                <span class="dot"></span>
+                <span>{category.label} · {category.slug}</span>
+            </div>
+            <h3>
+                {category.name}
+                <span>{category.path}</span>
+            </h3>
+            <p>{category.description}</p>
+        </div>
+        <div class="selector-card-meta">
+            <span>view <b>{category.meta}</b></span>
+            <span class="selector-card-keys"
+                ><span class="kbd">{shortcut}</span> jump</span
+            >
+        </div>
+    </div>
+
+    <div
+        class="selector-preview"
+        data-category-preview
+        data-track-slug={track.slug}
+        data-category-slug={category.slug}
+    >
+        <span class="selector-preview-state">loading...</span>
+    </div>
+
+    <div class="selector-card-foot">
+        <span class="tagline">{tagline[0]}<b>{tagline[1]}</b>{tagline[2]}</span>
+        <a class="more" href={href}>{moreLabel}</a>
+    </div>
+</article>
