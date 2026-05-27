@@ -577,6 +577,77 @@ pre.syn .cmt {
     color: var(--fg);
 }
 
+.landing-footer {
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+}
+
+.f-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) repeat(2, minmax(120px, 180px));
+    gap: 28px;
+}
+
+.footer-logo {
+    display: inline-flex;
+    margin-bottom: 14px;
+}
+
+.f-brand p {
+    max-width: 42ch;
+    margin: 0;
+    color: var(--fg-3);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.f-links h4 {
+    margin: 0 0 10px;
+    color: var(--fg);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.f-links ul {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.f-links a {
+    color: var(--fg-3);
+    font-size: 12.5px;
+    transition: color 100ms;
+}
+
+.f-links a:hover {
+    color: var(--fg);
+}
+
+.f-links small {
+    margin-left: 3px;
+    color: var(--warn);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+}
+
+.f-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 26px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+    color: var(--fg-4);
+    font-size: 11px;
+}
+
 .status {
     min-width: 0;
     display: flex;
@@ -718,6 +789,14 @@ pre.syn .cmt {
         grid-template-columns: 1fr;
     }
 
+    .f-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .f-brand {
+        grid-column: 1 / -1;
+    }
+
     .status {
         display: none;
     }
@@ -803,5 +882,15 @@ pre.syn .cmt {
     pre.syn {
         padding: 14px 16px;
         font-size: 12px;
+    }
+
+    .f-grid {
+        grid-template-columns: 1fr;
+        gap: 22px;
+    }
+
+    .f-meta {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }
