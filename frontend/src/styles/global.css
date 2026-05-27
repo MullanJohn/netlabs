@@ -351,6 +351,232 @@ body {
     padding: 32px var(--page-pad) 56px;
 }
 
+.top-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px var(--page-pad) 12px;
+    border-bottom: 1px solid var(--line);
+    color: var(--fg-4);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+}
+
+.top-bar b {
+    color: var(--fg-2);
+    font-weight: 500;
+}
+
+.top-bar .chev {
+    color: var(--fg-5);
+}
+
+.top-bar .right {
+    margin-left: auto;
+    display: flex;
+    gap: 18px;
+}
+
+.man-section + .man-section {
+    margin-top: 48px;
+}
+
+.sec {
+    margin: 0 0 16px;
+    color: var(--fg);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.sec::before {
+    content: "";
+    width: 10px;
+    height: 1px;
+    display: inline-block;
+    margin: 0 12px 3px 0;
+    background: var(--accent);
+    vertical-align: middle;
+}
+
+.body {
+    margin-left: 32px;
+}
+
+.editor p {
+    max-width: 70ch;
+    margin: 0 0 12px;
+    color: var(--fg-2);
+}
+
+.editor p.lede {
+    color: var(--fg);
+    font-size: 15px;
+}
+
+.name-block {
+    margin: 12px 0 28px;
+}
+
+.name-line {
+    color: var(--fg);
+    font-size: clamp(34px, 5vw, 52px);
+    font-weight: 500;
+    line-height: 1.05;
+}
+
+.name-line .sep {
+    margin: 0 14px;
+    color: var(--fg-4);
+    font-weight: 300;
+}
+
+.name-line .tag {
+    color: var(--fg-2);
+    font-weight: 400;
+}
+
+.name-sub {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    color: var(--fg-3);
+    font-size: 14px;
+}
+
+.terminal-cmd {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+
+.terminal-cmd .cursor {
+    width: 0.56em;
+    height: 1em;
+    margin-left: 0;
+    flex: 0 0 auto;
+}
+
+pre.syn {
+    max-width: 100%;
+    margin: 0;
+    padding: 16px 20px;
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-left: 2px solid var(--accent);
+    background: var(--bg-2);
+    color: var(--fg-2);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+pre.syn .cmd {
+    color: var(--accent);
+}
+
+pre.syn .flag {
+    color: var(--warn);
+}
+
+pre.syn .arg {
+    color: var(--fg);
+}
+
+pre.syn .cmt {
+    color: var(--fg-4);
+}
+
+.opt-grid {
+    display: grid;
+    grid-template-columns: minmax(140px, 200px) minmax(0, 1fr);
+    column-gap: 24px;
+    row-gap: 22px;
+    margin: 12px 0 0 32px;
+}
+
+.opt-grid dt {
+    color: var(--accent);
+    font-weight: 500;
+}
+
+.opt-grid dt span {
+    margin-left: 8px;
+    color: var(--fg-3);
+    font-weight: 400;
+}
+
+.opt-grid dd {
+    max-width: 60ch;
+    margin: 0;
+    color: var(--fg-2);
+}
+
+.opt-grid dd small {
+    display: block;
+    margin-top: 2px;
+    color: var(--fg-4);
+}
+
+.tracks {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 6px 0 0 32px;
+}
+
+.track {
+    min-width: 0;
+    padding: 16px 18px 18px;
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+}
+
+.track .label {
+    margin-bottom: 6px;
+    color: var(--fg-4);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.track h3 {
+    margin: 0 0 10px;
+    color: var(--fg);
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.track .count {
+    margin-bottom: 14px;
+    color: var(--accent);
+    font-size: 12px;
+}
+
+.track p {
+    margin: 0;
+    color: var(--fg-3);
+    font-size: 12.5px;
+    line-height: 1.55;
+}
+
+.track.upcoming {
+    opacity: 0.72;
+}
+
+.seealso a {
+    color: var(--accent);
+    border-bottom: 1px dashed var(--accent-ln);
+}
+
+.seealso a:hover {
+    color: var(--fg);
+}
+
 .status {
     min-width: 0;
     display: flex;
@@ -478,6 +704,20 @@ body {
         padding-bottom: 40px;
     }
 
+    .top-bar {
+        flex-wrap: wrap;
+        gap: 8px 16px;
+    }
+
+    .top-bar .right {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .tracks {
+        grid-template-columns: 1fr;
+    }
+
     .status {
         display: none;
     }
@@ -529,5 +769,39 @@ body {
     .editor-body {
         padding-top: 24px;
         padding-bottom: 32px;
+    }
+
+    .man-section + .man-section {
+        margin-top: 36px;
+    }
+
+    .body,
+    .opt-grid,
+    .tracks {
+        margin-left: 0;
+    }
+
+    .name-line {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .name-line .sep {
+        display: none;
+    }
+
+    .opt-grid {
+        grid-template-columns: 1fr;
+        row-gap: 6px;
+    }
+
+    .opt-grid dd + dt {
+        margin-top: 16px;
+    }
+
+    pre.syn {
+        padding: 14px 16px;
+        font-size: 12px;
     }
 }
