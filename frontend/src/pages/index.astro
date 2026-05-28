@@ -1,21 +1,36 @@
 ---
-import MultipleChoiceQuestion from "../quiz/MultipleChoiceQuestion";
-import DragDropQuestion from "../quiz/DragDropQuestion";
-import MultiSelectQuestion from "../quiz/MultiSelectQuestion";
-import QuizPlayer from "../quiz/QuizPlayer";
+import AppShell from "../layouts/AppShell.astro";
+import LandingContent from "../components/home/LandingContent.astro";
+import TopNav from "../components/nav/TopNav.astro";
+import Sidebar from "../components/sidebar/Sidebar.astro";
+import StatusBar from "../components/shell/StatusBar.astro";
 ---
 
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="netlabs is a focused CCNA and CCNP practice bank for network exam preparation." />
+        <meta name="generator" content={Astro.generator} />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
-        <meta name="viewport" content="width=device-width" />
-        <meta name="generator" content={Astro.generator} />
-        <title>Astro</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <title>netlabs</title>
     </head>
     <body>
-        <h1>Astro</h1>
-        <main></main>
+        <AppShell>
+            <TopNav slot="nav" />
+            <Sidebar slot="sidebar" />
+
+            <LandingContent />
+
+            <StatusBar slot="status" />
+        </AppShell>
     </body>
 </html>
