@@ -1,0 +1,367 @@
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--line);
+    background: var(--bg-2);
+}
+
+.sb-block {
+    padding: 16px 16px 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.sb-block:last-child {
+    border-bottom: 0;
+}
+
+.sb-h {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: var(--fg-4);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.sb-h .more {
+    color: var(--fg-4);
+    font-size: 10.5px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.track-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.track-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 -10px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    color: var(--fg-2);
+    transition:
+        background 100ms,
+        color 100ms;
+}
+
+.track-row:hover {
+    background: var(--surface);
+    color: var(--fg);
+}
+
+.track-row .dot {
+    width: 8px;
+    height: 8px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124, 140, 255, 0.18);
+}
+
+.track-row .name {
+    min-width: 0;
+    color: inherit;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.track-row .name small {
+    display: block;
+    margin-top: 1px;
+    color: var(--fg-4);
+    font-size: 10.5px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+}
+
+.track-row .count {
+    margin-left: auto;
+    color: var(--fg-3);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+.track-row.soon,
+.track-row.soon .name {
+    color: var(--fg-3);
+}
+
+.track-row.soon .dot {
+    background: var(--warn);
+    box-shadow: none;
+}
+
+.track-row.soon .count {
+    color: var(--warn);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+}
+
+.track-switch {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.track-switch a {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg-3);
+    transition:
+        background 100ms,
+        border-color 100ms,
+        color 100ms;
+}
+
+.track-switch a:hover {
+    border-color: var(--line-2);
+    color: var(--fg);
+}
+
+.track-switch a.active {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+    color: var(--fg);
+}
+
+.track-switch .ts-name {
+    overflow: hidden;
+    color: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.track-switch .ts-meta {
+    overflow: hidden;
+    color: var(--fg-4);
+    font-size: 10.5px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.track-switch a.active .ts-meta {
+    color: var(--accent);
+}
+
+.track-name {
+    margin-top: 18px;
+    color: var(--fg);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+}
+
+.track-sub {
+    margin-top: 3px;
+    color: var(--fg-3);
+    font-size: 11.5px;
+    line-height: 1.55;
+}
+
+.domain-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.dom-row {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) 60px auto;
+    align-items: center;
+    gap: 8px;
+    margin: 0 -6px;
+    padding: 7px 6px 7px 4px;
+    border-radius: 4px;
+    color: var(--fg-2);
+    font-size: 12px;
+}
+
+.dom-row:hover {
+    background: var(--surface);
+}
+
+.dom-num {
+    color: var(--fg-4);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+
+.dom-name {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--fg-2);
+    font-size: 12px;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dom-row:hover .dom-name {
+    color: var(--fg);
+}
+
+.dom-bar {
+    position: relative;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 2px;
+    background: var(--line);
+}
+
+.dom-bar i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--domain-share);
+    border-radius: 2px;
+    background: var(--accent);
+    opacity: 0.75;
+}
+
+.dom-count {
+    color: var(--fg-3);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+.back-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px -10px 0;
+    padding: 8px 10px;
+    border-radius: 4px;
+    color: var(--fg-3);
+    font-size: 11.5px;
+    transition:
+        background 100ms,
+        color 100ms;
+}
+
+.back-row:hover {
+    background: var(--surface);
+    color: var(--fg);
+}
+
+.back-row .arr {
+    color: var(--accent);
+}
+
+.back-row b {
+    color: var(--fg-2);
+    font-weight: 500;
+}
+
+.catnav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.catnav a {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    color: var(--fg-2);
+    transition:
+        background 100ms,
+        color 100ms;
+}
+
+.catnav a:hover {
+    background: var(--surface);
+    color: var(--fg);
+}
+
+.catnav a.active {
+    background: var(--accent-bg);
+    color: var(--fg);
+}
+
+.catnav .num {
+    color: var(--fg-4);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+}
+
+.catnav a.active .num {
+    color: var(--accent);
+}
+
+.catnav .name {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 12.5px;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.catnav .count {
+    color: var(--fg-4);
+    font-size: 10.5px;
+}
+
+.catnav a.active .count {
+    color: var(--accent);
+}
+
+.sb-spacer {
+    flex: 1;
+}
+
+@media (max-width: 980px) {
+    .sidebar {
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .sb-block {
+        padding: 14px var(--page-pad);
+    }
+
+    .track-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .track-row {
+        min-width: 0;
+        margin: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .track-list {
+        grid-template-columns: 1fr;
+        gap: 2px;
+    }
+
+    .track-row {
+        padding-block: 9px;
+    }
+}
