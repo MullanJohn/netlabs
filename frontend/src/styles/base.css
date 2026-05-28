@@ -1,0 +1,30 @@
+html,
+body {
+    height: 100%;
+}
+
+body {
+    overflow: hidden;
+    font-size: 13px;
+}
+
+@media (max-width: 980px) {
+    :root {
+        --nav-height: 56px;
+        --status-height: 0px;
+    }
+
+    body {
+        overflow: auto;
+    }
+}
+
+@media (max-width: 640px) {
+    :root {
+        --page-pad: 16px;
+    }
+
+    body {
+        font-size: 12px;
+    }
+}

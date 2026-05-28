@@ -8,7 +8,15 @@ from typing import Any
 import asyncpg
 from fastapi import Depends, FastAPI, HTTPException, Request
 
-from models import AnswerRequest, Quiz, QuizQuestion, SubmitAnswerResponse
+from models import (
+    AnswerRequest,
+    CatalogCategoryListResponse,
+    CatalogCategoryPreviewResponse,
+    CatalogDrillListResponse,
+    Quiz,
+    QuizQuestion,
+    SubmitAnswerResponse,
+)
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO").upper(),
@@ -95,6 +103,16 @@ def question_from_row(row: asyncpg.Record | None) -> dict[str, Any] | None:
     data["options"] = decode_json(data.get("options")) or []
     data["exhibit"] = decode_json(data.get("exhibit"))
     return data
+
+def catalog_drill(row: asyncpg.Record) -> dict[str, Any]:
+    return {
+        "slug": row["slug"],
+        "name": row["name"],
+        "description": row["description"],
+        "href": f"/quiz/{row['slug']}",
+        "quiz_slug": row["slug"],
+        "item_count": row["item_count"],
+    }
 
 async def fetch_first_question(
     quiz_slug: str,
@@ -193,7 +211,14 @@ async def list_quizzes(conn: asyncpg.Connection = Depends(get_conn)):
     try:
         rows = await conn.fetch(
             """
-            SELECT slug, name, kind, bank, time_limit_minutes
+            SELECT slug,
+                   name,
+                   description,
+                   track_slug,
+                   kind,
+                   subkind,
+                   bank,
+                   time_limit_minutes
             FROM quiz_templates
             ORDER BY slug
             """
@@ -204,6 +229,119 @@ async def list_quizzes(conn: asyncpg.Connection = Depends(get_conn)):
         raise
     except Exception as e:
         logger.exception("Failed to list quizzes")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+@app.get(
+    "/catalog/{track_slug}/categories",
+    response_model=CatalogCategoryListResponse,
+)
+async def list_catalog_categories(
+    track_slug: str,
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    try:
+        rows = await conn.fetch(
+            f"""
+            SELECT kind AS slug
+            FROM quiz_templates qt
+            WHERE qt.track_slug = $1
+            GROUP BY kind
+            ORDER BY kind
+            """,
+            track_slug,
+        )
+        categories = [dict(row) for row in rows]
+        logger.info(
+            "Fetched %d catalog categories: track_slug=%s",
+            len(categories),
+            track_slug,
+        )
+        return {"categories": categories}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Failed to list catalog categories: track_slug=%s", track_slug)
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+@app.get(
+    "/catalog/{track_slug}/categories/{category_slug}/preview",
+    response_model=CatalogCategoryPreviewResponse,
+)
+async def preview_catalog_drills(
+    track_slug: str,
+    category_slug: str,
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    try:
+        rows = await conn.fetch(
+            f"""
+            SELECT qt.slug,
+                   qt.name,
+                   qt.description,
+                   COUNT(qti.question_id)::int AS item_count
+            FROM quiz_templates qt
+            LEFT JOIN quiz_template_items qti ON qti.template_slug = qt.slug
+            WHERE qt.track_slug = $1
+              AND qt.kind = $2
+            GROUP BY qt.slug, qt.name, qt.description
+            ORDER BY qt.slug
+            LIMIT 3
+            """,
+            track_slug,
+            category_slug,
+        )
+        return {
+            "category_slug": category_slug,
+            "items": [catalog_drill(row) for row in rows],
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(
+            "Failed to preview catalog drills: track_slug=%s category_slug=%s",
+            track_slug,
+            category_slug,
+        )
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+@app.get(
+    "/catalog/{track_slug}/categories/{category_slug}/drills",
+    response_model=CatalogDrillListResponse,
+)
+async def list_catalog_drills(
+    track_slug: str,
+    category_slug: str,
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    try:
+        rows = await conn.fetch(
+            f"""
+            SELECT qt.slug,
+                   qt.name,
+                   qt.description,
+                   COUNT(qti.question_id)::int AS item_count
+            FROM quiz_templates qt
+            LEFT JOIN quiz_template_items qti ON qti.template_slug = qt.slug
+            WHERE qt.track_slug = $1
+              AND qt.kind = $2
+            GROUP BY qt.slug, qt.name, qt.description
+            ORDER BY qt.slug
+            """,
+            track_slug,
+            category_slug,
+        )
+        return {
+            "category_slug": category_slug,
+            "drills": [catalog_drill(row) for row in rows],
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(
+            "Failed to list catalog drills: track_slug=%s category_slug=%s",
+            track_slug,
+            category_slug,
+        )
         raise HTTPException(status_code=500, detail="Internal server error") from e
 
 @app.get("/{quiz_slug}/start", response_model=QuizQuestion)

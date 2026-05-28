@@ -1,4 +1,12 @@
-<span class="seg branch">main</span>
+---
+interface Props {
+    branch?: string;
+}
+
+const { branch = "main" } = Astro.props;
+---
+
+<span class="seg branch">{branch}</span>
 <span class="seg"><span class="led"></span><b>online</b></span>
 <span class="spacer"></span>
 <span class="seg ok">ready</span>

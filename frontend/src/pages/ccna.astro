@@ -1,9 +1,12 @@
 ---
 import AppShell from "../layouts/AppShell.astro";
-import LandingContent from "../components/home/LandingContent.astro";
 import TopNav from "../components/nav/TopNav.astro";
-import Sidebar from "../components/sidebar/Sidebar.astro";
 import StatusBar from "../components/shell/StatusBar.astro";
+import TrackSelectorContent from "../components/tracks/TrackSelectorContent.astro";
+import TrackSelectorSidebar from "../components/tracks/TrackSelectorSidebar.astro";
+import { trackSelectors } from "../data/track-selectors";
+
+const track = trackSelectors.ccna;
 ---
 
 <!doctype html>
@@ -11,7 +14,7 @@ import StatusBar from "../components/shell/StatusBar.astro";
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="netlabs is a focused CCNA and CCNP practice bank for network exam preparation." />
+        <meta name="description" content="CCNA practice drill selector for netlabs." />
         <meta name="generator" content={Astro.generator} />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
@@ -21,16 +24,16 @@ import StatusBar from "../components/shell/StatusBar.astro";
             href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap"
             rel="stylesheet"
         />
-        <title>netlabs</title>
+        <title>netlabs · CCNA</title>
     </head>
     <body>
         <AppShell>
             <TopNav slot="nav" />
-            <Sidebar slot="sidebar" />
+            <TrackSelectorSidebar slot="sidebar" track={track} />
 
-            <LandingContent />
+            <TrackSelectorContent track={track} />
 
-            <StatusBar slot="status" />
+            <StatusBar slot="status" branch={track.branch} />
         </AppShell>
     </body>
 </html>

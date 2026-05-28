@@ -1,0 +1,145 @@
+---
+import type {
+    SelectorCategory,
+    TrackSelector,
+} from "../../data/track-selectors";
+
+interface Props {
+    track: TrackSelector;
+    category: SelectorCategory;
+}
+
+const { track, category } = Astro.props;
+---
+
+<div class="top-bar">
+    <div class="breadcrumb">
+        netlabs <span class="chev">/</span> tracks <span class="chev">/</span>
+        <b>{track.statusLabel}</b>
+        <span class="chev">/</span>
+        <b>{category.slug}</b>
+    </div>
+</div>
+
+<div
+    class="editor-body inner-page"
+    data-drill-page
+    data-track-slug={track.slug}
+    data-category-slug={category.slug}
+>
+    <section class="inner-hero">
+        <div>
+            <div class="label">
+                <span class="num">{category.label}</span>
+                <span>{track.statusLabel} {track.exam}</span>
+            </div>
+            <h1>
+                {category.name}
+                <span>{category.path}</span>
+            </h1>
+            <p>{category.description}</p>
+        </div>
+    </section>
+
+    <div class="drill-toolbar">
+        <h2>drills in this category</h2>
+        <span class="count"><b data-drill-count>0</b> drills</span>
+    </div>
+
+    <div class="drills" data-drill-list>
+        <span class="drill-state">loading drills...</span>
+    </div>
+</div>
+
+<script>
+    import { fetchCatalogDrills } from "../../data/catalog-client";
+
+    const page = document.querySelector<HTMLElement>("[data-drill-page]")!;
+    const list = document.querySelector<HTMLElement>("[data-drill-list]")!;
+    const count = document.querySelector<HTMLElement>("[data-drill-count]")!;
+    const trackSlug = page.dataset.trackSlug!;
+    const categorySlug = page.dataset.categorySlug!;
+
+    type Drill = Awaited<
+        ReturnType<typeof fetchCatalogDrills>
+    >["drills"][number];
+
+    function render(drills: Drill[]) {
+        list.replaceChildren();
+        count.textContent = String(drills.length);
+
+        if (drills.length === 0) {
+            const empty = document.createElement("span");
+            empty.className = "drill-state";
+            empty.textContent = "no drills yet";
+            list.append(empty);
+            return;
+        }
+
+        drills.forEach((drill, index) => {
+            const row = document.createElement("a");
+            row.className = "drill-row";
+            row.href = drill.href;
+
+            const badge = document.createElement("span");
+            badge.className = "badge";
+            badge.textContent = String(index + 1).padStart(2, "0");
+
+            const body = document.createElement("span");
+            body.className = "body";
+
+            const name = document.createElement("span");
+            name.className = "name";
+            name.textContent = drill.name;
+
+            const desc = document.createElement("span");
+            desc.className = "desc";
+            desc.textContent = drill.description;
+
+            const tags = document.createElement("span");
+            tags.className = "tags";
+
+            const categoryTag = document.createElement("span");
+            categoryTag.className = "tag accent";
+            categoryTag.textContent = categorySlug;
+
+            const bankTag = document.createElement("span");
+            bankTag.className = "tag";
+            bankTag.textContent = trackSlug;
+
+            tags.append(categoryTag, bankTag);
+            body.append(name, desc, tags);
+
+            const meta = document.createElement("span");
+            meta.className = "meta";
+
+            const items = document.createElement("span");
+            items.innerHTML = `<span class="lab">items</span><b>${drill.item_count ?? "--"}</b>`;
+
+            const format = document.createElement("span");
+            format.innerHTML = `<span class="lab">format</span><b>practice</b>`;
+
+            meta.append(items, format);
+
+            const cta = document.createElement("span");
+            cta.className = "cta";
+            cta.innerHTML = `<span class="start">start drill →</span><span class="est">opens quiz</span>`;
+
+            row.append(badge, body, meta, cta);
+            list.append(row);
+        });
+    }
+
+    fetchCatalogDrills(trackSlug, categorySlug)
+        .then((data) => {
+            render(data.drills);
+        })
+        .catch(() => {
+            list.replaceChildren();
+
+            const error = document.createElement("span");
+            error.className = "drill-state error";
+            error.textContent = "drills unavailable";
+            list.append(error);
+        });
+</script>
