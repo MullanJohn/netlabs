@@ -1,0 +1,55 @@
+---
+import AppShell from "../../layouts/AppShell.astro";
+import TopNav from "../../components/nav/TopNav.astro";
+import StatusBar from "../../components/shell/StatusBar.astro";
+import CategoryDrillListContent from "../../components/drills/CategoryDrillListContent.astro";
+import CategoryDrillSidebar from "../../components/drills/CategoryDrillSidebar.astro";
+import { selectorCategories, trackSelectors } from "../../data/track-selectors";
+
+export function getStaticPaths() {
+    return Object.values(trackSelectors).flatMap((track) =>
+        selectorCategories.map((category) => ({
+            params: {
+                trackSlug: track.slug,
+                categorySlug: category.slug,
+            },
+            props: {
+                track,
+                category,
+            },
+        })),
+    );
+}
+
+const { track, category } = Astro.props;
+const branch = `${track.slug}/${category.slug}`;
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content={`${track.name} ${category.name} drill list for netlabs.`} />
+        <meta name="generator" content={Astro.generator} />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap"
+            rel="stylesheet"
+        />
+        <title>netlabs · {track.name} · {category.name}</title>
+    </head>
+    <body>
+        <AppShell>
+            <TopNav slot="nav" />
+            <CategoryDrillSidebar slot="sidebar" track={track} category={category} />
+
+            <CategoryDrillListContent track={track} category={category} />
+
+            <StatusBar slot="status" branch={branch} />
+        </AppShell>
+    </body>
+</html>
