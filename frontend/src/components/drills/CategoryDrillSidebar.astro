@@ -1,0 +1,56 @@
+---
+import { selectorCategories, trackSelectors } from "../../data/track-selectors";
+import type { SelectorCategory, TrackSelector } from "../../data/track-selectors";
+
+interface Props {
+    track: TrackSelector;
+    category: SelectorCategory;
+}
+
+const { track, category } = Astro.props;
+const tracks = Object.values(trackSelectors);
+---
+
+<div class="sb-block">
+    <div class="sb-h">
+        <span>Track</span>
+        <span class="more">practice bank</span>
+    </div>
+
+    <div class="track-switch">
+        {
+            tracks.map((item) => (
+                <a class={item.slug === track.slug ? "active" : ""} href={`/${item.slug}`}>
+                    <span class="ts-name">{item.switchName}</span>
+                    <span class="ts-meta">{item.switchMeta}</span>
+                </a>
+            ))
+        }
+    </div>
+
+    <a class="back-row" href={`/${track.slug}`}>
+        <span class="arr">←</span>
+        <span>back to <b>drill picker</b></span>
+    </a>
+</div>
+
+<div class="sb-block">
+    <div class="sb-h">
+        <span>Categories</span>
+        <span class="more">{track.slug}</span>
+    </div>
+
+    <div class="catnav">
+        {
+            selectorCategories.map((item) => (
+                <a class={item.slug === category.slug ? "active" : ""} href={`/${track.slug}/${item.slug}`}>
+                    <span class="num">{item.label}</span>
+                    <span class="name">{item.name}</span>
+                    <span class="count">{item.meta.replace(" view", "")}</span>
+                </a>
+            ))
+        }
+    </div>
+</div>
+
+<div class="sb-spacer"></div>
