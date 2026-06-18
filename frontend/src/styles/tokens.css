@@ -24,9 +24,15 @@
     --err-bg: rgba(255, 122, 133, 0.1);
     --warn: #f0c674;
 
-    --mono:
+    --font-ui:
         "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
         monospace;
+    --font-code:
+        "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+        monospace;
+
+    /* --font-ui: "Geist", "Inter", system-ui, sans-serif; */
+    /* --font-code: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Consolas, monospace; */
 
     --page-pad: clamp(20px, 5vw, 56px);
     --sidebar-width: 280px;
@@ -77,7 +83,7 @@ body {
     min-width: 320px;
     background: var(--bg);
     color: var(--fg);
-    font-family: var(--mono);
+    font-family: var(--font-ui);
     font-feature-settings:
         "calt" 1,
         "liga" 0,
