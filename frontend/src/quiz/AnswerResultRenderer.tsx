@@ -1,6 +1,6 @@
 import MultipleChoiceResultView from "./results/MultipleChoiceResultView";
 import MultiSelectResultView from "./results/MultiSelectResultView";
-import DragDropResultView from "./results/DragDropResultView";
+import DragOrderResultView from "./results/DragOrderResultView";
 
 import type {
     QuizAnswer,
@@ -44,11 +44,11 @@ const AnswerResultRenderer = ({
             );
         }
 
-        case "drag-drop": {
-            if (submittedAnswer.type !== "drag-drop") return null;
+        case "drag-order": {
+            if (submittedAnswer.type !== "drag-order") return null;
 
             return (
-                <DragDropResultView
+                <DragOrderResultView
                     question={question}
                     submittedAnswer={submittedAnswer}
                     result={result}

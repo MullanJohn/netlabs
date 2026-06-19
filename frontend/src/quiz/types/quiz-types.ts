@@ -1,7 +1,7 @@
 export type QuizQuestion =
     | McqSingleQuestion
     | McqMultiQuestion
-    | DragDropQuestion;
+    | DragOrderQuestion;
 
 export type BaseQuestion = {
     id: string;
@@ -18,7 +18,7 @@ export type BaseQuestion = {
      */
     sub_topic_id: string;
 
-    question_type: "mcq-single" | "mcq-multi" | "drag-drop";
+    question_type: "mcq-single" | "mcq-multi" | "drag-order";
     stem: string;
     exhibit?: Exhibit;
     options: QuestionOption[];
@@ -33,8 +33,8 @@ export type McqMultiQuestion = BaseQuestion & {
     select_count: number;
 };
 
-export type DragDropQuestion = BaseQuestion & {
-    question_type: "drag-drop";
+export type DragOrderQuestion = BaseQuestion & {
+    question_type: "drag-order";
 };
 
 export type QuestionOption = {
@@ -56,10 +56,10 @@ export type Exhibit =
           content: string;
       };
 
-type QuizAnswer =
-    | { type: "single"; optionId: string | null }
-    | { type: "multi"; optionIds: string[] }
-    | { type: "dragDrop"; pairs: Partial<Record<string, string>> };
+export type QuizAnswer =
+    | { type: "mcq-single"; optionId: string | null }
+    | { type: "mcq-multi"; optionIds: string[] }
+    | { type: "drag-order"; pairs: Partial<Record<string, string>> };
 
 export type QuizAnswers = Record<string, QuizAnswer>;
 

@@ -1,4 +1,4 @@
-import DragDropQuestionView from "./questions/DragDropQuestionView";
+import DragOrderQuestionView from "./questions/DragOrderQuestionView";
 import MultipleChoiceQuestionView from "./questions/MultipleChoiceQuestionView";
 import MultipleSelectQuestionView from "./questions/MultiSelectQuestionView";
 import type { QuizAnswer, QuizQuestion } from "./types/quiz-types";
@@ -12,7 +12,7 @@ type QuestionRendererProps = {
         optionId: string,
         selectCount: number,
     ) => void;
-    onUpdateDragDrop: (
+    onUpdateDragOrder: (
         questionId: string,
         pairs: Partial<Record<string, string>>,
     ) => void;
@@ -23,7 +23,7 @@ const QuestionRenderer = ({
     answer,
     onSelectSingle,
     onToggleMulti,
-    onUpdateDragDrop,
+    onUpdateDragOrder,
 }: QuestionRendererProps) => {
     switch (question.question_type) {
         case "mcq-single": {
@@ -60,14 +60,14 @@ const QuestionRenderer = ({
             );
         }
 
-        case "drag-drop": {
-            const pairs = answer?.type === "drag-drop" ? answer.pairs : {};
+        case "drag-order": {
+            const pairs = answer?.type === "drag-order" ? answer.pairs : {};
 
             return (
-                <DragDropQuestionView
+                <DragOrderQuestionView
                     question={question}
                     pairs={pairs}
-                    onSelect={(pairs) => onUpdateDragDrop(question.id, pairs)}
+                    onSelect={(pairs) => onUpdateDragOrder(question.id, pairs)}
                 />
             );
         }

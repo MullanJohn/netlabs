@@ -1,6 +1,6 @@
 export function validateAnswer(
     question: QuizQuestion,
-    answer: QuizAnswer | undefined,
+    answer: QuizAnswer,
 ): string | null {
     switch (question.question_type) {
         case "mcq-single": {
@@ -23,8 +23,8 @@ export function validateAnswer(
             return null;
         }
 
-        case "drag-drop": {
-            if (!answer || answer.type !== "drag-drop") {
+        case "drag-order": {
+            if (!answer || answer.type !== "drag-order") {
                 return "Please complete the matching question.";
             }
 
@@ -46,12 +46,31 @@ export function validateAnswer(
 export async function submitAnswer(
     quizId: string,
     questionId: string,
-    answer: QuizAnswer | undefined,
+    answer: QuizAnswer,
 ) {
     console.log("Submitting answer", {
+        quizId,
         questionId,
         answer,
     });
+    try {
+        const response = await fetch(
+            `http://192.168.1.113:8080/${quizId}/${questionId}/answer`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(answer),
+            },
+        );
 
-    return {};
+        if (!response.ok) {
+            throw new Error(`Backend returned ${response.status}`);
+        }
+
+        return await response.json();
+    } catch (err) {
+        console.error("Failed to submit answer:", err);
+    }
 }

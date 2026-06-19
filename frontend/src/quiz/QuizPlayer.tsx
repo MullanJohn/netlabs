@@ -15,7 +15,7 @@ const QuizPlayer = ({ quizId, initialQuestion }: QuizPlayerProps) => {
         answers,
         selectSingleOption,
         toggleMultiSelectOption,
-        updateDragDropAnswer,
+        updateDragOrderAnswer,
     } = useQuizAnswers();
     const [currentQuestion, setCurrentQuestion] = useState<QuizQuestion | null>(
         initialQuestion,
@@ -79,7 +79,7 @@ const QuizPlayer = ({ quizId, initialQuestion }: QuizPlayerProps) => {
                     answer={answer}
                     onSelectSingle={selectSingleOption}
                     onToggleMulti={toggleMultiSelectOption}
-                    onUpdateDragDrop={updateDragDropAnswer}
+                    onUpdateDragOrder={updateDragOrderAnswer}
                 />
             )}
 

@@ -1,13 +1,13 @@
 import { DragDropProvider, useDraggable, useDroppable } from "@dnd-kit/react";
-import type { DragDropQuestion, QuestionOption } from "./types/quiz-types";
+import type { DragOrderQuestion, QuestionOption } from "../types/quiz-types";
 
 type Props = {
-    question: DragDropQuestion;
+    question: DragOrderQuestion;
     pairs: Partial<Record<string, string>>;
     onSelect: (pairs: Partial<Record<string, string>>) => void;
 };
 
-const DragDropQuestionView = ({ question, pairs, onSelect }: Props) => {
+const DragOrderQuestionView = ({ question, pairs, onSelect }: Props) => {
     return (
         <div>
             <h2>{question.stem}</h2>
@@ -94,7 +94,7 @@ const DragDropQuestionView = ({ question, pairs, onSelect }: Props) => {
     );
 };
 
-export default DragDropQuestionView;
+export default DragOrderQuestionView;
 
 type DroppableProps = {
     id: string;

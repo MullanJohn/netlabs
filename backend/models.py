@@ -2,7 +2,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, Field
 
 class AnswerRequest(BaseModel):
-    type: Literal["mcq-single", "mcq-multi", "drag-drop"]
+    type: Literal["mcq-single", "mcq-multi", "drag-order"]
     optionId: str | None = None
     optionIds: list[str] | None = None
     pairs: dict[str, str] | None = None
@@ -31,11 +31,11 @@ class McqMultiQuestion(BaseQuestion):
     question_type: Literal["mcq-multi"] = "mcq-multi"
     select_count: int
 
-class DragDropQuestion(BaseQuestion):
-    question_type: Literal["drag-drop"] = "drag-drop"
+class DragOrderQuestion(BaseQuestion):
+    question_type: Literal["drag-order"] = "drag-order"
 
 QuizQuestion = Annotated[
-    McqSingleQuestion | McqMultiQuestion | DragDropQuestion,
+    McqSingleQuestion | McqMultiQuestion | DragOrderQuestion,
     Field(discriminator="question_type"),
 ]
 

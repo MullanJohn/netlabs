@@ -1,20 +1,20 @@
 import type {
-    DragDropQuestion,
+    DragOrderQuestion,
     QuizAnswer,
     SubmissionResult,
-} from "./types/quiz-types";
+} from "../types/quiz-types";
 
-type DragDropResultViewProps = {
-    question: DragDropQuestion;
-    submittedAnswer: Extract<QuizAnswer, { type: "drag-drop" }>;
+type DragOrderResultViewProps = {
+    question: DragOrderQuestion;
+    submittedAnswer: Extract<QuizAnswer, { type: "drag-order" }>;
     result: SubmissionResult;
 };
 
-const DragDropResultView = ({
+const DragOrderResultView = ({
     question,
     submittedAnswer,
     result,
-}: DragDropResultViewProps) => {
+}: DragOrderResultViewProps) => {
     const correctPairs = result.correctPairs ?? {};
 
     return (
@@ -76,4 +76,4 @@ const DragDropResultView = ({
     );
 };
 
-export default DragDropResultView;
+export default DragOrderResultView;

@@ -43,14 +43,14 @@ export function useQuizAnswers() {
         });
     }
 
-    function updateDragDropAnswer(
+    function updateDragOrderAnswer(
         questionId: string,
         pairs: Partial<Record<string, string>>,
     ) {
         setAnswers((prev) => ({
             ...prev,
             [questionId]: {
-                type: "drag-drop",
+                type: "drag-order",
                 pairs,
             },
         }));
@@ -60,6 +60,6 @@ export function useQuizAnswers() {
         answers,
         selectSingleOption,
         toggleMultiSelectOption,
-        updateDragDropAnswer,
+        updateDragOrderAnswer,
     };
 }
