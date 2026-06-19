@@ -11,6 +11,10 @@ class QuestionOption(BaseModel):
     id: str
     text: str
 
+class Premise(BaseModel):
+    id: str
+    text: str
+
 class Exhibit(BaseModel):
     type: str
     content: str
@@ -34,8 +38,23 @@ class McqMultiQuestion(BaseQuestion):
 class DragOrderQuestion(BaseQuestion):
     question_type: Literal["drag-order"] = "drag-order"
 
+class MatchingQuestion(BaseQuestion):
+    question_type: Literal["matching"] = "matching"
+    premises: list[Premise]
+
+class MultiTfQuestion(BaseQuestion):
+    question_type: Literal["multi-tf"] = "multi-tf"
+
+class FillBlankQuestion(BaseQuestion):
+    question_type: Literal["fill-blank"] = "fill-blank"
+
 QuizQuestion = Annotated[
-    McqSingleQuestion | McqMultiQuestion | DragOrderQuestion,
+    McqSingleQuestion
+    | McqMultiQuestion
+    | DragOrderQuestion
+    | MatchingQuestion
+    | MultiTfQuestion
+    | FillBlankQuestion,
     Field(discriminator="question_type"),
 ]
 
