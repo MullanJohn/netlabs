@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 from typing import Any
+from urllib.parse import quote
 
 import asyncpg
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -114,7 +115,7 @@ def catalog_drill(row: asyncpg.Record) -> dict[str, Any]:
         "slug": row["slug"],
         "name": row["name"],
         "description": row["description"],
-        "href": f"/quiz/{row['slug']}",
+        "href": f"/quiz?quiz={quote(row['slug'], safe='')}",
         "quiz_slug": row["slug"],
         "item_count": row["item_count"],
     }
