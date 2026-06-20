@@ -63,14 +63,21 @@ export type QuizAnswer =
 
 export type QuizAnswers = Record<string, QuizAnswer>;
 
-export type SubmissionResult = {
+type SubmissionResultBase = {
     isCorrect: boolean;
     explanation: string;
-    correctOptionIds?: string[];
-    correctPairs?: Record<string, string>;
 };
 
-export type SubmitAnswerResponse = {
-    result: SubmissionResult;
-    nextQuestion: QuizQuestion | null;
-};
+export type SubmissionResult =
+    | (SubmissionResultBase & {
+          type: "mcq-single" | "mcq-multi" | "multi-tf";
+          correctOptionIds: string[];
+      })
+    | (SubmissionResultBase & {
+          type: "drag-order" | "matching";
+          correctPairs: Record<string, string>;
+      })
+    | (SubmissionResultBase & {
+          type: "fill-blank";
+          acceptedAnswers: string[];
+      });
