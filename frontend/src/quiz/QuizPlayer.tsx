@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 import QuestionRenderer from "./QuestionRenderer";
 import AnswerResultRenderer from "./AnswerResultRenderer";
 import { useQuizAnswers } from "./quiz-hook";
-import type { QuizAnswer, QuizQuestion } from "./types/quiz-types";
-import { validateAnswer, submitAnswer } from "./answer";
+import type {
+    QuizAnswer,
+    QuizQuestion,
+    SubmissionResult,
+} from "./types/quiz-types";
+import { validateAnswer } from "./answer";
+import { submitAnswer } from "../data/quiz-client";
 
 type QuizPlayerProps = {
     quizId: string;
@@ -52,8 +57,7 @@ const QuizPlayer = ({ quizId, initialQuestion }: QuizPlayerProps) => {
                 answer,
             );
             setSubmittedAnswer(answer);
-            setSubmissionResult(response.result);
-            setNextQuestion(response.nextQuestion);
+            setSubmissionResult(response);
         } catch {
             setError("Something went wrong while submitting your answer.");
         }

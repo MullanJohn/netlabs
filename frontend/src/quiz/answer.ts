@@ -1,3 +1,5 @@
+import type { QuizAnswer, QuizQuestion } from "./types/quiz-types";
+
 export function validateAnswer(
     question: QuizQuestion,
     answer: QuizAnswer,
@@ -40,37 +42,5 @@ export function validateAnswer(
 
         default:
             return "Unsupported question type.";
-    }
-}
-
-export async function submitAnswer(
-    quizId: string,
-    questionId: string,
-    answer: QuizAnswer,
-) {
-    console.log("Submitting answer", {
-        quizId,
-        questionId,
-        answer,
-    });
-    try {
-        const response = await fetch(
-            `http://192.168.1.113:8080/${quizId}/${questionId}/answer`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(answer),
-            },
-        );
-
-        if (!response.ok) {
-            throw new Error(`Backend returned ${response.status}`);
-        }
-
-        return await response.json();
-    } catch (err) {
-        console.error("Failed to submit answer:", err);
     }
 }
