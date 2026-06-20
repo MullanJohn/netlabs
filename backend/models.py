@@ -1,11 +1,34 @@
 from typing import Annotated, Literal
 from pydantic import BaseModel, Field
 
-class AnswerRequest(BaseModel):
-    type: Literal["mcq-single", "mcq-multi", "drag-order"]
-    optionId: str | None = None
-    optionIds: list[str] | None = None
-    pairs: dict[str, str] | None = None
+class Quiz(BaseModel):
+    slug: str
+    name: str
+    description: str
+    track_slug: str
+    kind: str
+    subkind: str
+    bank: str
+    time_limit_minutes: int | None = None
+
+class CatalogDrill(BaseModel):
+    slug: str
+    name: str
+    description: str
+    href: str
+    quiz_slug: str | None = None
+    item_count: int | None = None
+
+class CatalogCategoryListResponse(BaseModel):
+    categories: list[str]
+
+class CatalogCategoryPreviewResponse(BaseModel):
+    category_slug: str
+    items: list[CatalogDrill]
+
+class CatalogDrillListResponse(BaseModel):
+    category_slug: str
+    drills: list[CatalogDrill]
 
 class QuestionOption(BaseModel):
     id: str
@@ -58,41 +81,57 @@ QuizQuestion = Annotated[
     Field(discriminator="question_type"),
 ]
 
-class SubmissionResult(BaseModel):
+class McqSingleAnswer(BaseModel):
+    type: Literal["mcq-single"] = "mcq-single"
+    answer: str
+
+class McqMultiAnswer(BaseModel):
+    type: Literal["mcq-multi"] = "mcq-multi"
+    answer: list[str]
+
+class DragOrderAnswer(BaseModel):
+    type: Literal["drag-order"] = "drag-order"
+    answer: dict[str, str]
+
+class MatchingAnswer(BaseModel):
+    type: Literal["matching"] = "matching"
+    answer: dict[str, str]
+
+class MultiTfAnswer(BaseModel):
+    type: Literal["multi-tf"] = "multi-tf"
+    answer: list[str]
+
+class FillBlankAnswer(BaseModel):
+    type: Literal["fill-blank"] = "fill-blank"
+    answer: str
+
+AnswerRequest = Annotated[
+    McqSingleAnswer
+    | McqMultiAnswer
+    | DragOrderAnswer
+    | MatchingAnswer
+    | MultiTfAnswer
+    | FillBlankAnswer,
+    Field(discriminator="type"),
+]
+
+class SubmissionResultBase(BaseModel):
     isCorrect: bool
     explanation: str
-    correctOptionIds: list[str] | None = None
-    correctPairs: dict[str, str] | None = None
 
-class SubmitAnswerResponse(BaseModel):
-    result: SubmissionResult
-    nextQuestion: QuizQuestion | None = None
+class OptionsResult(SubmissionResultBase):
+    type: Literal["mcq-single", "mcq-multi", "multi-tf"]
+    correctOptionIds: list[str]
 
-class Quiz(BaseModel):
-    slug: str
-    name: str
-    description: str
-    track_slug: str
-    kind: str
-    subkind: str
-    bank: str
-    time_limit_minutes: int | None = None
+class PairsResult(SubmissionResultBase):
+    type: Literal["drag-order", "matching"]
+    correctPairs: dict[str, str]
 
-class CatalogDrill(BaseModel):
-    slug: str
-    name: str
-    description: str
-    href: str
-    quiz_slug: str | None = None
-    item_count: int | None = None
+class FillBlankResult(SubmissionResultBase):
+    type: Literal["fill-blank"]
+    acceptedAnswers: list[str]
 
-class CatalogCategoryListResponse(BaseModel):
-    categories: list[str]
-
-class CatalogCategoryPreviewResponse(BaseModel):
-    category_slug: str
-    items: list[CatalogDrill]
-
-class CatalogDrillListResponse(BaseModel):
-    category_slug: str
-    drills: list[CatalogDrill]
+SubmissionResult = Annotated[
+    OptionsResult | PairsResult | FillBlankResult,
+    Field(discriminator="type"),
+]

@@ -11,12 +11,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from models import (
     AnswerRequest,
+    DragOrderAnswer,
+    FillBlankAnswer,
+    MatchingAnswer,
+    McqMultiAnswer,
+    McqSingleAnswer,
+    MultiTfAnswer,
     CatalogCategoryListResponse,
     CatalogCategoryPreviewResponse,
     CatalogDrillListResponse,
     Quiz,
     QuizQuestion,
-    SubmitAnswerResponse,
+    SubmissionResult,
 )
 
 logging.basicConfig(
@@ -103,19 +109,6 @@ def decode_json(value: Any) -> Any:
             return value
     return value
 
-def decode_correct_answer(value: Any) -> list[str]:
-    decoded = decode_json(value)
-    return [str(option_id) for option_id in decoded]
-
-def question_from_row(row: asyncpg.Record | None) -> dict[str, Any] | None:
-    if row is None:
-        return None
-    data = dict(row)
-    data["options"] = decode_json(data.get("options")) or []
-    data["exhibit"] = decode_json(data.get("exhibit"))
-    data["premises"] = decode_json(data.get("premises"))
-    return data
-
 def catalog_drill(row: asyncpg.Record) -> dict[str, Any]:
     return {
         "slug": row["slug"],
@@ -125,6 +118,15 @@ def catalog_drill(row: asyncpg.Record) -> dict[str, Any]:
         "quiz_slug": row["slug"],
         "item_count": row["item_count"],
     }
+
+def question_from_row(row: asyncpg.Record | None) -> dict[str, Any] | None:
+    if row is None:
+        return None
+    data = dict(row)
+    data["options"] = decode_json(data.get("options")) or []
+    data["exhibit"] = decode_json(data.get("exhibit"))
+    data["premises"] = decode_json(data.get("premises"))
+    return data
 
 async def fetch_quiz_questions(
     quiz_slug: str,
@@ -143,75 +145,31 @@ async def fetch_quiz_questions(
     )
     return [question_from_row(row) for row in rows]
 
-async def fetch_next_question(
-    quiz_slug: str,
-    question_id: str,
-    conn: asyncpg.Connection,
-) -> dict[str, Any] | None:
-    row = await conn.fetchrow(
-        f"""
-        {QUESTION_ROW_SELECT}
-        JOIN (
-            SELECT question_id, position
-            FROM quiz_template_items
-            WHERE template_slug = $1
-              AND position > (
-                  SELECT position
-                  FROM quiz_template_items
-                  WHERE template_slug = $1
-                    AND question_id = $2
-              )
-            ORDER BY position
-            LIMIT 1
-        ) qti ON qti.question_id = q.id
-        {QUESTION_ROW_GROUP_BY},
-            qti.position
-        ORDER BY qti.position
-        """,
-        quiz_slug,
-        question_id,
-    )
-    return question_from_row(row)
-
-def check_answer(
-    answer: AnswerRequest,
-    correct_answer: list[str],
-) -> bool:
-    logger.debug("Checking answer type=%s", answer.type)
-    match answer.type:
-        case "mcq-single":
-            return check_answer_single(answer, correct_answer)
-        case "mcq-multi":
-            return check_answer_multi(answer, correct_answer)
-        case "drag-order":
-            return check_answer_drag_order(answer, correct_answer)
+def check_answer(submission: AnswerRequest, key: dict[str, Any]) -> bool:
+    logger.debug("Checking answer type=%s", submission.type)
+    match submission:
+        case McqSingleAnswer():
+            return submission.answer == key["correct"][0]
+        case McqMultiAnswer() | MultiTfAnswer():
+            return frozenset(submission.answer) == frozenset(key["correct"])
+        case DragOrderAnswer():
+            return submission.answer == {
+                f"answer-{position}": option_id
+                for position, option_id in enumerate(key["correct"])
+            }
+        case MatchingAnswer():
+            return string_map(submission.answer) == string_map(key["correct"])
+        case FillBlankAnswer():
+            return normalize_text_answer(submission.answer) in {normalize_text_answer(a) for a in key["accepted"]}
         case _:
-            logger.warning("Unsupported answer type: %s", answer.type)
+            logger.warning("Unsupported answer type: %s", submission.type)
             return False
 
-def check_answer_single(
-    answer: AnswerRequest,
-    correct_answer: list[str],
-) -> bool:
-    return answer.optionId == correct_answer[0]
+def string_map(mapping: dict[Any, Any]) -> dict[str, str]:
+    return {str(key): str(value) for key, value in mapping.items()}
 
-def check_answer_multi(
-    answer: AnswerRequest,
-    correct_answer: list[str],
-) -> bool:
-    return frozenset(answer.optionIds or []) == frozenset(correct_answer)
-
-def correct_drag_order_pairs(correct_answer: list[str]) -> dict[str, str]:
-    return {
-        f"answer-{position}": option_id
-        for position, option_id in enumerate(correct_answer)
-    }
-
-def check_answer_drag_order(
-    answer: AnswerRequest,
-    correct_answer: list[str],
-) -> bool:
-    return (answer.pairs or {}) == correct_drag_order_pairs(correct_answer)
+def normalize_text_answer(value: str) -> str:
+    return " ".join(value.split()).casefold()
 
 @app.get("/quizzes", response_model=list[Quiz])
 async def list_quizzes(conn: asyncpg.Connection = Depends(get_conn)):
@@ -371,18 +329,18 @@ async def list_quiz_questions(
 
 @app.post(
     "/{quiz_slug}/{question_id}/answer",
-    response_model=SubmitAnswerResponse,
+    response_model=SubmissionResult,
 )
 async def submit_answer(
     quiz_slug: str,
     question_id: str,
-    answer: AnswerRequest,
+    submission: AnswerRequest,
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     try:
         row = await conn.fetchrow(
             """
-            SELECT q.question_type, q.answer_correct, q.rationale
+            SELECT q.question_type, q.answer, q.rationale
             FROM questions q
             JOIN quiz_template_items qti ON qti.question_id = q.id
             WHERE q.id = $1
@@ -399,40 +357,45 @@ async def submit_answer(
             )
             raise HTTPException(status_code=404, detail="Question not found in quiz")
         expected_answer_type = row["question_type"]
-        if answer.type != expected_answer_type:
+        if submission.type != expected_answer_type:
             logger.warning(
                 "Answer type mismatch: quiz_slug=%s question_id=%s expected=%s received=%s",
                 quiz_slug,
                 question_id,
                 expected_answer_type,
-                answer.type,
+                submission.type,
             )
             raise HTTPException(
                 status_code=400,
                 detail="Answer type does not match question type",
             )
-        correct_answer = decode_correct_answer(row["answer_correct"])
-        is_correct = check_answer(answer, correct_answer)
-        next_q = await fetch_next_question(quiz_slug, question_id, conn)
+        key = decode_json(row["answer"])
+        is_correct = check_answer(submission, key)
         result_data: dict[str, Any] = {
+            "type": submission.type,
             "isCorrect": is_correct,
             "explanation": row["rationale"],
         }
-        if answer.type == "drag-order":
-            result_data["correctPairs"] = correct_drag_order_pairs(correct_answer)
-        elif answer.type in {"mcq-single", "mcq-multi"}:
-            result_data["correctOptionIds"] = correct_answer
+        match submission.type:
+            case "mcq-single" | "mcq-multi" | "multi-tf":
+                result_data["correctOptionIds"] = key["correct"]
+            case "drag-order":
+                result_data["correctPairs"] = {
+                    f"answer-{position}": option_id
+                    for position, option_id in enumerate(key["correct"])
+                }
+            case "matching":
+                result_data["correctPairs"] = string_map(key["correct"])
+            case "fill-blank":
+                result_data["acceptedAnswers"] = key["accepted"]
         logger.info(
             "Submitted answer: quiz_slug=%s question_id=%s type=%s is_correct=%s",
             quiz_slug,
             question_id,
-            answer.type,
+            submission.type,
             is_correct,
         )
-        return {
-            "result": result_data,
-            "nextQuestion": next_q,
-        }
+        return result_data
     except HTTPException:
         raise
     except Exception as e:
