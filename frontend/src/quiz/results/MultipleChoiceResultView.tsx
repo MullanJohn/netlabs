@@ -3,7 +3,7 @@ import type {
     QuizAnswer,
     QuizQuestion,
     SubmissionResult,
-} from "./types/quiz-types";
+} from "../types/quiz-types";
 
 type MultipleChoiceResultViewProps = {
     question: McqSingleQuestion;

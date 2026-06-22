@@ -28,7 +28,7 @@ const QuestionRenderer = ({
     switch (question.question_type) {
         case "mcq-single": {
             const selectedOptionId =
-                answer?.type === "mcq-single" ? answer.optionId : undefined;
+                answer?.type === "mcq-single" ? answer.optionId : null;
 
             return (
                 <MultipleChoiceQuestionView

@@ -1,4 +1,4 @@
-import type { McqSingleQuestion } from "./types/quiz-types";
+import type { McqSingleQuestion } from "../types/quiz-types";
 
 type Props = {
     question: McqSingleQuestion;

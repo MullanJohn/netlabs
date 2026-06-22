@@ -1,5 +1,6 @@
 import { DragDropProvider, useDraggable, useDroppable } from "@dnd-kit/react";
-import type { DragOrderQuestion, QuestionOption } from "../types/quiz-types";
+import type { ReactNode } from "react";
+import type { DragOrderQuestion } from "../types/quiz-types";
 
 type Props = {
     question: DragOrderQuestion;
