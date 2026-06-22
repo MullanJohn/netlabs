@@ -56,10 +56,20 @@ export function useQuizAnswers() {
         }));
     }
 
+    function clearAnswer(questionId: string) {
+        setAnswers((prev) => {
+            if (!(questionId in prev)) return prev;
+            const next = { ...prev };
+            delete next[questionId];
+            return next;
+        });
+    }
+
     return {
         answers,
         selectSingleOption,
         toggleMultiSelectOption,
         updateDragOrderAnswer,
+        clearAnswer,
     };
 }

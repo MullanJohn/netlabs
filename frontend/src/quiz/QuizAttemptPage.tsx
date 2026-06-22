@@ -1,16 +1,11 @@
 import { useEffect, useState } from "react";
-import QuizPlayer from "./QuizPlayer";
+import QuizSession from "./session/QuizSession";
 import { fetchQuizQuestions } from "../data/quiz-client";
 import { ApiError } from "../data/api-client";
 import type { QuizQuestion } from "./types/quiz-types";
 
-type QuizAttemptPageProps = {
-    // Optional override; otherwise the slug is read from the `quiz` query param.
-    quizId?: string;
-};
-
-const QuizAttemptPage = ({ quizId }: QuizAttemptPageProps) => {
-    const slug = quizId ?? readQuizSlug();
+const QuizAttemptPage = () => {
+    const slug = readQuizSlug();
 
     const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -42,13 +37,29 @@ const QuizAttemptPage = ({ quizId }: QuizAttemptPageProps) => {
         return () => controller.abort();
     }, [slug]);
 
-    if (isLoading) return <p>Loading quiz…</p>;
-    if (error) return <p>{error}</p>;
+    if (isLoading) {
+        return (
+            <div className="main">
+                <p className="quiz-status">Loading quiz…</p>
+            </div>
+        );
+    }
+    if (error) {
+        return (
+            <div className="main">
+                <p className="quiz-status">{error}</p>
+            </div>
+        );
+    }
+    if (!slug || !questions || questions.length === 0) {
+        return (
+            <div className="main">
+                <p className="quiz-status">Quiz not found.</p>
+            </div>
+        );
+    }
 
-    const firstQuestion = questions?.[0];
-    if (!slug || !firstQuestion) return <p>Quiz not found.</p>;
-
-    return <QuizPlayer quizId={slug} initialQuestion={firstQuestion} />;
+    return <QuizSession quizId={slug} questions={questions} />;
 };
 
 function readQuizSlug(): string | null {

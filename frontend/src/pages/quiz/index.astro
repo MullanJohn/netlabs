@@ -1,5 +1,5 @@
 ---
-import AppShell from "../../layouts/AppShell.astro";
+import QuizShell from "../../layouts/QuizShell.astro";
 import TopNav from "../../components/nav/TopNav.astro";
 import StatusBar from "../../components/shell/StatusBar.astro";
 import QuizAttemptPage from "../../quiz/QuizAttemptPage";
@@ -23,12 +23,17 @@ import QuizAttemptPage from "../../quiz/QuizAttemptPage";
         <title>netlabs · quiz</title>
     </head>
     <body>
-        <AppShell>
+        <QuizShell>
             <TopNav slot="nav" />
 
-            <QuizAttemptPage client:only="react" />
+            <QuizAttemptPage client:only="react">
+                <div slot="fallback" class="main">
+                    <aside class="pane sidebar"></aside>
+                    <section class="pane editor"></section>
+                </div>
+            </QuizAttemptPage>
 
             <StatusBar slot="status" branch="quiz" />
-        </AppShell>
+        </QuizShell>
     </body>
 </html>

@@ -1,0 +1,249 @@
+.quiz-host {
+    display: contents;
+}
+
+.quiz-status {
+    grid-column: 1 / -1;
+    align-self: center;
+    justify-self: center;
+    padding: 40px;
+    color: var(--fg-3);
+    font-size: 13px;
+}
+
+.drill-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    color: var(--fg);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.drill-meta {
+    color: var(--fg-3);
+    font-size: 11.5px;
+    line-height: 1.55;
+}
+
+.drill-meta b {
+    color: var(--fg-2);
+    font-weight: 500;
+}
+
+.timer-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 14px;
+}
+
+.timer-row .pos {
+    color: var(--fg-3);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+}
+
+.timer-row .pos b {
+    color: var(--fg);
+    font-weight: 600;
+}
+
+.progress-bar {
+    display: flex;
+    gap: 2px;
+    margin-top: 8px;
+    height: 3px;
+}
+
+.progress-bar span {
+    flex: 1;
+    border-radius: 2px;
+    background: var(--line);
+    transition: background 200ms;
+}
+
+.progress-bar span.current {
+    background: var(--accent);
+}
+
+.nav-rail {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-2) transparent;
+}
+
+.nav-rail::-webkit-scrollbar {
+    height: 6px;
+}
+
+.nav-rail::-webkit-scrollbar-thumb {
+    background: var(--line-2);
+    border-radius: 3px;
+}
+
+.nav-cell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 0 0 56px;
+    aspect-ratio: 1.4 / 1;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg-3);
+    font-size: 16px;
+    font-weight: 600;
+    transition:
+        background 100ms,
+        border-color 100ms,
+        color 100ms;
+}
+
+.nav-cell:hover {
+    border-color: var(--line-2);
+    color: var(--fg-2);
+}
+
+.nav-cell .qtype {
+    color: var(--fg-4);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.nav-cell.current {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+    color: var(--fg);
+}
+
+.nav-cell.current .qtype {
+    color: var(--accent);
+}
+
+.q-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.q-info .cell {
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--bg);
+}
+
+.q-info .lab {
+    margin-bottom: 3px;
+    color: var(--fg-4);
+    font-size: 9.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.q-info .val {
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.q-info .val.accent {
+    color: var(--accent);
+}
+
+.sb-bottom {
+    display: flex;
+    gap: 6px;
+    margin-top: auto;
+    padding: 14px 16px;
+    border-top: 1px solid var(--line);
+}
+
+.sb-bottom .btn {
+    flex: 1;
+}
+
+.qfoot {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+    height: 60px;
+    padding: 0 var(--page-pad);
+    border-top: 1px solid var(--line);
+    background: var(--bg-2);
+}
+
+.qfoot .spacer {
+    flex: 1;
+}
+
+.qfoot .nav-btns {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.qfoot .nav-btns .btn {
+    min-width: 116px;
+    white-space: nowrap;
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn.primary:disabled {
+    border-color: var(--line-2);
+    background: var(--line-2);
+    color: var(--fg-3);
+}
+
+.sb-h .more b {
+    color: var(--fg);
+    font-weight: 600;
+}
+
+.nav-cell:focus-visible,
+.sb-bottom .btn:focus-visible,
+.qfoot .btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+    .qfoot {
+        height: auto;
+        min-height: 60px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .qfoot .spacer {
+        display: none;
+    }
+
+    .qfoot .nav-btns {
+        flex: 1;
+    }
+
+    .qfoot .nav-btns .btn {
+        flex: 1;
+        min-width: 0;
+        white-space: normal;
+    }
+}
