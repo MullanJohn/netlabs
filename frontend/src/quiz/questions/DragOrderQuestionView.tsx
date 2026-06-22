@@ -1,6 +1,7 @@
 import { DragDropProvider, useDraggable, useDroppable } from "@dnd-kit/react";
 import type { ReactNode } from "react";
 import type { DragOrderQuestion } from "../types/quiz-types";
+import QuestionPrompt from "./QuestionPrompt";
 
 type Props = {
     question: DragOrderQuestion;
@@ -9,9 +10,15 @@ type Props = {
 };
 
 const DragOrderQuestionView = ({ question, pairs, onSelect }: Props) => {
+    const placedCount = Object.values(pairs).filter(Boolean).length;
+    const remaining = question.options.length - placedCount;
+
     return (
-        <div>
-            <h2>{question.stem}</h2>
+        <>
+            <QuestionPrompt
+                question={question}
+                sub="Drag each item into the correct position."
+            />
 
             <DragDropProvider
                 onDragEnd={(event) => {
@@ -24,28 +31,12 @@ const DragOrderQuestionView = ({ question, pairs, onSelect }: Props) => {
                     const optionId = String(source.id);
                     const targetId = String(target.id);
 
-                    if (
-                        targetId !== "options" &&
-                        !targetId.startsWith("answer-")
-                    ) {
-                        return;
-                    }
-
-                    if (
-                        targetId !== "options" &&
-                        pairs[targetId] !== undefined &&
-                        pairs[targetId] !== optionId
-                    ) {
-                        return;
-                    }
-
-                    const next = { ...pairs };
-
-                    for (const key in next) {
-                        if (next[key] === optionId) {
-                            delete next[key];
-                        }
-                    }
+                    const next: Partial<Record<string, string>> =
+                        Object.fromEntries(
+                            Object.entries(pairs).filter(
+                                ([, value]) => value && value !== optionId,
+                            ),
+                        );
 
                     if (targetId !== "options") {
                         next[targetId] = optionId;
@@ -54,44 +45,62 @@ const DragOrderQuestionView = ({ question, pairs, onSelect }: Props) => {
                     onSelect(next);
                 }}
             >
-                <Droppable id="options">
-                    {question.options.map((option) => {
-                        const isDropped = Object.values(pairs).includes(
-                            option.id,
-                        );
+                <div className="q-dnd">
+                    <Droppable id="options" className="q-dnd-bank">
+                        <div className="q-dnd-bank-head">
+                            <span>Items</span>
+                            <span className="remaining">
+                                {remaining} of {question.options.length} to place
+                            </span>
+                        </div>
 
-                        if (isDropped) return null;
+                        {question.options.map((option) => {
+                            const isPlaced = Object.values(pairs).includes(
+                                option.id,
+                            );
 
-                        return (
-                            <Draggable key={option.id} id={option.id}>
-                                {option.text}
-                            </Draggable>
-                        );
-                    })}
-                </Droppable>
+                            if (isPlaced) return null;
 
-                <div>
-                    {question.options.map((_, index) => {
-                        const boxId = `answer-${index}`;
-                        const droppedOption = question.options.find(
-                            (option) => option.id === pairs[boxId],
-                        );
+                            return (
+                                <Chip key={option.id} id={option.id}>
+                                    {option.text}
+                                </Chip>
+                            );
+                        })}
+                    </Droppable>
 
-                        return (
-                            <Droppable key={boxId} id={boxId}>
-                                {droppedOption ? (
-                                    <Draggable id={droppedOption.id}>
-                                        {droppedOption.text}
-                                    </Draggable>
-                                ) : (
-                                    <span>Drop here</span>
-                                )}
-                            </Droppable>
-                        );
-                    })}
+                    <div className="q-dnd-slots">
+                        {question.options.map((_, index) => {
+                            const boxId = `answer-${index}`;
+                            const droppedOption = question.options.find(
+                                (option) => option.id === pairs[boxId],
+                            );
+
+                            return (
+                                <Droppable
+                                    key={boxId}
+                                    id={boxId}
+                                    className="q-zone"
+                                >
+                                    <span className="pos" aria-hidden="true">
+                                        {index + 1}
+                                    </span>
+                                    {droppedOption ? (
+                                        <Chip id={droppedOption.id}>
+                                            {droppedOption.text}
+                                        </Chip>
+                                    ) : (
+                                        <span className="q-zone-empty">
+                                            drop item here
+                                        </span>
+                                    )}
+                                </Droppable>
+                            );
+                        })}
+                    </div>
                 </div>
             </DragDropProvider>
-        </div>
+        </>
     );
 };
 
@@ -99,36 +108,38 @@ export default DragOrderQuestionView;
 
 type DroppableProps = {
     id: string;
+    className: string;
     children: ReactNode;
 };
 
-const Droppable = ({ id, children }: DroppableProps) => {
-    const { ref } = useDroppable({ id });
+const Droppable = ({ id, className, children }: DroppableProps) => {
+    const { ref, isDropTarget } = useDroppable({ id });
 
     return (
-        <div
-            ref={ref}
-            className="rounded border border-gray-300 bg-white px-4 py-2 text-gray-900"
-        >
+        <div ref={ref} className={isDropTarget ? `${className} over` : className}>
             {children}
         </div>
     );
 };
 
-type DraggableProps = {
+type ChipProps = {
     id: string;
     children: ReactNode;
 };
 
-const Draggable = ({ id, children }: DraggableProps) => {
-    const { ref } = useDraggable({ id });
+const Chip = ({ id, children }: ChipProps) => {
+    const { ref, isDragging } = useDraggable({ id });
 
     return (
         <button
             ref={ref}
-            className="rounded border border-gray-300 bg-white px-4 py-2 text-gray-900"
+            type="button"
+            className={isDragging ? "q-chip dragging" : "q-chip"}
         >
-            {children}
+            <span className="handle" aria-hidden="true">
+                ⋮⋮
+            </span>
+            <span>{children}</span>
         </button>
     );
 };

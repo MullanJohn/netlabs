@@ -1,6 +1,6 @@
 import DragOrderQuestionView from "./questions/DragOrderQuestionView";
 import MultipleChoiceQuestionView from "./questions/MultipleChoiceQuestionView";
-import MultipleSelectQuestionView from "./questions/MultiSelectQuestionView";
+import MultipleSelectQuestionView from "./questions/MultipleSelectQuestionView";
 import type { QuizAnswer, QuizQuestion } from "./types/quiz-types";
 
 type QuestionRendererProps = {
@@ -72,8 +72,10 @@ const QuestionRenderer = ({
             );
         }
 
-        default:
-            return null;
+        default: {
+            const _exhaustive: never = question;
+            return _exhaustive;
+        }
     }
 };
 

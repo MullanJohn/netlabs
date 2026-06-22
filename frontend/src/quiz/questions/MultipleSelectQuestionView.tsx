@@ -1,22 +1,33 @@
-import type { McqSingleQuestion } from "../types/quiz-types";
-import QuestionPrompt, { stemDomId } from "./QuestionPrompt";
+import type { McqMultiQuestion } from "../types/quiz-types";
+import QuestionPrompt, { stemDomId, subDomId } from "./QuestionPrompt";
 
 type Props = {
-    question: McqSingleQuestion;
-    selectedOptionId: string | null;
+    question: McqMultiQuestion;
+    selectedOptionIds: string[];
     onSelect: (optionId: string) => void;
 };
 
-const MultipleChoiceQuestionView = ({
+const MultipleSelectQuestionView = ({
     question,
-    selectedOptionId,
+    selectedOptionIds,
     onSelect,
 }: Props) => (
     <>
-        <QuestionPrompt question={question} />
-        <fieldset className="opts" aria-labelledby={stemDomId(question.id)}>
+        <QuestionPrompt
+            question={question}
+            sub={
+                <>
+                    <b>Select all that apply.</b> Choose {question.select_count}.
+                </>
+            }
+        />
+        <fieldset
+            className="opts"
+            aria-labelledby={stemDomId(question.id)}
+            aria-describedby={subDomId(question.id)}
+        >
             {question.options.map((option, index) => {
-                const isSelected = selectedOptionId === option.id;
+                const isSelected = selectedOptionIds.includes(option.id);
 
                 return (
                     <label
@@ -24,7 +35,7 @@ const MultipleChoiceQuestionView = ({
                         className={isSelected ? "q-opt is-selected" : "q-opt"}
                     >
                         <input
-                            type="radio"
+                            type="checkbox"
                             className="visually-hidden"
                             name={question.id}
                             value={option.id}
@@ -42,4 +53,4 @@ const MultipleChoiceQuestionView = ({
     </>
 );
 
-export default MultipleChoiceQuestionView;
+export default MultipleSelectQuestionView;

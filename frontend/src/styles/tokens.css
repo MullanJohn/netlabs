@@ -151,6 +151,7 @@ button {
 }
 
 .q-opt {
+    position: relative;
     display: flex;
     align-items: flex-start;
     gap: 12px;
@@ -163,13 +164,14 @@ button {
     text-align: left;
     font-size: 13px;
     line-height: 1.45;
+    cursor: pointer;
     transition:
         background 90ms,
         border-color 90ms,
         color 90ms;
 }
 
-.q-opt:hover:not(:disabled) {
+.q-opt:hover:not(.is-selected):not(.is-correct):not(.is-wrong):not(:disabled) {
     border-color: var(--line-2);
     background: var(--surface);
     color: var(--fg);
@@ -177,6 +179,11 @@ button {
 
 .q-opt:disabled {
     cursor: default;
+}
+
+.q-opt:has(input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 .q-opt .k {
@@ -209,6 +216,20 @@ button {
     opacity: 0.55;
 }
 
+.q-opt .txt {
+    flex: 1;
+}
+
+.q-opt.is-selected {
+    border-color: var(--accent-ln);
+    background: var(--accent-bg);
+    color: var(--fg);
+}
+
+.q-opt.is-selected .k {
+    color: var(--accent);
+}
+
 .muted {
     color: var(--fg-3);
 }
@@ -231,6 +252,18 @@ button {
 
 .dim {
     opacity: 0.6;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .row {
