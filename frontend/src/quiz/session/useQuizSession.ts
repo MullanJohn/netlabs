@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuizAnswers } from "../quiz-hook";
+import { useQuizState } from "../quiz-hook";
 import type {
     QuizAnswer,
     QuizAnswers,
     QuizQuestion,
+    SubmissionResult,
 } from "../types/quiz-types";
 
 export type QuizSessionApi = {
@@ -12,7 +13,10 @@ export type QuizSessionApi = {
     currentIndex: number;
     currentQuestion: QuizQuestion | undefined;
     answers: QuizAnswers;
-    answeredCount: number;
+    results: Record<string, SubmissionResult>;
+    selectedCount: number;
+    isChecking: (questionId: string) => boolean;
+    errorFor: (questionId: string) => string | undefined;
     goTo: (index: number) => void;
     selectSingleOption: (questionId: string, optionId: string) => void;
     toggleMultiSelectOption: (
@@ -25,21 +29,29 @@ export type QuizSessionApi = {
         pairs: Partial<Record<string, string>>,
     ) => void;
     clearAnswer: (questionId: string) => void;
+    checkAnswer: (question: QuizQuestion) => void;
 };
 
-export function useQuizSession(questions: QuizQuestion[]): QuizSessionApi {
+export function useQuizSession(
+    quizId: string,
+    questions: QuizQuestion[],
+): QuizSessionApi {
     const {
         answers,
+        results,
+        checkingId,
+        errors,
         selectSingleOption,
         toggleMultiSelectOption,
         updateDragOrderAnswer,
         clearAnswer,
-    } = useQuizAnswers();
+        checkAnswer,
+    } = useQuizState(quizId);
     const [currentIndex, setCurrentIndex] = useState(0);
 
     const total = questions.length;
     const currentQuestion = questions[currentIndex];
-    const answeredCount = questions.filter((question) =>
+    const selectedCount = questions.filter((question) =>
         hasSelection(answers[question.id]),
     ).length;
 
@@ -54,12 +66,16 @@ export function useQuizSession(questions: QuizQuestion[]): QuizSessionApi {
         currentIndex,
         currentQuestion,
         answers,
-        answeredCount,
+        results,
+        selectedCount,
+        isChecking: (questionId) => checkingId === questionId,
+        errorFor: (questionId) => errors[questionId],
         goTo,
         selectSingleOption,
         toggleMultiSelectOption,
         updateDragOrderAnswer,
         clearAnswer,
+        checkAnswer,
     };
 }
 

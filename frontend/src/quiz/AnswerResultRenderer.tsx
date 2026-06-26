@@ -22,6 +22,7 @@ const AnswerResultRenderer = ({
     switch (question.question_type) {
         case "mcq-single": {
             if (submittedAnswer.type !== "mcq-single") return null;
+            if (!("correctOptionIds" in result)) return null;
 
             return (
                 <MultipleChoiceResultView
@@ -34,6 +35,7 @@ const AnswerResultRenderer = ({
 
         case "mcq-multi": {
             if (submittedAnswer.type !== "mcq-multi") return null;
+            if (!("correctOptionIds" in result)) return null;
 
             return (
                 <MultiSelectResultView
@@ -46,6 +48,7 @@ const AnswerResultRenderer = ({
 
         case "drag-order": {
             if (submittedAnswer.type !== "drag-order") return null;
+            if (!("correctPairs" in result)) return null;
 
             return (
                 <DragOrderResultView

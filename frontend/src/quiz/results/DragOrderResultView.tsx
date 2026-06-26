@@ -3,76 +3,56 @@ import type {
     QuizAnswer,
     SubmissionResult,
 } from "../types/quiz-types";
+import QuestionPrompt from "../questions/QuestionPrompt";
+import Verdict from "./Verdict";
 
-type DragOrderResultViewProps = {
+type Props = {
     question: DragOrderQuestion;
     submittedAnswer: Extract<QuizAnswer, { type: "drag-order" }>;
-    result: SubmissionResult;
+    result: Extract<SubmissionResult, { type: "drag-order" | "matching" }>;
 };
 
-const DragOrderResultView = ({
-    question,
-    submittedAnswer,
-    result,
-}: DragOrderResultViewProps) => {
-    const correctPairs = result.correctPairs ?? {};
+const DragOrderResultView = ({ question, submittedAnswer, result }: Props) => {
+    const correctPairs = result.correctPairs;
+    const optionText = (id: string | undefined) =>
+        question.options.find((option) => option.id === id)?.text ?? "—";
 
     return (
-        <div>
-            <h2>{question.stem}</h2>
+        <>
+            <QuestionPrompt question={question} />
+            <div className="q-dnd-slots">
+                {question.options.map((_, index) => {
+                    const boxId = `answer-${index}`;
+                    const placed = submittedAnswer.pairs[boxId];
+                    const correct = correctPairs[boxId];
+                    const isCorrect = correct !== undefined && placed === correct;
 
-            <p>{result.isCorrect ? "Correct" : "Incorrect"}</p>
-
-            <section>
-                <div className="space-y-2">
-                    {question.options.map((_, index) => {
-                        const boxId = `answer-${index}`;
-
-                        const selectedOption = submittedAnswer.pairs[boxId];
-                        const correctOption = correctPairs[boxId];
-
-                        const isCorrect = selectedOption === correctOption;
-
-                        return (
-                            <div
-                                key={boxId}
-                                className={
-                                    isCorrect
-                                        ? "rounded border border-green-500 p-2"
-                                        : "rounded border border-red-500 p-2"
-                                }
-                            >
-                                {selectedOption ?? "No answer"}
-                            </div>
-                        );
-                    })}
-                </div>
-            </section>
-
-            {!result.isCorrect && (
-                <section>
-                    <h3>Correct order</h3>
-
-                    <div className="space-y-2">
-                        {question.options.map((_, index) => {
-                            const boxId = `answer-${index}`;
-                            const correctLetter = correctPairs[boxId];
-
-                            return (
-                                <div
-                                    key={boxId}
-                                    className="rounded border border-gray-300 p-2"
-                                >
-                                    {correctLetter ?? "No answer"}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </section>
-            )}
-
-            {result.explanation && <p>{result.explanation}</p>}
-        </div>
+                    return (
+                        <div
+                            key={boxId}
+                            className={
+                                isCorrect ? "q-zone is-correct" : "q-zone is-wrong"
+                            }
+                        >
+                            <span className="pos">{index + 1}</span>
+                            <span className="placed">{optionText(placed)}</span>
+                            <span className="visually-hidden">
+                                {isCorrect ? "correct" : "incorrect"}
+                            </span>
+                            {!isCorrect && (
+                                <span className="q-zone-correct">
+                                    correct: {optionText(correct)}
+                                </span>
+                            )}
+                            <span className="verdict-mark" aria-hidden="true">
+                                {isCorrect ? "✓" : "✗"}
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
+            <Verdict isCorrect={result.isCorrect} explanation={result.explanation} />
+        </>
     );
 };
 

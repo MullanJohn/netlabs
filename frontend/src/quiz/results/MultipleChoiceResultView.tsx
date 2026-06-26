@@ -1,53 +1,41 @@
 import type {
     McqSingleQuestion,
     QuizAnswer,
-    QuizQuestion,
     SubmissionResult,
 } from "../types/quiz-types";
+import QuestionPrompt from "../questions/QuestionPrompt";
+import ResultOption from "./ResultOption";
+import Verdict from "./Verdict";
 
-type MultipleChoiceResultViewProps = {
+type Props = {
     question: McqSingleQuestion;
     submittedAnswer: Extract<QuizAnswer, { type: "mcq-single" }>;
-    result: SubmissionResult;
+    result: Extract<
+        SubmissionResult,
+        { type: "mcq-single" | "mcq-multi" | "multi-tf" }
+    >;
 };
 
 const MultipleChoiceResultView = ({
     question,
     submittedAnswer,
     result,
-}: MultipleChoiceResultViewProps) => {
-    return (
-        <div>
-            <h2>{question.stem}</h2>
-
-            <p>{result.isCorrect ? "Correct" : "Incorrect"}</p>
-
-            <div className="space-y-2">
-                {question.options.map((option) => {
-                    const isSelected = option.id === submittedAnswer.optionId;
-                    const isCorrect =
-                        result.correctOptionIds?.includes(option.id) ?? false;
-
-                    return (
-                        <div
-                            key={option.id}
-                            className={
-                                isCorrect
-                                    ? "rounded border border-green-500 p-2"
-                                    : isSelected
-                                      ? "rounded border border-red-500 p-2"
-                                      : "rounded border border-gray-300 p-2"
-                            }
-                        >
-                            {option.text}
-                        </div>
-                    );
-                })}
-            </div>
-
-            {result.explanation && <p>{result.explanation}</p>}
+}: Props) => (
+    <>
+        <QuestionPrompt question={question} />
+        <div className="opts">
+            {question.options.map((option, index) => (
+                <ResultOption
+                    key={option.id}
+                    letter={String.fromCharCode(65 + index)}
+                    text={option.text}
+                    isCorrect={result.correctOptionIds.includes(option.id)}
+                    isSelected={option.id === submittedAnswer.optionId}
+                />
+            ))}
         </div>
-    );
-};
+        <Verdict isCorrect={result.isCorrect} explanation={result.explanation} />
+    </>
+);
 
 export default MultipleChoiceResultView;

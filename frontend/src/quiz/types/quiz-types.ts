@@ -63,6 +63,11 @@ export type QuizAnswer =
 
 export type QuizAnswers = Record<string, QuizAnswer>;
 
+export type AnswerRequest =
+    | { type: "mcq-single"; answer: string }
+    | { type: "mcq-multi"; answer: string[] }
+    | { type: "drag-order"; answer: Record<string, string> };
+
 type SubmissionResultBase = {
     isCorrect: boolean;
     explanation: string;

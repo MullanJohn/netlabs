@@ -10,7 +10,7 @@ type Props = {
 };
 
 const QuizSession = ({ quizId, questions }: Props) => {
-    const session = useQuizSession(questions);
+    const session = useQuizSession(quizId, questions);
     const drillName = drillLabel(quizId);
 
     return (

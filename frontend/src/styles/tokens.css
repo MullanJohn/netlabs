@@ -171,7 +171,7 @@ button {
         color 90ms;
 }
 
-.q-opt:hover:not(.is-selected):not(.is-correct):not(.is-wrong):not(:disabled) {
+.q-opt:hover:not(.is-selected):not(.is-correct):not(.is-wrong):not(.is-muted):not(:disabled) {
     border-color: var(--line-2);
     background: var(--surface);
     color: var(--fg);
@@ -214,6 +214,12 @@ button {
 
 .q-opt.is-muted {
     opacity: 0.55;
+}
+
+.q-opt.is-correct,
+.q-opt.is-wrong,
+.q-opt.is-muted {
+    cursor: default;
 }
 
 .q-opt .txt {

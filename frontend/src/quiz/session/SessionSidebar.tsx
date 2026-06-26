@@ -8,7 +8,7 @@ type Props = {
 };
 
 const SessionSidebar = ({ session, drillName }: Props) => {
-    const { total, currentIndex, answeredCount, currentQuestion } = session;
+    const { total, currentIndex, selectedCount, currentQuestion } = session;
 
     return (
         <aside className="pane sidebar">
@@ -32,7 +32,7 @@ const SessionSidebar = ({ session, drillName }: Props) => {
                 <div className="sb-h">
                     <span>Navigator</span>
                     <span className="more">
-                        <b>{answeredCount}</b>/{total} answered
+                        <b>{selectedCount}</b>/{total} answered
                     </span>
                 </div>
                 <QuestionNavigator session={session} />
