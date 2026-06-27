@@ -1,6 +1,8 @@
+import { useState } from "react";
 import type { QuizSessionApi } from "./useQuizSession";
 import { questionTypeLabel } from "./labels";
 import QuestionNavigator from "./QuestionNavigator";
+import FinishDrillDialog from "./FinishDrillDialog";
 
 type Props = {
     session: QuizSessionApi;
@@ -9,6 +11,7 @@ type Props = {
 
 const SessionSidebar = ({ session, drillName }: Props) => {
     const { total, currentIndex, selectedCount, currentQuestion } = session;
+    const [finishOpen, setFinishOpen] = useState(false);
 
     return (
         <aside className="pane sidebar">
@@ -59,9 +62,19 @@ const SessionSidebar = ({ session, drillName }: Props) => {
             )}
 
             <div className="sb-bottom">
-                <button className="btn primary" type="button" disabled>
+                <button
+                    className="btn primary"
+                    type="button"
+                    onClick={() => setFinishOpen(true)}
+                    disabled={total === 0}
+                >
                     Finish drill
                 </button>
+                <FinishDrillDialog
+                    session={session}
+                    open={finishOpen}
+                    onClose={() => setFinishOpen(false)}
+                />
             </div>
         </aside>
     );

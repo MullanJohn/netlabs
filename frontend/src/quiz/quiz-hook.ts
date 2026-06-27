@@ -32,7 +32,8 @@ type QuizAction =
     | { kind: "clear"; questionId: string }
     | { kind: "check-start"; questionId: string }
     | { kind: "check-success"; questionId: string; result: SubmissionResult }
-    | { kind: "check-error"; questionId: string; message: string };
+    | { kind: "check-error"; questionId: string; message: string }
+    | { kind: "reset" };
 
 const initialState: QuizState = {
     answers: {},
@@ -73,6 +74,8 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
             });
         case "clear":
             return without(state, action.questionId);
+        case "reset":
+            return initialState;
         case "check-start":
             if (state.checkingId || state.results[action.questionId]) {
                 return state;
@@ -83,6 +86,7 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
                 errors: { ...state.errors, [action.questionId]: undefined },
             };
         case "check-success":
+            if (state.checkingId !== action.questionId) return state;
             return {
                 ...state,
                 checkingId: null,
@@ -200,6 +204,7 @@ export function useQuizState(quizSlug: string) {
         ) => dispatch({ kind: "update-drag", questionId, pairs }),
         clearAnswer: (questionId: string) =>
             dispatch({ kind: "clear", questionId }),
+        reset: () => dispatch({ kind: "reset" }),
         checkAnswer,
     };
 }

@@ -30,6 +30,7 @@ export type QuizSessionApi = {
     ) => void;
     clearAnswer: (questionId: string) => void;
     checkAnswer: (question: QuizQuestion) => void;
+    resetQuiz: () => void;
 };
 
 export function useQuizSession(
@@ -46,6 +47,7 @@ export function useQuizSession(
         updateDragOrderAnswer,
         clearAnswer,
         checkAnswer,
+        reset,
     } = useQuizState(quizId);
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -58,6 +60,11 @@ export function useQuizSession(
     function goTo(index: number) {
         if (index < 0 || index >= total) return;
         setCurrentIndex(index);
+    }
+
+    function resetQuiz() {
+        reset();
+        setCurrentIndex(0);
     }
 
     return {
@@ -76,6 +83,7 @@ export function useQuizSession(
         updateDragOrderAnswer,
         clearAnswer,
         checkAnswer,
+        resetQuiz,
     };
 }
 
