@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { QuizSessionApi } from "./useQuizSession";
+import { useStopwatch, formatElapsed } from "./useStopwatch";
 import { questionTypeLabel } from "./labels";
 import QuestionNavigator from "./QuestionNavigator";
 import FinishDrillDialog from "./FinishDrillDialog";
@@ -10,7 +11,8 @@ type Props = {
 };
 
 const SessionSidebar = ({ session, drillName }: Props) => {
-    const { total, currentIndex, selectedCount, currentQuestion } = session;
+    const { total, currentIndex, selectedCount, currentQuestion, resetKey } =
+        session;
     const [finishOpen, setFinishOpen] = useState(false);
 
     return (
@@ -27,6 +29,7 @@ const SessionSidebar = ({ session, drillName }: Props) => {
                     <span className="pos">
                         item <b>{currentIndex + 1}</b> / <b>{total}</b>
                     </span>
+                    <ElapsedTimer key={resetKey} />
                 </div>
                 <ProgressBar total={total} currentIndex={currentIndex} />
             </div>
@@ -77,6 +80,16 @@ const SessionSidebar = ({ session, drillName }: Props) => {
                 />
             </div>
         </aside>
+    );
+};
+
+const ElapsedTimer = () => {
+    const elapsedMs = useStopwatch();
+    return (
+        <span className="elapsed" role="timer" aria-live="off">
+            <span className="visually-hidden">Elapsed </span>
+            {formatElapsed(elapsedMs)}
+        </span>
     );
 };
 

@@ -16,7 +16,7 @@ const QuestionPrompt = ({ question, sub }: Props) => (
             <span className="tag">{question.sub_topic_id}</span>
             <span className="id">{question.id}</span>
         </div>
-        <h2 id={stemDomId(question.id)} className="q-prompt">
+        <h2 id={stemDomId(question.id)} className="q-prompt" tabIndex={-1}>
             {question.stem}
         </h2>
         {sub && (

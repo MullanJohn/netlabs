@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuizState } from "../quiz-hook";
+import { hasSelection } from "../answer";
 import type {
-    QuizAnswer,
     QuizAnswers,
     QuizQuestion,
     SubmissionResult,
@@ -15,6 +15,7 @@ export type QuizSessionApi = {
     answers: QuizAnswers;
     results: Record<string, SubmissionResult>;
     selectedCount: number;
+    resetKey: number;
     isChecking: (questionId: string) => boolean;
     errorFor: (questionId: string) => string | undefined;
     goTo: (index: number) => void;
@@ -50,6 +51,7 @@ export function useQuizSession(
         reset,
     } = useQuizState(quizId);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [resetKey, setResetKey] = useState(0);
 
     const total = questions.length;
     const currentQuestion = questions[currentIndex];
@@ -65,6 +67,7 @@ export function useQuizSession(
     function resetQuiz() {
         reset();
         setCurrentIndex(0);
+        setResetKey((key) => key + 1);
     }
 
     return {
@@ -75,6 +78,7 @@ export function useQuizSession(
         answers,
         results,
         selectedCount,
+        resetKey,
         isChecking: (questionId) => checkingId === questionId,
         errorFor: (questionId) => errors[questionId],
         goTo,
@@ -85,21 +89,4 @@ export function useQuizSession(
         checkAnswer,
         resetQuiz,
     };
-}
-
-function hasSelection(answer: QuizAnswer | undefined): boolean {
-    if (!answer) return false;
-    switch (answer.type) {
-        case "mcq-single":
-            return answer.optionId !== null;
-        case "mcq-multi":
-            return answer.optionIds.length > 0;
-        case "drag-order":
-            return Object.keys(answer.pairs).length > 0;
-        default: {
-            const _exhaustive: never = answer;
-            void _exhaustive;
-            return false;
-        }
-    }
 }

@@ -1,7 +1,20 @@
-import { DragDropProvider, useDraggable, useDroppable } from "@dnd-kit/react";
+import {
+    DragDropProvider,
+    DragOverlay,
+    PointerSensor,
+    useDraggable,
+    useDroppable,
+} from "@dnd-kit/react";
+import { Accessibility, defaultPreset } from "@dnd-kit/dom";
 import type { ReactNode } from "react";
 import type { DragOrderQuestion } from "../types/quiz-types";
 import QuestionPrompt from "./QuestionPrompt";
+
+const BANK_ID = "options";
+const SENSORS = [PointerSensor];
+const PLUGINS = defaultPreset.plugins.filter(
+    (plugin) => plugin !== Accessibility,
+);
 
 type Props = {
     question: DragOrderQuestion;
@@ -21,6 +34,8 @@ const DragOrderQuestionView = ({ question, pairs, onSelect }: Props) => {
             />
 
             <DragDropProvider
+                sensors={SENSORS}
+                plugins={PLUGINS}
                 onDragEnd={(event) => {
                     if (event.canceled) return;
 
@@ -38,7 +53,7 @@ const DragOrderQuestionView = ({ question, pairs, onSelect }: Props) => {
                             ),
                         );
 
-                    if (targetId !== "options") {
+                    if (targetId !== BANK_ID) {
                         next[targetId] = optionId;
                     }
 
@@ -46,7 +61,7 @@ const DragOrderQuestionView = ({ question, pairs, onSelect }: Props) => {
                 }}
             >
                 <div className="q-dnd">
-                    <Droppable id="options" className="q-dnd-bank">
+                    <Droppable id={BANK_ID} className="q-dnd-bank">
                         <div className="q-dnd-bank-head">
                             <span>Items</span>
                             <span className="remaining">
@@ -99,6 +114,17 @@ const DragOrderQuestionView = ({ question, pairs, onSelect }: Props) => {
                         })}
                     </div>
                 </div>
+
+                <DragOverlay>
+                    {(source) => {
+                        const option = question.options.find(
+                            (item) => item.id === String(source.id),
+                        );
+                        return option ? (
+                            <ChipBody decorative>{option.text}</ChipBody>
+                        ) : null;
+                    }}
+                </DragOverlay>
             </DragDropProvider>
         </>
     );
@@ -122,24 +148,42 @@ const Droppable = ({ id, className, children }: DroppableProps) => {
     );
 };
 
+type ChipBodyProps = {
+    children: ReactNode;
+    elementRef?: (element: Element | null) => void;
+    dragging?: boolean;
+    decorative?: boolean;
+};
+
+const ChipBody = ({
+    children,
+    elementRef,
+    dragging,
+    decorative,
+}: ChipBodyProps) => (
+    <div
+        ref={elementRef}
+        className={dragging ? "q-chip dragging" : "q-chip"}
+        aria-hidden={decorative || undefined}
+    >
+        <span className="handle" aria-hidden="true">
+            ⋮⋮
+        </span>
+        <span>{children}</span>
+    </div>
+);
+
 type ChipProps = {
     id: string;
     children: ReactNode;
 };
 
 const Chip = ({ id, children }: ChipProps) => {
-    const { ref, isDragging } = useDraggable({ id });
+    const { ref, isDragSource } = useDraggable({ id });
 
     return (
-        <button
-            ref={ref}
-            type="button"
-            className={isDragging ? "q-chip dragging" : "q-chip"}
-        >
-            <span className="handle" aria-hidden="true">
-                ⋮⋮
-            </span>
-            <span>{children}</span>
-        </button>
+        <ChipBody elementRef={ref} dragging={isDragSource}>
+            {children}
+        </ChipBody>
     );
 };

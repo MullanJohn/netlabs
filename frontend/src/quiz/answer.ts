@@ -1,4 +1,39 @@
-import type { QuizAnswer, QuizQuestion } from "./types/quiz-types";
+import type {
+    QuizAnswer,
+    QuizQuestion,
+    SubmissionResult,
+} from "./types/quiz-types";
+
+export function canCheckAnswer(
+    question: QuizQuestion,
+    answer: QuizAnswer | undefined,
+    result: SubmissionResult | undefined,
+    checking: boolean,
+): boolean {
+    return (
+        !result &&
+        !checking &&
+        answer !== undefined &&
+        validateAnswer(question, answer) === null
+    );
+}
+
+export function hasSelection(answer: QuizAnswer | undefined): boolean {
+    if (!answer) return false;
+    switch (answer.type) {
+        case "mcq-single":
+            return answer.optionId !== null;
+        case "mcq-multi":
+            return answer.optionIds.length > 0;
+        case "drag-order":
+            return Object.keys(answer.pairs).length > 0;
+        default: {
+            const _exhaustive: never = answer;
+            void _exhaustive;
+            return false;
+        }
+    }
+}
 
 export function validateAnswer(
     question: QuizQuestion,

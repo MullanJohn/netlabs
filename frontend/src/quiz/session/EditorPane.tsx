@@ -1,14 +1,23 @@
 import type { QuizSessionApi } from "./useQuizSession";
 import QuestionRenderer from "../QuestionRenderer";
 import AnswerResultRenderer from "../AnswerResultRenderer";
-import { validateAnswer } from "../answer";
+import { canCheckAnswer } from "../answer";
 
 type Props = {
     session: QuizSessionApi;
     drillName: string;
+    liveMessage: string;
+    onNavigate: (index: number) => void;
+    onCheck: () => void;
 };
 
-const EditorPane = ({ session, drillName }: Props) => {
+const EditorPane = ({
+    session,
+    drillName,
+    liveMessage,
+    onNavigate,
+    onCheck,
+}: Props) => {
     const {
         currentQuestion,
         currentIndex,
@@ -17,11 +26,9 @@ const EditorPane = ({ session, drillName }: Props) => {
         results,
         isChecking,
         errorFor,
-        goTo,
         selectSingleOption,
         toggleMultiSelectOption,
         updateDragOrderAnswer,
-        checkAnswer,
     } = session;
 
     if (!currentQuestion) return null;
@@ -30,16 +37,7 @@ const EditorPane = ({ session, drillName }: Props) => {
     const result = results[currentQuestion.id];
     const checking = isChecking(currentQuestion.id);
     const error = errorFor(currentQuestion.id);
-    const liveMessage = result
-        ? result.isCorrect
-            ? "Correct"
-            : "Incorrect"
-        : "";
-    const canCheck =
-        !result &&
-        !checking &&
-        answer !== undefined &&
-        validateAnswer(currentQuestion, answer) === null;
+    const canCheck = canCheckAnswer(currentQuestion, answer, result, checking);
 
     return (
         <section className="pane editor">
@@ -90,16 +88,18 @@ const EditorPane = ({ session, drillName }: Props) => {
                     <button
                         className="btn"
                         type="button"
-                        onClick={() => goTo(currentIndex - 1)}
+                        onClick={() => onNavigate(currentIndex - 1)}
                         disabled={currentIndex === 0}
+                        aria-keyshortcuts="ArrowLeft"
                     >
                         ← Prev
                     </button>
                     <button
                         className="btn primary"
                         type="button"
-                        onClick={() => checkAnswer(currentQuestion)}
+                        onClick={onCheck}
                         disabled={!canCheck}
+                        aria-keyshortcuts="Enter"
                     >
                         {result
                             ? "Checked"
@@ -110,8 +110,9 @@ const EditorPane = ({ session, drillName }: Props) => {
                     <button
                         className="btn"
                         type="button"
-                        onClick={() => goTo(currentIndex + 1)}
+                        onClick={() => onNavigate(currentIndex + 1)}
                         disabled={currentIndex === total - 1}
+                        aria-keyshortcuts="ArrowRight"
                     >
                         Next →
                     </button>
