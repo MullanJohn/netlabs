@@ -29,6 +29,12 @@ export type QuizSessionApi = {
         questionId: string,
         pairs: Partial<Record<string, string>>,
     ) => void;
+    updateMatchingAnswer: (
+        questionId: string,
+        pairs: Partial<Record<string, string>>,
+    ) => void;
+    setTrueFalse: (questionId: string, optionId: string, value: boolean) => void;
+    updateFillBlank: (questionId: string, text: string) => void;
     clearAnswer: (questionId: string) => void;
     checkAnswer: (question: QuizQuestion) => void;
     resetQuiz: () => void;
@@ -46,6 +52,9 @@ export function useQuizSession(
         selectSingleOption,
         toggleMultiSelectOption,
         updateDragOrderAnswer,
+        updateMatchingAnswer,
+        setTrueFalse,
+        updateFillBlank,
         clearAnswer,
         checkAnswer,
         reset,
@@ -85,6 +94,9 @@ export function useQuizSession(
         selectSingleOption,
         toggleMultiSelectOption,
         updateDragOrderAnswer,
+        updateMatchingAnswer,
+        setTrueFalse,
+        updateFillBlank,
         clearAnswer,
         checkAnswer,
         resetQuiz,

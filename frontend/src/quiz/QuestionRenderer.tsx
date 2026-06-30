@@ -1,4 +1,7 @@
 import DragOrderQuestionView from "./questions/DragOrderQuestionView";
+import FillBlankQuestionView from "./questions/FillBlankQuestionView";
+import MatchingQuestionView from "./questions/MatchingQuestionView";
+import MultiTfQuestionView from "./questions/MultiTfQuestionView";
 import MultipleChoiceQuestionView from "./questions/MultipleChoiceQuestionView";
 import MultipleSelectQuestionView from "./questions/MultipleSelectQuestionView";
 import type { QuizAnswer, QuizQuestion } from "./types/quiz-types";
@@ -16,6 +19,17 @@ type QuestionRendererProps = {
         questionId: string,
         pairs: Partial<Record<string, string>>,
     ) => void;
+    onUpdateMatching: (
+        questionId: string,
+        pairs: Partial<Record<string, string>>,
+    ) => void;
+    onSetTrueFalse: (
+        questionId: string,
+        optionId: string,
+        value: boolean,
+    ) => void;
+    onUpdateFillBlank: (questionId: string, text: string) => void;
+    onCheck: () => void;
 };
 
 const QuestionRenderer = ({
@@ -24,6 +38,10 @@ const QuestionRenderer = ({
     onSelectSingle,
     onToggleMulti,
     onUpdateDragOrder,
+    onUpdateMatching,
+    onSetTrueFalse,
+    onUpdateFillBlank,
+    onCheck,
 }: QuestionRendererProps) => {
     switch (question.question_type) {
         case "mcq-single": {
@@ -68,6 +86,46 @@ const QuestionRenderer = ({
                     question={question}
                     pairs={pairs}
                     onSelect={(pairs) => onUpdateDragOrder(question.id, pairs)}
+                />
+            );
+        }
+
+        case "matching": {
+            const pairs = answer?.type === "matching" ? answer.pairs : {};
+
+            return (
+                <MatchingQuestionView
+                    question={question}
+                    pairs={pairs}
+                    onSelect={(pairs) => onUpdateMatching(question.id, pairs)}
+                />
+            );
+        }
+
+        case "multi-tf": {
+            const verdicts =
+                answer?.type === "multi-tf" ? answer.verdicts : {};
+
+            return (
+                <MultiTfQuestionView
+                    question={question}
+                    verdicts={verdicts}
+                    onSelect={(optionId, value) =>
+                        onSetTrueFalse(question.id, optionId, value)
+                    }
+                />
+            );
+        }
+
+        case "fill-blank": {
+            const text = answer?.type === "fill-blank" ? answer.text : "";
+
+            return (
+                <FillBlankQuestionView
+                    question={question}
+                    text={text}
+                    onChange={(value) => onUpdateFillBlank(question.id, value)}
+                    onSubmit={onCheck}
                 />
             );
         }

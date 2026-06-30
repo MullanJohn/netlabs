@@ -628,3 +628,335 @@
 .q-zone.is-wrong .verdict-mark {
     color: var(--err);
 }
+
+.q-fill-wrap {
+    max-width: 720px;
+}
+
+.q-fill-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.q-fill {
+    flex: 0 1 420px;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--line-2);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-code);
+    font-size: 14px;
+    line-height: 1.4;
+    transition:
+        border-color 90ms,
+        background 90ms;
+}
+
+.q-fill::placeholder {
+    color: var(--fg-4);
+}
+
+.q-fill:hover:not([readonly]) {
+    border-color: var(--accent-ln);
+}
+
+.q-fill:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-color: var(--accent-ln);
+}
+
+.q-fill[readonly] {
+    cursor: default;
+}
+
+.q-fill-mark {
+    flex: 0 0 auto;
+    width: 1.4em;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.q-fill-row.is-correct .q-fill {
+    border-color: var(--ok);
+}
+
+.q-fill-row.is-wrong .q-fill {
+    border-color: var(--err);
+}
+
+.q-fill-row.is-correct .q-fill-mark {
+    color: var(--ok);
+}
+
+.q-fill-row.is-wrong .q-fill-mark {
+    color: var(--err);
+}
+
+.q-fill-accepted .label {
+    flex: 0 0 auto;
+    color: var(--fg-4);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.q-fill-accepted {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    margin: 10px 0 0;
+    color: var(--fg-3);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.q-tf-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+}
+
+.q-tf-row .txt {
+    flex: 1;
+    color: var(--fg-2);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.q-tf-controls {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+
+.q-opt.q-tf-opt {
+    width: auto;
+    flex: 1 1 0;
+    min-width: 4.5em;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.q-tf-mark {
+    flex: 0 0 auto;
+    width: 1.1em;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.q-opt.q-tf-opt.is-correct .q-tf-mark {
+    color: var(--ok);
+}
+
+.q-opt.q-tf-opt.is-wrong .q-tf-mark {
+    color: var(--err);
+}
+
+@media (max-width: 640px) {
+    .q-tf-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .q-tf-controls {
+        width: 100%;
+    }
+}
+
+.q-match-legend {
+    margin: 0 0 18px;
+    max-width: 720px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: var(--bg-2);
+}
+
+.q-match-legend dt {
+    margin-bottom: 8px;
+    color: var(--fg-4);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.q-match-legend dd {
+    display: flex;
+    gap: 10px;
+    margin: 0;
+    padding: 3px 0;
+    color: var(--fg-2);
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.q-match-legend dd .k {
+    flex: 0 0 1.4em;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.q-match {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 720px;
+}
+
+.q-match-row {
+    display: grid;
+    grid-template-columns: minmax(0, 38%) minmax(0, 1fr) 1.4em;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 4px;
+    min-height: 52px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: var(--bg-2);
+}
+
+.q-match-row .premise {
+    grid-column: 1;
+    grid-row: 1;
+    color: var(--fg);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.q-match-value {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    min-width: 0;
+    height: 34px;
+    margin: 0;
+    padding: 0 28px 0 10px;
+    border: 1px solid var(--line-2);
+    border-radius: 4px;
+    background-color: var(--bg);
+    background-image: var(--select-chevron);
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 9px 6px;
+    color: var(--fg);
+    font-family: var(--font-code);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    transition:
+        border-color 90ms,
+        background-color 90ms;
+}
+
+.q-match-value[data-empty="true"] {
+    color: var(--fg-3);
+    font-weight: 400;
+}
+
+.q-match-value:hover {
+    border-color: var(--accent-ln);
+    background-color: var(--surface);
+}
+
+.q-match-value:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-color: var(--accent-ln);
+}
+
+.q-match-value[aria-disabled="true"] {
+    pointer-events: none;
+    cursor: default;
+    background-image: none;
+}
+
+.q-match-value option {
+    color: var(--fg);
+    background: var(--bg);
+}
+
+.q-match-mark {
+    grid-column: 3;
+    grid-row: 1;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.q-match-row.is-correct .q-match-value {
+    border-color: var(--ok);
+}
+
+.q-match-row.is-wrong .q-match-value {
+    border-color: var(--err);
+}
+
+.q-match-row.is-correct .q-match-mark {
+    color: var(--ok);
+}
+
+.q-match-row.is-wrong .q-match-mark {
+    color: var(--err);
+}
+
+.q-match-correct {
+    grid-column: 1 / 4;
+    grid-row: 2;
+    min-height: 1.4em;
+    overflow: hidden;
+    color: var(--ok);
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+    .q-match-row {
+        grid-template-columns: minmax(0, 1fr) 1.4em;
+    }
+
+    .q-match-row .premise {
+        grid-column: 1 / 3;
+        grid-row: 1;
+    }
+
+    .q-match-value {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .q-match-mark {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .q-match-correct {
+        grid-column: 1 / 3;
+        grid-row: 3;
+    }
+}

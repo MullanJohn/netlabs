@@ -23,7 +23,7 @@ const QuizSession = ({ quizId, questions }: Props) => {
     const currentError = currentQuestion
         ? session.errorFor(currentQuestion.id)
         : undefined;
-    const pendingStemFocus = useRef(false);
+    const pendingStemFocus = useRef<FocusOptions | null>(null);
     const pendingAnnounce = useRef(false);
     const [liveMessage, setLiveMessage] = useState("");
 
@@ -39,14 +39,17 @@ const QuizSession = ({ quizId, questions }: Props) => {
             );
         }
         if (pendingStemFocus.current && currentQuestion) {
-            pendingStemFocus.current = false;
-            document.getElementById(stemDomId(currentQuestion.id))?.focus();
+            const focusOptions = pendingStemFocus.current;
+            pendingStemFocus.current = null;
+            document
+                .getElementById(stemDomId(currentQuestion.id))
+                ?.focus(focusOptions);
         }
     }, [currentIndex, currentQuestion, currentResult, currentError]);
 
     function navigate(index: number) {
         if (index < 0 || index >= total) return;
-        pendingStemFocus.current = true;
+        pendingStemFocus.current = { preventScroll: false };
         setLiveMessage("");
         goTo(index);
     }
@@ -61,7 +64,7 @@ const QuizSession = ({ quizId, questions }: Props) => {
         if (!canCheckAnswer(currentQuestion, answer, currentResult, checking)) {
             return;
         }
-        pendingStemFocus.current = true;
+        pendingStemFocus.current = { preventScroll: true };
         pendingAnnounce.current = true;
         checkAnswer(currentQuestion);
     }

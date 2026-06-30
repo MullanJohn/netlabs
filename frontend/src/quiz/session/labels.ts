@@ -14,6 +14,12 @@ export function questionTypeLabel(type: QuestionType): string {
             return "multi-select";
         case "drag-order":
             return "drag-order";
+        case "matching":
+            return "matching";
+        case "multi-tf":
+            return "true / false";
+        case "fill-blank":
+            return "fill in the blank";
         default: {
             const _exhaustive: never = type;
             return _exhaustive;
@@ -29,6 +35,12 @@ export function questionTypeShort(type: QuestionType): string {
             return "multi";
         case "drag-order":
             return "order";
+        case "matching":
+            return "match";
+        case "multi-tf":
+            return "t/f";
+        case "fill-blank":
+            return "fill";
         default: {
             const _exhaustive: never = type;
             return _exhaustive;

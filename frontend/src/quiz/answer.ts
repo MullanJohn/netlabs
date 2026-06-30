@@ -27,6 +27,12 @@ export function hasSelection(answer: QuizAnswer | undefined): boolean {
             return answer.optionIds.length > 0;
         case "drag-order":
             return Object.keys(answer.pairs).length > 0;
+        case "matching":
+            return Object.keys(answer.pairs).length > 0;
+        case "multi-tf":
+            return Object.keys(answer.verdicts).length > 0;
+        case "fill-blank":
+            return answer.text.trim().length > 0;
         default: {
             const _exhaustive: never = answer;
             void _exhaustive;
@@ -73,6 +79,42 @@ export function validateAnswer(
             }
 
             return null;
+        }
+
+        case "matching": {
+            if (!answer || answer.type !== "matching") {
+                return "Please match every item.";
+            }
+
+            const allMatched = question.premises.every(
+                (premise) => answer.pairs[premise.id],
+            );
+
+            return allMatched ? null : "Please match every item.";
+        }
+
+        case "multi-tf": {
+            if (!answer || answer.type !== "multi-tf") {
+                return "Please mark every statement True or False.";
+            }
+
+            const allJudged = question.options.every(
+                (option) => answer.verdicts[option.id] !== undefined,
+            );
+
+            return allJudged
+                ? null
+                : "Please mark every statement True or False.";
+        }
+
+        case "fill-blank": {
+            if (!answer || answer.type !== "fill-blank") {
+                return "Please type an answer.";
+            }
+
+            return answer.text.trim().length > 0
+                ? null
+                : "Please type an answer.";
         }
 
         default:

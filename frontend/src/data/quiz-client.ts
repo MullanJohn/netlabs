@@ -40,6 +40,24 @@ export function toAnswerRequest(answer: QuizAnswer): AnswerRequest | null {
             }
             return { type: "drag-order", answer: answerMap };
         }
+        case "matching": {
+            const answerMap: Record<string, string> = {};
+            for (const [premiseId, optionId] of Object.entries(answer.pairs)) {
+                if (optionId !== undefined) answerMap[premiseId] = optionId;
+            }
+            return { type: "matching", answer: answerMap };
+        }
+        case "multi-tf":
+            return {
+                type: "multi-tf",
+                answer: Object.entries(answer.verdicts)
+                    .filter(([, value]) => value === true)
+                    .map(([optionId]) => optionId),
+            };
+        case "fill-blank": {
+            const text = answer.text.trim();
+            return text === "" ? null : { type: "fill-blank", answer: text };
+        }
         default: {
             const _exhaustive: never = answer;
             return _exhaustive;

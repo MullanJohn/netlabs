@@ -1,7 +1,10 @@
 export type QuizQuestion =
     | McqSingleQuestion
     | McqMultiQuestion
-    | DragOrderQuestion;
+    | DragOrderQuestion
+    | MatchingQuestion
+    | MultiTfQuestion
+    | FillBlankQuestion;
 
 export type BaseQuestion = {
     id: string;
@@ -18,7 +21,13 @@ export type BaseQuestion = {
      */
     sub_topic_id: string;
 
-    question_type: "mcq-single" | "mcq-multi" | "drag-order";
+    question_type:
+        | "mcq-single"
+        | "mcq-multi"
+        | "drag-order"
+        | "matching"
+        | "multi-tf"
+        | "fill-blank";
     stem: string;
     exhibit?: Exhibit;
     options: QuestionOption[];
@@ -37,7 +46,25 @@ export type DragOrderQuestion = BaseQuestion & {
     question_type: "drag-order";
 };
 
+export type MatchingQuestion = BaseQuestion & {
+    question_type: "matching";
+    premises: Premise[];
+};
+
+export type MultiTfQuestion = BaseQuestion & {
+    question_type: "multi-tf";
+};
+
+export type FillBlankQuestion = BaseQuestion & {
+    question_type: "fill-blank";
+};
+
 export type QuestionOption = {
+    id: string;
+    text: string;
+};
+
+export type Premise = {
     id: string;
     text: string;
 };
@@ -59,14 +86,20 @@ export type Exhibit =
 export type QuizAnswer =
     | { type: "mcq-single"; optionId: string | null }
     | { type: "mcq-multi"; optionIds: string[] }
-    | { type: "drag-order"; pairs: Partial<Record<string, string>> };
+    | { type: "drag-order"; pairs: Partial<Record<string, string>> }
+    | { type: "matching"; pairs: Partial<Record<string, string>> }
+    | { type: "multi-tf"; verdicts: Partial<Record<string, boolean>> }
+    | { type: "fill-blank"; text: string };
 
 export type QuizAnswers = Record<string, QuizAnswer>;
 
 export type AnswerRequest =
     | { type: "mcq-single"; answer: string }
     | { type: "mcq-multi"; answer: string[] }
-    | { type: "drag-order"; answer: Record<string, string> };
+    | { type: "drag-order"; answer: Record<string, string> }
+    | { type: "matching"; answer: Record<string, string> }
+    | { type: "multi-tf"; answer: string[] }
+    | { type: "fill-blank"; answer: string };
 
 type SubmissionResultBase = {
     isCorrect: boolean;

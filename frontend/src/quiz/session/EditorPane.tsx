@@ -29,6 +29,9 @@ const EditorPane = ({
         selectSingleOption,
         toggleMultiSelectOption,
         updateDragOrderAnswer,
+        updateMatchingAnswer,
+        setTrueFalse,
+        updateFillBlank,
     } = session;
 
     if (!currentQuestion) return null;
@@ -72,6 +75,10 @@ const EditorPane = ({
                         onSelectSingle={selectSingleOption}
                         onToggleMulti={toggleMultiSelectOption}
                         onUpdateDragOrder={updateDragOrderAnswer}
+                        onUpdateMatching={updateMatchingAnswer}
+                        onSetTrueFalse={setTrueFalse}
+                        onUpdateFillBlank={updateFillBlank}
+                        onCheck={onCheck}
                     />
                 )}
 

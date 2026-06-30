@@ -9,6 +9,7 @@
     --fg: #e6e7ea;
     --fg-2: #b6b8c0;
     --fg-3: #8c8e96;
+    --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='%238c8e96' stroke-width='1.5'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
     --fg-4: #5b5e67;
     --fg-5: #3a3d44;
 
@@ -53,6 +54,7 @@
     --fg: #181a1f;
     --fg-2: #3a3e46;
     --fg-3: #686c75;
+    --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='%23686c75' stroke-width='1.5'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E");
     --fg-4: #989aa3;
     --fg-5: #c0c4cd;
 

@@ -29,6 +29,18 @@ type QuizAction =
           questionId: string;
           pairs: Partial<Record<string, string>>;
       }
+    | {
+          kind: "update-matching";
+          questionId: string;
+          pairs: Partial<Record<string, string>>;
+      }
+    | {
+          kind: "set-tf";
+          questionId: string;
+          optionId: string;
+          value: boolean;
+      }
+    | { kind: "update-fill-blank"; questionId: string; text: string }
     | { kind: "clear"; questionId: string }
     | { kind: "check-start"; questionId: string }
     | { kind: "check-success"; questionId: string; result: SubmissionResult }
@@ -71,6 +83,28 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
             return setAnswer(state, action.questionId, {
                 type: "drag-order",
                 pairs: action.pairs,
+            });
+        case "update-matching":
+            return setAnswer(state, action.questionId, {
+                type: "matching",
+                pairs: action.pairs,
+            });
+        case "set-tf": {
+            const current = state.answers[action.questionId];
+            const currentVerdicts =
+                current?.type === "multi-tf" ? current.verdicts : {};
+            return setAnswer(state, action.questionId, {
+                type: "multi-tf",
+                verdicts: {
+                    ...currentVerdicts,
+                    [action.optionId]: action.value,
+                },
+            });
+        }
+        case "update-fill-blank":
+            return setAnswer(state, action.questionId, {
+                type: "fill-blank",
+                text: action.text,
             });
         case "clear":
             return without(state, action.questionId);
@@ -202,6 +236,14 @@ export function useQuizState(quizSlug: string) {
             questionId: string,
             pairs: Partial<Record<string, string>>,
         ) => dispatch({ kind: "update-drag", questionId, pairs }),
+        updateMatchingAnswer: (
+            questionId: string,
+            pairs: Partial<Record<string, string>>,
+        ) => dispatch({ kind: "update-matching", questionId, pairs }),
+        setTrueFalse: (questionId: string, optionId: string, value: boolean) =>
+            dispatch({ kind: "set-tf", questionId, optionId, value }),
+        updateFillBlank: (questionId: string, text: string) =>
+            dispatch({ kind: "update-fill-blank", questionId, text }),
         clearAnswer: (questionId: string) =>
             dispatch({ kind: "clear", questionId }),
         reset: () => dispatch({ kind: "reset" }),
