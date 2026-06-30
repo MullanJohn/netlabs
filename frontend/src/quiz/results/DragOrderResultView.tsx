@@ -4,6 +4,7 @@ import type {
     SubmissionResult,
 } from "../types/quiz-types";
 import QuestionPrompt from "../questions/QuestionPrompt";
+import { DRAG_HINT } from "../questions/DragOrderQuestionView";
 import Verdict from "./Verdict";
 
 type Props = {
@@ -19,7 +20,7 @@ const DragOrderResultView = ({ question, submittedAnswer, result }: Props) => {
 
     return (
         <>
-            <QuestionPrompt question={question} />
+            <QuestionPrompt question={question} sub={DRAG_HINT} />
             <div className="q-dnd-slots">
                 {question.options.map((_, index) => {
                     const boxId = `answer-${index}`;

@@ -10,6 +10,8 @@ import type { ReactNode } from "react";
 import type { DragOrderQuestion } from "../types/quiz-types";
 import QuestionPrompt from "./QuestionPrompt";
 
+export const DRAG_HINT = "Drag each item into the correct position.";
+
 const BANK_ID = "options";
 const SENSORS = [PointerSensor];
 const PLUGINS = defaultPreset.plugins.filter(
@@ -28,10 +30,7 @@ const DragOrderQuestionView = ({ question, pairs, onSelect }: Props) => {
 
     return (
         <>
-            <QuestionPrompt
-                question={question}
-                sub="Drag each item into the correct position."
-            />
+            <QuestionPrompt question={question} sub={DRAG_HINT} />
 
             <DragDropProvider
                 sensors={SENSORS}

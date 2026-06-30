@@ -4,6 +4,7 @@ import type {
     SubmissionResult,
 } from "../types/quiz-types";
 import QuestionPrompt from "../questions/QuestionPrompt";
+import { mcqMultiHint } from "../questions/MultipleSelectQuestionView";
 import ResultOption from "./ResultOption";
 import Verdict from "./Verdict";
 
@@ -18,7 +19,7 @@ type Props = {
 
 const MultiSelectResultView = ({ question, submittedAnswer, result }: Props) => (
     <>
-        <QuestionPrompt question={question} />
+        <QuestionPrompt question={question} sub={mcqMultiHint(question)} />
         <div className="opts">
             {question.options.map((option, index) => (
                 <ResultOption

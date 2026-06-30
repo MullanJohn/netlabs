@@ -1,6 +1,12 @@
 import type { McqMultiQuestion } from "../types/quiz-types";
 import QuestionPrompt, { stemDomId, subDomId } from "./QuestionPrompt";
 
+export const mcqMultiHint = (question: McqMultiQuestion) => (
+    <>
+        <b>Select all that apply.</b> Choose {question.select_count}.
+    </>
+);
+
 type Props = {
     question: McqMultiQuestion;
     selectedOptionIds: string[];
@@ -13,14 +19,7 @@ const MultipleSelectQuestionView = ({
     onSelect,
 }: Props) => (
     <>
-        <QuestionPrompt
-            question={question}
-            sub={
-                <>
-                    <b>Select all that apply.</b> Choose {question.select_count}.
-                </>
-            }
-        />
+        <QuestionPrompt question={question} sub={mcqMultiHint(question)} />
         <fieldset
             className="opts"
             aria-labelledby={stemDomId(question.id)}
