@@ -69,19 +69,16 @@ export type Premise = {
     text: string;
 };
 
-export type Exhibit =
-    | {
-          type: "config-snippet";
-          content: string;
-      }
-    | {
-          type: "show-output";
-          content: string;
-      }
-    | {
-          type: "text";
-          content: string;
-      };
+export type Exhibit = {
+    type:
+        | "show-output"
+        | "config-snippet"
+        | "topology-table"
+        | "code-snippet"
+        | "diagram-mermaid"
+        | "diagram-png";
+    content: string;
+};
 
 export type QuizAnswer =
     | { type: "mcq-single"; optionId: string | null }

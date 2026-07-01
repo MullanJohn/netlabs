@@ -1,24 +1,35 @@
 import type { Exhibit } from "../types/quiz-types";
 
-const EXHIBIT_TITLES: Record<Exhibit["type"], string> = {
+const EXHIBIT_TITLES: Record<string, string> = {
     "config-snippet": "config",
     "show-output": "show output",
-    text: "note",
+    "code-snippet": "code",
+    "topology-table": "topology",
+    "diagram-mermaid": "diagram",
+    "diagram-png": "diagram",
 };
+
+const TERMINAL_TYPES = new Set<Exhibit["type"]>([
+    "config-snippet",
+    "show-output",
+    "code-snippet",
+]);
 
 type Props = {
     exhibit: Exhibit;
 };
 
 const ExhibitView = ({ exhibit }: Props) => {
-    const isTerminal =
-        exhibit.type === "config-snippet" || exhibit.type === "show-output";
+    const isTerminal = TERMINAL_TYPES.has(exhibit.type);
+    const noWrap = isTerminal || exhibit.type === "topology-table";
+    const title =
+        EXHIBIT_TITLES[exhibit.type] ?? exhibit.type.replaceAll("-", " ");
 
     return (
         <figure
-            className={`exhibit exhibit-${exhibit.type}`}
+            className="exhibit"
             role="figure"
-            aria-label={`${EXHIBIT_TITLES[exhibit.type]} exhibit`}
+            aria-label={`${title} exhibit`}
         >
             <div className="exhibit-head">
                 {isTerminal && (
@@ -28,10 +39,10 @@ const ExhibitView = ({ exhibit }: Props) => {
                         <span />
                     </div>
                 )}
-                <span className="title">{EXHIBIT_TITLES[exhibit.type]}</span>
-                <span className="meta">{exhibit.type.replace("-", " ")}</span>
+                <span className="title">{title}</span>
+                <span className="meta">{exhibit.type.replaceAll("-", " ")}</span>
             </div>
-            <pre className={isTerminal ? "exhibit-body" : "exhibit-body wrap"}>
+            <pre className={noWrap ? "exhibit-body" : "exhibit-body wrap"}>
                 {exhibit.content}
             </pre>
         </figure>
