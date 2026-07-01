@@ -4,6 +4,7 @@ import ExhibitView from "./ExhibitView";
 
 export const stemDomId = (questionId: string) => `q-stem-${questionId}`;
 export const subDomId = (questionId: string) => `q-sub-${questionId}`;
+export const optionLetter = (index: number) => String.fromCharCode(65 + index);
 
 type Props = {
     question: QuizQuestion;

@@ -1,10 +1,13 @@
 import type { MatchingQuestion, SubmissionResult } from "../types/quiz-types";
-import QuestionPrompt, { stemDomId, subDomId } from "../questions/QuestionPrompt";
+import QuestionPrompt, {
+    optionLetter,
+    stemDomId,
+    subDomId,
+} from "../questions/QuestionPrompt";
+import Corrections from "../results/Corrections";
 import Verdict from "../results/Verdict";
 
 export const MATCH_HINT = "Choose the best match for each item.";
-
-const optionLetter = (index: number) => String.fromCharCode(65 + index);
 
 type Pairs = Partial<Record<string, string>>;
 type GradedResult = Extract<SubmissionResult, { type: "matching" }>;
@@ -36,7 +39,13 @@ const MatchingField = (props: Props) => {
                   .filter(
                       ({ picked, correct }) =>
                           correct !== undefined && picked !== correct,
-                  );
+                  )
+                  .map(({ premise, picked, correct }) => ({
+                      id: premise.id,
+                      label: premise.text,
+                      picked: labelFor(picked),
+                      correct: labelFor(correct),
+                  }));
 
     return (
         <>
@@ -111,21 +120,7 @@ const MatchingField = (props: Props) => {
                     );
                 })}
             </div>
-            {corrections.length > 0 && (
-                <div className="q-corrections">
-                    <h4>Corrections</h4>
-                    <ul>
-                        {corrections.map(({ premise, picked, correct }) => (
-                            <li key={premise.id}>
-                                {premise.text}: you chose{" "}
-                                <span className="you">{labelFor(picked)}</span>,
-                                correct answer is{" "}
-                                <span className="ok">{labelFor(correct)}</span>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+            <Corrections verb="chose" rows={corrections} />
             {result && (
                 <Verdict
                     isCorrect={result.isCorrect}

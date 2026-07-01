@@ -1,5 +1,5 @@
 import type { McqMultiQuestion } from "../types/quiz-types";
-import QuestionPrompt, { stemDomId, subDomId } from "./QuestionPrompt";
+import QuestionPrompt, { optionLetter, stemDomId, subDomId } from "./QuestionPrompt";
 
 export const mcqMultiHint = (question: McqMultiQuestion) => (
     <>
@@ -41,9 +41,7 @@ const MultipleSelectQuestionView = ({
                             checked={isSelected}
                             onChange={() => onSelect(option.id)}
                         />
-                        <span className="k">
-                            {String.fromCharCode(65 + index)}
-                        </span>
+                        <span className="k">{optionLetter(index)}</span>
                         <span className="txt">{option.text}</span>
                     </label>
                 );

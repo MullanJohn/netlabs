@@ -3,24 +3,34 @@ import json
 import logging
 import os
 import sys
-from typing import Any
+from typing import Any, assert_never
 from urllib.parse import quote
 
 import asyncpg
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 
 from models import (
     AnswerRequest,
     DragOrderAnswer,
+    DragOrderResult,
     FillBlankAnswer,
+    FillBlankKey,
+    FillBlankResult,
     MatchingAnswer,
+    MatchingKey,
+    MatchingResult,
     McqMultiAnswer,
+    McqMultiResult,
     McqSingleAnswer,
+    McqSingleResult,
     MultiTfAnswer,
+    MultiTfResult,
     CatalogCategoryListResponse,
     CatalogCategoryPreviewResponse,
     CatalogDrillListResponse,
+    OptionsKey,
     Quiz,
     QuizQuestion,
     SubmissionResult,
@@ -149,25 +159,63 @@ async def fetch_quiz_questions(
     )
     return [question_from_row(row) for row in rows]
 
-def check_answer(submission: AnswerRequest, key: dict[str, Any]) -> bool:
-    logger.debug("Checking answer type=%s", submission.type)
+def grade_submission(
+    submission: AnswerRequest,
+    key_json: Any,
+    explanation: str,
+) -> SubmissionResult:
     match submission:
         case McqSingleAnswer():
-            return submission.answer == key["correct"][0]
-        case McqMultiAnswer() | MultiTfAnswer():
-            return frozenset(submission.answer) == frozenset(key["correct"])
+            key = OptionsKey.model_validate(key_json)
+            return McqSingleResult(
+                isCorrect=submission.answer == key.correct[0],
+                correctOptionIds=key.correct,
+                explanation=explanation,
+            )
+        case McqMultiAnswer():
+            key = OptionsKey.model_validate(key_json)
+            return McqMultiResult(
+                isCorrect=frozenset(submission.answer) == frozenset(key.correct),
+                correctOptionIds=key.correct,
+                explanation=explanation,
+            )
+        case MultiTfAnswer():
+            key = OptionsKey.model_validate(key_json)
+            return MultiTfResult(
+                isCorrect=frozenset(submission.answer) == frozenset(key.correct),
+                correctOptionIds=key.correct,
+                explanation=explanation,
+            )
         case DragOrderAnswer():
-            return submission.answer == {
-                f"answer-{position}": option_id
-                for position, option_id in enumerate(key["correct"])
-            }
+            key = OptionsKey.model_validate(key_json)
+            if len(submission.answer) != len(key.correct):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Answer must order exactly the question's options",
+                )
+            return DragOrderResult(
+                isCorrect=submission.answer == key.correct,
+                correctOrder=key.correct,
+                explanation=explanation,
+            )
         case MatchingAnswer():
-            return string_map(submission.answer) == string_map(key["correct"])
+            key = MatchingKey.model_validate(key_json)
+            correct_pairs = string_map(key.correct)
+            return MatchingResult(
+                isCorrect=string_map(submission.answer) == correct_pairs,
+                correctPairs=correct_pairs,
+                explanation=explanation,
+            )
         case FillBlankAnswer():
-            return normalize_text_answer(submission.answer) in {normalize_text_answer(a) for a in key["accepted"]}
+            key = FillBlankKey.model_validate(key_json)
+            return FillBlankResult(
+                isCorrect=normalize_text_answer(submission.answer)
+                in {normalize_text_answer(a) for a in key.accepted},
+                acceptedAnswers=key.accepted,
+                explanation=explanation,
+            )
         case _:
-            logger.warning("Unsupported answer type: %s", submission.type)
-            return False
+            assert_never(submission)
 
 def string_map(mapping: dict[Any, Any]) -> dict[str, str]:
     return {str(key): str(value) for key, value in mapping.items()}
@@ -373,33 +421,31 @@ async def submit_answer(
                 status_code=400,
                 detail="Answer type does not match question type",
             )
-        key = decode_json(row["answer"])
-        is_correct = check_answer(submission, key)
-        result_data: dict[str, Any] = {
-            "type": submission.type,
-            "isCorrect": is_correct,
-            "explanation": row["rationale"],
-        }
-        match submission.type:
-            case "mcq-single" | "mcq-multi" | "multi-tf":
-                result_data["correctOptionIds"] = key["correct"]
-            case "drag-order":
-                result_data["correctPairs"] = {
-                    f"answer-{position}": option_id
-                    for position, option_id in enumerate(key["correct"])
-                }
-            case "matching":
-                result_data["correctPairs"] = string_map(key["correct"])
-            case "fill-blank":
-                result_data["acceptedAnswers"] = key["accepted"]
+        try:
+            result = grade_submission(
+                submission,
+                decode_json(row["answer"]),
+                row["rationale"],
+            )
+        except ValidationError as e:
+            logger.error(
+                "Malformed answer key: quiz_slug=%s question_id=%s error=%s",
+                quiz_slug,
+                question_id,
+                e,
+            )
+            raise HTTPException(
+                status_code=500,
+                detail="Malformed question data",
+            ) from e
         logger.info(
             "Submitted answer: quiz_slug=%s question_id=%s type=%s is_correct=%s",
             quiz_slug,
             question_id,
             submission.type,
-            is_correct,
+            result.isCorrect,
         )
-        return result_data
+        return result
     except HTTPException:
         raise
     except Exception as e:

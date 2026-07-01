@@ -1,19 +1,16 @@
 import type {
     McqSingleQuestion,
+    McqSingleResult,
     QuizAnswer,
-    SubmissionResult,
 } from "../types/quiz-types";
-import QuestionPrompt from "../questions/QuestionPrompt";
+import QuestionPrompt, { optionLetter } from "../questions/QuestionPrompt";
 import ResultOption from "./ResultOption";
 import Verdict from "./Verdict";
 
 type Props = {
     question: McqSingleQuestion;
     submittedAnswer: Extract<QuizAnswer, { type: "mcq-single" }>;
-    result: Extract<
-        SubmissionResult,
-        { type: "mcq-single" | "mcq-multi" | "multi-tf" }
-    >;
+    result: McqSingleResult;
 };
 
 const MultipleChoiceResultView = ({
@@ -27,7 +24,7 @@ const MultipleChoiceResultView = ({
             {question.options.map((option, index) => (
                 <ResultOption
                     key={option.id}
-                    letter={String.fromCharCode(65 + index)}
+                    letter={optionLetter(index)}
                     text={option.text}
                     isCorrect={result.correctOptionIds.includes(option.id)}
                     isSelected={option.id === submittedAnswer.optionId}

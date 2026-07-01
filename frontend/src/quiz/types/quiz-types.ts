@@ -96,7 +96,7 @@ export type QuizAnswers = Record<string, QuizAnswer>;
 export type AnswerRequest =
     | { type: "mcq-single"; answer: string }
     | { type: "mcq-multi"; answer: string[] }
-    | { type: "drag-order"; answer: Record<string, string> }
+    | { type: "drag-order"; answer: string[] }
     | { type: "matching"; answer: Record<string, string> }
     | { type: "multi-tf"; answer: string[] }
     | { type: "fill-blank"; answer: string };
@@ -106,20 +106,40 @@ type SubmissionResultBase = {
     explanation: string;
 };
 
+export type McqSingleResult = SubmissionResultBase & {
+    type: "mcq-single";
+    correctOptionIds: string[];
+};
+
+export type McqMultiResult = SubmissionResultBase & {
+    type: "mcq-multi";
+    correctOptionIds: string[];
+};
+
+export type MultiTfResult = SubmissionResultBase & {
+    type: "multi-tf";
+    correctOptionIds: string[];
+};
+
+export type DragOrderResult = SubmissionResultBase & {
+    type: "drag-order";
+    correctOrder: string[];
+};
+
+export type MatchingResult = SubmissionResultBase & {
+    type: "matching";
+    correctPairs: Record<string, string>;
+};
+
+export type FillBlankResult = SubmissionResultBase & {
+    type: "fill-blank";
+    acceptedAnswers: string[];
+};
+
 export type SubmissionResult =
-    | (SubmissionResultBase & {
-          type: "mcq-single" | "mcq-multi" | "multi-tf";
-          correctOptionIds: string[];
-      })
-    | (SubmissionResultBase & {
-          type: "drag-order";
-          correctPairs: Record<string, string>;
-      })
-    | (SubmissionResultBase & {
-          type: "matching";
-          correctPairs: Record<string, string>;
-      })
-    | (SubmissionResultBase & {
-          type: "fill-blank";
-          acceptedAnswers: string[];
-      });
+    | McqSingleResult
+    | McqMultiResult
+    | MultiTfResult
+    | DragOrderResult
+    | MatchingResult
+    | FillBlankResult;

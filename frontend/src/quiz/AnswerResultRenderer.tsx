@@ -25,7 +25,7 @@ const AnswerResultRenderer = ({
     switch (question.question_type) {
         case "mcq-single": {
             if (submittedAnswer.type !== "mcq-single") return null;
-            if (!("correctOptionIds" in result)) return null;
+            if (result.type !== "mcq-single") return null;
 
             return (
                 <MultipleChoiceResultView
@@ -38,7 +38,7 @@ const AnswerResultRenderer = ({
 
         case "mcq-multi": {
             if (submittedAnswer.type !== "mcq-multi") return null;
-            if (!("correctOptionIds" in result)) return null;
+            if (result.type !== "mcq-multi") return null;
 
             return (
                 <MultiSelectResultView
@@ -79,7 +79,7 @@ const AnswerResultRenderer = ({
 
         case "multi-tf": {
             if (submittedAnswer.type !== "multi-tf") return null;
-            if (!("correctOptionIds" in result)) return null;
+            if (result.type !== "multi-tf") return null;
 
             return (
                 <MultiTfResultView
@@ -104,8 +104,10 @@ const AnswerResultRenderer = ({
             );
         }
 
-        default:
-            return null;
+        default: {
+            const _exhaustive: never = question;
+            return _exhaustive;
+        }
     }
 };
 

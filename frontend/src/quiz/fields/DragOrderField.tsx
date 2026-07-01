@@ -9,9 +9,12 @@ import { Accessibility, defaultPreset } from "@dnd-kit/dom";
 import type { ReactNode } from "react";
 import type { DragOrderQuestion, SubmissionResult } from "../types/quiz-types";
 import QuestionPrompt from "../questions/QuestionPrompt";
+import Corrections from "../results/Corrections";
 import Verdict from "../results/Verdict";
 
 export const DRAG_HINT = "Drag each item into the correct position.";
+
+export const slotId = (index: number) => `answer-${index}`;
 
 const BANK_ID = "options";
 const SENSORS = [PointerSensor];
@@ -33,11 +36,11 @@ const DragOrderField = (props: Props) => {
         question.options.find((option) => option.id === id)?.text ?? "—";
 
     const slots = question.options.map((_, index) => {
-        const boxId = `answer-${index}`;
+        const boxId = slotId(index);
         const placed = pairs[boxId];
 
         if (props.mode === "graded") {
-            const correct = props.result.correctPairs[boxId];
+            const correct = props.result.correctOrder[index];
             const isCorrect = correct !== undefined && placed === correct;
 
             return (
@@ -81,18 +84,21 @@ const DragOrderField = (props: Props) => {
     if (props.mode === "graded") {
         const result = props.result;
         const corrections = question.options
-            .map((_, index) => {
-                const boxId = `answer-${index}`;
-                return {
-                    index,
-                    placed: pairs[boxId],
-                    correct: result.correctPairs[boxId],
-                };
-            })
+            .map((_, index) => ({
+                index,
+                placed: pairs[slotId(index)],
+                correct: result.correctOrder[index],
+            }))
             .filter(
                 ({ placed, correct }) =>
                     correct !== undefined && placed !== correct,
-            );
+            )
+            .map(({ index, placed, correct }) => ({
+                id: index,
+                label: `Position ${index + 1}`,
+                picked: optionText(placed),
+                correct: optionText(correct),
+            }));
 
         return (
             <>
@@ -106,25 +112,7 @@ const DragOrderField = (props: Props) => {
                     </div>
                     <div className="q-dnd-slots">{slots}</div>
                 </div>
-                {corrections.length > 0 && (
-                    <div className="q-corrections">
-                        <h4>Corrections</h4>
-                        <ul>
-                            {corrections.map(({ index, placed, correct }) => (
-                                <li key={index}>
-                                    Position {index + 1}: you placed{" "}
-                                    <span className="you">
-                                        {optionText(placed)}
-                                    </span>
-                                    , correct answer is{" "}
-                                    <span className="ok">
-                                        {optionText(correct)}
-                                    </span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
+                <Corrections verb="placed" rows={corrections} />
                 <Verdict
                     isCorrect={result.isCorrect}
                     explanation={result.explanation}

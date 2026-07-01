@@ -1,9 +1,9 @@
 import type {
     McqMultiQuestion,
+    McqMultiResult,
     QuizAnswer,
-    SubmissionResult,
 } from "../types/quiz-types";
-import QuestionPrompt from "../questions/QuestionPrompt";
+import QuestionPrompt, { optionLetter } from "../questions/QuestionPrompt";
 import { mcqMultiHint } from "../questions/MultipleSelectQuestionView";
 import ResultOption from "./ResultOption";
 import Verdict from "./Verdict";
@@ -11,10 +11,7 @@ import Verdict from "./Verdict";
 type Props = {
     question: McqMultiQuestion;
     submittedAnswer: Extract<QuizAnswer, { type: "mcq-multi" }>;
-    result: Extract<
-        SubmissionResult,
-        { type: "mcq-single" | "mcq-multi" | "multi-tf" }
-    >;
+    result: McqMultiResult;
 };
 
 const MultiSelectResultView = ({ question, submittedAnswer, result }: Props) => (
@@ -24,7 +21,7 @@ const MultiSelectResultView = ({ question, submittedAnswer, result }: Props) => 
             {question.options.map((option, index) => (
                 <ResultOption
                     key={option.id}
-                    letter={String.fromCharCode(65 + index)}
+                    letter={optionLetter(index)}
                     text={option.text}
                     isCorrect={result.correctOptionIds.includes(option.id)}
                     isSelected={submittedAnswer.optionIds.includes(option.id)}

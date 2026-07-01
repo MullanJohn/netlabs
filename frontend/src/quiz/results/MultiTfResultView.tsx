@@ -1,7 +1,7 @@
 import type {
     MultiTfQuestion,
+    MultiTfResult,
     QuizAnswer,
-    SubmissionResult,
 } from "../types/quiz-types";
 import QuestionPrompt from "../questions/QuestionPrompt";
 import { MULTI_TF_HINT, CHOICES } from "../questions/MultiTfQuestionView";
@@ -10,10 +10,7 @@ import Verdict from "./Verdict";
 type Props = {
     question: MultiTfQuestion;
     submittedAnswer: Extract<QuizAnswer, { type: "multi-tf" }>;
-    result: Extract<
-        SubmissionResult,
-        { type: "mcq-single" | "mcq-multi" | "multi-tf" }
-    >;
+    result: MultiTfResult;
 };
 
 const MultiTfResultView = ({ question, submittedAnswer, result }: Props) => (

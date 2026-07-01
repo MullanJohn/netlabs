@@ -94,7 +94,7 @@ class McqMultiAnswer(BaseModel):
 
 class DragOrderAnswer(BaseModel):
     type: Literal["drag-order"] = "drag-order"
-    answer: dict[str, str]
+    answer: list[str]
 
 class MatchingAnswer(BaseModel):
     type: Literal["matching"] = "matching"
@@ -122,19 +122,45 @@ class SubmissionResultBase(BaseModel):
     isCorrect: bool
     explanation: str
 
-class OptionsResult(SubmissionResultBase):
-    type: Literal["mcq-single", "mcq-multi", "multi-tf"]
+class McqSingleResult(SubmissionResultBase):
+    type: Literal["mcq-single"] = "mcq-single"
     correctOptionIds: list[str]
 
-class PairsResult(SubmissionResultBase):
-    type: Literal["drag-order", "matching"]
+class McqMultiResult(SubmissionResultBase):
+    type: Literal["mcq-multi"] = "mcq-multi"
+    correctOptionIds: list[str]
+
+class MultiTfResult(SubmissionResultBase):
+    type: Literal["multi-tf"] = "multi-tf"
+    correctOptionIds: list[str]
+
+class DragOrderResult(SubmissionResultBase):
+    type: Literal["drag-order"] = "drag-order"
+    correctOrder: list[str]
+
+class MatchingResult(SubmissionResultBase):
+    type: Literal["matching"] = "matching"
     correctPairs: dict[str, str]
 
 class FillBlankResult(SubmissionResultBase):
-    type: Literal["fill-blank"]
+    type: Literal["fill-blank"] = "fill-blank"
     acceptedAnswers: list[str]
 
 SubmissionResult = Annotated[
-    OptionsResult | PairsResult | FillBlankResult,
+    McqSingleResult
+    | McqMultiResult
+    | MultiTfResult
+    | DragOrderResult
+    | MatchingResult
+    | FillBlankResult,
     Field(discriminator="type"),
 ]
+
+class OptionsKey(BaseModel):
+    correct: list[str] = Field(min_length=1)
+
+class MatchingKey(BaseModel):
+    correct: dict[str, str]
+
+class FillBlankKey(BaseModel):
+    accepted: list[str] = Field(min_length=1)

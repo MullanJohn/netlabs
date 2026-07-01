@@ -1,5 +1,5 @@
 import type { McqSingleQuestion } from "../types/quiz-types";
-import QuestionPrompt, { stemDomId } from "./QuestionPrompt";
+import QuestionPrompt, { optionLetter, stemDomId } from "./QuestionPrompt";
 
 type Props = {
     question: McqSingleQuestion;
@@ -31,9 +31,7 @@ const MultipleChoiceQuestionView = ({
                             checked={isSelected}
                             onChange={() => onSelect(option.id)}
                         />
-                        <span className="k">
-                            {String.fromCharCode(65 + index)}
-                        </span>
+                        <span className="k">{optionLetter(index)}</span>
                         <span className="txt">{option.text}</span>
                     </label>
                 );

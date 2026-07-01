@@ -1,4 +1,5 @@
 import { apiFetch } from "./api-client";
+import { slotId } from "../quiz/fields/DragOrderField";
 import type {
     AnswerRequest,
     QuizAnswer,
@@ -34,11 +35,13 @@ export function toAnswerRequest(answer: QuizAnswer): AnswerRequest | null {
         case "mcq-multi":
             return { type: "mcq-multi", answer: answer.optionIds };
         case "drag-order": {
-            const answerMap: Record<string, string> = {};
-            for (const [slot, optionId] of Object.entries(answer.pairs)) {
-                if (optionId !== undefined) answerMap[slot] = optionId;
+            const order: string[] = [];
+            for (let i = 0; i < Object.keys(answer.pairs).length; i++) {
+                const optionId = answer.pairs[slotId(i)];
+                if (optionId === undefined) return null;
+                order.push(optionId);
             }
-            return { type: "drag-order", answer: answerMap };
+            return { type: "drag-order", answer: order };
         }
         case "matching": {
             const answerMap: Record<string, string> = {};
