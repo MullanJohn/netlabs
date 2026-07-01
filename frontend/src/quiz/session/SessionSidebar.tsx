@@ -1,18 +1,37 @@
-import { useState } from "react";
-import type { QuizSessionApi } from "./useQuizSession";
+import { memo, useState } from "react";
+import type { QuizQuestion, SubmissionResult } from "../types/quiz-types";
 import { useStopwatch, formatElapsed } from "./useStopwatch";
 import { questionTypeLabel } from "./labels";
 import QuestionNavigator from "./QuestionNavigator";
 import FinishDrillDialog from "./FinishDrillDialog";
 
 type Props = {
-    session: QuizSessionApi;
     drillName: string;
+    questions: QuizQuestion[];
+    total: number;
+    currentIndex: number;
+    currentQuestion: QuizQuestion | undefined;
+    selectedCount: number;
+    answeredKey: string;
+    resetKey: number;
+    results: Record<string, SubmissionResult>;
+    goTo: (index: number) => void;
+    resetQuiz: () => void;
 };
 
-const SessionSidebar = ({ session, drillName }: Props) => {
-    const { total, currentIndex, selectedCount, currentQuestion, resetKey } =
-        session;
+const SessionSidebar = ({
+    drillName,
+    questions,
+    total,
+    currentIndex,
+    currentQuestion,
+    selectedCount,
+    answeredKey,
+    resetKey,
+    results,
+    goTo,
+    resetQuiz,
+}: Props) => {
     const [finishOpen, setFinishOpen] = useState(false);
 
     return (
@@ -41,7 +60,13 @@ const SessionSidebar = ({ session, drillName }: Props) => {
                         <b>{selectedCount}</b>/{total} answered
                     </span>
                 </div>
-                <QuestionNavigator session={session} />
+                <QuestionNavigator
+                    questions={questions}
+                    currentIndex={currentIndex}
+                    results={results}
+                    answeredKey={answeredKey}
+                    goTo={goTo}
+                />
             </div>
 
             {currentQuestion && (
@@ -74,7 +99,10 @@ const SessionSidebar = ({ session, drillName }: Props) => {
                     Finish drill
                 </button>
                 <FinishDrillDialog
-                    session={session}
+                    questions={questions}
+                    results={results}
+                    goTo={goTo}
+                    resetQuiz={resetQuiz}
                     open={finishOpen}
                     onClose={() => setFinishOpen(false)}
                 />
@@ -84,11 +112,11 @@ const SessionSidebar = ({ session, drillName }: Props) => {
 };
 
 const ElapsedTimer = () => {
-    const elapsedMs = useStopwatch();
+    const elapsedSeconds = useStopwatch();
     return (
         <span className="elapsed" role="timer" aria-live="off">
             <span className="visually-hidden">Elapsed </span>
-            {formatElapsed(elapsedMs)}
+            {formatElapsed(elapsedSeconds)}
         </span>
     );
 };
@@ -106,4 +134,4 @@ const ProgressBar = ({ total, currentIndex }: ProgressBarProps) => (
     </div>
 );
 
-export default SessionSidebar;
+export default memo(SessionSidebar);

@@ -2,27 +2,25 @@ import { useEffect, useRef, useState } from "react";
 
 export function useStopwatch(): number {
     const startRef = useRef<number | null>(null);
-    const [elapsedMs, setElapsedMs] = useState(0);
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
     useEffect(() => {
-        if (startRef.current === null) startRef.current = performance.now();
+        startRef.current ??= performance.now();
+        const start = startRef.current;
+        let id: number;
         const tick = () => {
-            const start = startRef.current;
-            if (start !== null) {
-                const seconds = Math.floor((performance.now() - start) / 1000);
-                setElapsedMs(seconds * 1000);
-            }
+            const elapsed = performance.now() - start;
+            setElapsedSeconds(Math.floor(elapsed / 1000));
+            id = window.setTimeout(tick, 1000 - (elapsed % 1000));
         };
         tick();
-        const id = setInterval(tick, 250);
-        return () => clearInterval(id);
+        return () => clearTimeout(id);
     }, []);
 
-    return elapsedMs;
+    return elapsedSeconds;
 }
 
-export function formatElapsed(ms: number): string {
-    const totalSeconds = Math.floor(ms / 1000);
+export function formatElapsed(totalSeconds: number): string {
     const seconds = totalSeconds % 60;
     const minutes = Math.floor(totalSeconds / 60) % 60;
     const hours = Math.floor(totalSeconds / 3600);

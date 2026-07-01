@@ -1,66 +1,45 @@
 import { useEffect, useState } from "react";
 import QuizSession from "./session/QuizSession";
 import { fetchQuizQuestions } from "../data/quiz-client";
-import { ApiError } from "../data/api-client";
+import { ApiError, transportErrorMessage } from "../data/api-client";
 import type { QuizQuestion } from "./types/quiz-types";
 
 const QuizAttemptPage = () => {
     const slug = readQuizSlug();
 
     const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!slug) {
-            setError("No quiz specified.");
-            setIsLoading(false);
-            return;
-        }
+        if (!slug) return;
 
         const controller = new AbortController();
-        setIsLoading(true);
         setError(null);
         setQuestions(null);
 
         fetchQuizQuestions(slug, controller.signal)
-            .then((loaded) => {
-                setQuestions(loaded);
-                setIsLoading(false);
-            })
+            .then(setQuestions)
             .catch((err: unknown) => {
                 if (controller.signal.aborted) return; // unmounted / slug changed
                 setError(loadErrorMessage(err));
-                setIsLoading(false);
             });
 
         return () => controller.abort();
     }, [slug]);
 
-    if (isLoading) {
-        return (
-            <div className="main">
-                <p className="quiz-status">Loading quiz…</p>
-            </div>
-        );
-    }
-    if (error) {
-        return (
-            <div className="main">
-                <p className="quiz-status">{error}</p>
-            </div>
-        );
-    }
-    if (!slug || !questions || questions.length === 0) {
-        return (
-            <div className="main">
-                <p className="quiz-status">Quiz not found.</p>
-            </div>
-        );
-    }
+    if (!slug) return <QuizStatus message="No quiz specified." />;
+    if (error) return <QuizStatus message={error} />;
+    if (!questions) return <QuizStatus message="Loading quiz…" />;
+    if (questions.length === 0) return <QuizStatus message="Quiz not found." />;
 
     return <QuizSession quizId={slug} questions={questions} />;
 };
+
+const QuizStatus = ({ message }: { message: string }) => (
+    <div className="main">
+        <p className="quiz-status">{message}</p>
+    </div>
+);
 
 function readQuizSlug(): string | null {
     if (typeof window === "undefined") return null;
@@ -68,19 +47,12 @@ function readQuizSlug(): string | null {
 }
 
 function loadErrorMessage(error: unknown): string {
-    if (error instanceof ApiError) {
-        switch (error.kind) {
-            case "notFound":
-                return "Quiz not found.";
-            case "network":
-                return "Couldn't reach the server. Please try again.";
-            case "server":
-                return "The server had a problem. Please try again.";
-            case "client":
-                return "Something went wrong loading this quiz.";
-        }
+    if (error instanceof ApiError && error.kind === "notFound") {
+        return "Quiz not found.";
     }
-    return "Something went wrong loading this quiz.";
+    return (
+        transportErrorMessage(error) ?? "Something went wrong loading this quiz."
+    );
 }
 
 export default QuizAttemptPage;

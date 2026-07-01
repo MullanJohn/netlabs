@@ -1,16 +1,26 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
-import type { QuizSessionApi } from "./useQuizSession";
+import type { QuizQuestion, SubmissionResult } from "../types/quiz-types";
 import { buildDrillSummary, type DrillSummary } from "./drill-summary";
 import SummaryPhase from "./SummaryPhase";
 import ConfirmPhase from "./ConfirmPhase";
 
 type Props = {
-    session: QuizSessionApi;
+    questions: QuizQuestion[];
+    results: Record<string, SubmissionResult>;
+    goTo: (index: number) => void;
+    resetQuiz: () => void;
     open: boolean;
     onClose: () => void;
 };
 
-const FinishDrillDialog = ({ session, open, onClose }: Props) => {
+const FinishDrillDialog = ({
+    questions,
+    results,
+    goTo,
+    resetQuiz,
+    open,
+    onClose,
+}: Props) => {
     const ref = useRef<HTMLDialogElement>(null);
     const headingRef = useRef<HTMLHeadingElement>(null);
     const titleId = useId();
@@ -32,7 +42,7 @@ const FinishDrillDialog = ({ session, open, onClose }: Props) => {
 
     const frozen = useRef<DrillSummary | null>(null);
     if (open || frozen.current === null) {
-        frozen.current = buildDrillSummary(session.questions, session.results);
+        frozen.current = buildDrillSummary(questions, results);
     }
     const summary = frozen.current;
     const showSummary = summary.allChecked || acknowledged;
@@ -46,12 +56,12 @@ const FinishDrillDialog = ({ session, open, onClose }: Props) => {
     }
 
     function jumpTo(index: number) {
-        session.goTo(index);
+        goTo(index);
         ref.current?.close();
     }
 
     function restart() {
-        session.resetQuiz();
+        resetQuiz();
         ref.current?.close();
     }
 

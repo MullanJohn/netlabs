@@ -21,7 +21,7 @@ const QuizSession = ({ quizId, questions }: Props) => {
         ? session.results[currentQuestion.id]
         : undefined;
     const currentError = currentQuestion
-        ? session.errorFor(currentQuestion.id)
+        ? session.errors[currentQuestion.id]
         : undefined;
     const pendingStemFocus = useRef<FocusOptions | null>(null);
     const pendingAnnounce = useRef(false);
@@ -60,7 +60,7 @@ const QuizSession = ({ quizId, questions }: Props) => {
     function checkCurrent() {
         if (!currentQuestion) return;
         const answer = session.answers[currentQuestion.id];
-        const checking = session.isChecking(currentQuestion.id);
+        const checking = session.checkingId !== null;
         if (!canCheckAnswer(currentQuestion, answer, currentResult, checking)) {
             return;
         }
@@ -77,7 +77,19 @@ const QuizSession = ({ quizId, questions }: Props) => {
 
     return (
         <div className="main">
-            <SessionSidebar session={session} drillName={drillName} />
+            <SessionSidebar
+                drillName={drillName}
+                questions={session.questions}
+                total={total}
+                currentIndex={currentIndex}
+                currentQuestion={currentQuestion}
+                selectedCount={session.selectedCount}
+                answeredKey={session.answeredKey}
+                resetKey={session.resetKey}
+                results={session.results}
+                goTo={goTo}
+                resetQuiz={session.resetQuiz}
+            />
             <EditorPane
                 session={session}
                 drillName={drillName}

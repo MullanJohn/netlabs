@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useQuizState } from "../quiz-hook";
 import { hasSelection } from "../answer";
 import type {
+    QuizAnswer,
     QuizAnswers,
     QuizQuestion,
     SubmissionResult,
@@ -14,28 +15,13 @@ export type QuizSessionApi = {
     currentQuestion: QuizQuestion | undefined;
     answers: QuizAnswers;
     results: Record<string, SubmissionResult>;
+    errors: Record<string, string | undefined>;
+    checkingId: string | null;
     selectedCount: number;
+    answeredKey: string;
     resetKey: number;
-    isChecking: (questionId: string) => boolean;
-    errorFor: (questionId: string) => string | undefined;
     goTo: (index: number) => void;
-    selectSingleOption: (questionId: string, optionId: string) => void;
-    toggleMultiSelectOption: (
-        questionId: string,
-        optionId: string,
-        selectCount: number,
-    ) => void;
-    updateDragOrderAnswer: (
-        questionId: string,
-        pairs: Partial<Record<string, string>>,
-    ) => void;
-    updateMatchingAnswer: (
-        questionId: string,
-        pairs: Partial<Record<string, string>>,
-    ) => void;
-    setTrueFalse: (questionId: string, optionId: string, value: boolean) => void;
-    updateFillBlank: (questionId: string, text: string) => void;
-    clearAnswer: (questionId: string) => void;
+    setAnswer: (questionId: string, answer: QuizAnswer) => void;
     checkAnswer: (question: QuizQuestion) => void;
     resetQuiz: () => void;
 };
@@ -44,40 +30,37 @@ export function useQuizSession(
     quizId: string,
     questions: QuizQuestion[],
 ): QuizSessionApi {
-    const {
-        answers,
-        results,
-        checkingId,
-        errors,
-        selectSingleOption,
-        toggleMultiSelectOption,
-        updateDragOrderAnswer,
-        updateMatchingAnswer,
-        setTrueFalse,
-        updateFillBlank,
-        clearAnswer,
-        checkAnswer,
-        reset,
-    } = useQuizState(quizId);
+    const { answers, results, checkingId, errors, setAnswer, checkAnswer, reset } =
+        useQuizState(quizId);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [resetKey, setResetKey] = useState(0);
 
     const total = questions.length;
     const currentQuestion = questions[currentIndex];
-    const selectedCount = questions.filter((question) =>
-        hasSelection(answers[question.id]),
-    ).length;
 
-    function goTo(index: number) {
-        if (index < 0 || index >= total) return;
-        setCurrentIndex(index);
-    }
+    const { selectedCount, answeredKey } = useMemo(() => {
+        const flags = questions.map((question) =>
+            hasSelection(answers[question.id]),
+        );
+        return {
+            selectedCount: flags.filter(Boolean).length,
+            answeredKey: flags.map((flag) => (flag ? "1" : "0")).join(""),
+        };
+    }, [questions, answers]);
 
-    function resetQuiz() {
+    const goTo = useCallback(
+        (index: number) => {
+            if (index < 0 || index >= total) return;
+            setCurrentIndex(index);
+        },
+        [total],
+    );
+
+    const resetQuiz = useCallback(() => {
         reset();
         setCurrentIndex(0);
         setResetKey((key) => key + 1);
-    }
+    }, [reset]);
 
     return {
         questions,
@@ -86,18 +69,13 @@ export function useQuizSession(
         currentQuestion,
         answers,
         results,
+        errors,
+        checkingId,
         selectedCount,
+        answeredKey,
         resetKey,
-        isChecking: (questionId) => checkingId === questionId,
-        errorFor: (questionId) => errors[questionId],
         goTo,
-        selectSingleOption,
-        toggleMultiSelectOption,
-        updateDragOrderAnswer,
-        updateMatchingAnswer,
-        setTrueFalse,
-        updateFillBlank,
-        clearAnswer,
+        setAnswer,
         checkAnswer,
         resetQuiz,
     };

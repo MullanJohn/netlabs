@@ -17,19 +17,22 @@ export type DrillSummary = {
     unchecked: DrillItem[];
 };
 
+export function resultStatus(
+    result: SubmissionResult | undefined,
+): DrillItemStatus {
+    if (!result) return "unchecked";
+    return result.isCorrect ? "correct" : "incorrect";
+}
+
 export function buildDrillSummary(
     questions: QuizQuestion[],
     results: Record<string, SubmissionResult>,
 ): DrillSummary {
-    const items: DrillItem[] = questions.map((question, index) => {
-        const result = results[question.id];
-        const status: DrillItemStatus = !result
-            ? "unchecked"
-            : result.isCorrect
-              ? "correct"
-              : "incorrect";
-        return { question, index, status };
-    });
+    const items: DrillItem[] = questions.map((question, index) => ({
+        question,
+        index,
+        status: resultStatus(results[question.id]),
+    }));
 
     const correct = items.filter((item) => item.status === "correct").length;
     const incorrect = items.filter(

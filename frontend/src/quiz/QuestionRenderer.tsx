@@ -9,38 +9,14 @@ import type { QuizAnswer, QuizQuestion } from "./types/quiz-types";
 type QuestionRendererProps = {
     question: QuizQuestion;
     answer: QuizAnswer | undefined;
-    onSelectSingle: (questionId: string, optionId: string) => void;
-    onToggleMulti: (
-        questionId: string,
-        optionId: string,
-        selectCount: number,
-    ) => void;
-    onUpdateDragOrder: (
-        questionId: string,
-        pairs: Partial<Record<string, string>>,
-    ) => void;
-    onUpdateMatching: (
-        questionId: string,
-        pairs: Partial<Record<string, string>>,
-    ) => void;
-    onSetTrueFalse: (
-        questionId: string,
-        optionId: string,
-        value: boolean,
-    ) => void;
-    onUpdateFillBlank: (questionId: string, text: string) => void;
+    onAnswer: (answer: QuizAnswer) => void;
     onCheck: () => void;
 };
 
 const QuestionRenderer = ({
     question,
     answer,
-    onSelectSingle,
-    onToggleMulti,
-    onUpdateDragOrder,
-    onUpdateMatching,
-    onSetTrueFalse,
-    onUpdateFillBlank,
+    onAnswer,
     onCheck,
 }: QuestionRendererProps) => {
     switch (question.question_type) {
@@ -53,7 +29,7 @@ const QuestionRenderer = ({
                     question={question}
                     selectedOptionId={selectedOptionId}
                     onSelect={(optionId) =>
-                        onSelectSingle(question.id, optionId)
+                        onAnswer({ type: "mcq-single", optionId })
                     }
                 />
             );
@@ -67,13 +43,23 @@ const QuestionRenderer = ({
                 <MultipleSelectQuestionView
                     question={question}
                     selectedOptionIds={selectedOptionIds}
-                    onSelect={(optionId) =>
-                        onToggleMulti(
-                            question.id,
-                            optionId,
-                            question.select_count,
-                        )
-                    }
+                    onSelect={(optionId) => {
+                        const isSelected = selectedOptionIds.includes(optionId);
+                        if (
+                            !isSelected &&
+                            selectedOptionIds.length >= question.select_count
+                        ) {
+                            return;
+                        }
+                        onAnswer({
+                            type: "mcq-multi",
+                            optionIds: isSelected
+                                ? selectedOptionIds.filter(
+                                      (id) => id !== optionId,
+                                  )
+                                : [...selectedOptionIds, optionId],
+                        });
+                    }}
                 />
             );
         }
@@ -86,7 +72,7 @@ const QuestionRenderer = ({
                     mode="attempt"
                     question={question}
                     pairs={pairs}
-                    onSelect={(pairs) => onUpdateDragOrder(question.id, pairs)}
+                    onSelect={(pairs) => onAnswer({ type: "drag-order", pairs })}
                 />
             );
         }
@@ -99,7 +85,7 @@ const QuestionRenderer = ({
                     mode="attempt"
                     question={question}
                     pairs={pairs}
-                    onSelect={(pairs) => onUpdateMatching(question.id, pairs)}
+                    onSelect={(pairs) => onAnswer({ type: "matching", pairs })}
                 />
             );
         }
@@ -113,7 +99,10 @@ const QuestionRenderer = ({
                     question={question}
                     verdicts={verdicts}
                     onSelect={(optionId, value) =>
-                        onSetTrueFalse(question.id, optionId, value)
+                        onAnswer({
+                            type: "multi-tf",
+                            verdicts: { ...verdicts, [optionId]: value },
+                        })
                     }
                 />
             );
@@ -127,7 +116,9 @@ const QuestionRenderer = ({
                     mode="attempt"
                     question={question}
                     text={text}
-                    onChange={(value) => onUpdateFillBlank(question.id, value)}
+                    onChange={(value) =>
+                        onAnswer({ type: "fill-blank", text: value })
+                    }
                     onSubmit={onCheck}
                 />
             );

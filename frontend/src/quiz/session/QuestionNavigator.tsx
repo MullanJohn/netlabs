@@ -1,12 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { KeyboardEvent } from "react";
-import type { QuizSessionApi } from "./useQuizSession";
-import { hasSelection } from "../answer";
-import type {
-    QuizAnswers,
-    QuizQuestion,
-    SubmissionResult,
-} from "../types/quiz-types";
+import type { QuizQuestion, SubmissionResult } from "../types/quiz-types";
+import { resultStatus } from "./drill-summary";
 import { questionTypeLabel, questionTypeShort } from "./labels";
 
 type NavStatus = "correct" | "incorrect" | "answered" | "unanswered";
@@ -23,20 +18,30 @@ const STATUS: Record<
 
 function navStatus(
     question: QuizQuestion,
+    index: number,
     results: Record<string, SubmissionResult>,
-    answers: QuizAnswers,
+    answeredKey: string,
 ): NavStatus {
-    const result = results[question.id];
-    if (result) return result.isCorrect ? "correct" : "incorrect";
-    return hasSelection(answers[question.id]) ? "answered" : "unanswered";
+    const status = resultStatus(results[question.id]);
+    if (status !== "unchecked") return status;
+    return answeredKey[index] === "1" ? "answered" : "unanswered";
 }
 
 type Props = {
-    session: QuizSessionApi;
+    questions: QuizQuestion[];
+    currentIndex: number;
+    results: Record<string, SubmissionResult>;
+    answeredKey: string;
+    goTo: (index: number) => void;
 };
 
-const QuestionNavigator = ({ session }: Props) => {
-    const { questions, currentIndex, goTo, results, answers } = session;
+const QuestionNavigator = ({
+    questions,
+    currentIndex,
+    results,
+    answeredKey,
+    goTo,
+}: Props) => {
     const railRef = useRef<HTMLDivElement>(null);
     const cellRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -95,7 +100,7 @@ const QuestionNavigator = ({ session }: Props) => {
             {questions.map((question, index) => {
                 const isCurrent = index === currentIndex;
                 const { class: statusClass, mark, word } =
-                    STATUS[navStatus(question, results, answers)];
+                    STATUS[navStatus(question, index, results, answeredKey)];
                 const label = `Question ${index + 1}, ${questionTypeLabel(
                     question.question_type,
                 )}, ${word}`;

@@ -16,6 +16,18 @@ export class ApiError extends Error {
     }
 }
 
+export function transportErrorMessage(error: unknown): string | null {
+    if (error instanceof ApiError) {
+        if (error.kind === "network") {
+            return "Couldn't reach the server. Please try again.";
+        }
+        if (error.kind === "server") {
+            return "The server had a problem. Please try again.";
+        }
+    }
+    return null;
+}
+
 type RequestOptions = {
     method?: "GET" | "POST";
     body?: unknown;

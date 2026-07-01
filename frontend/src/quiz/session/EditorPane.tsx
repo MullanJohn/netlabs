@@ -24,23 +24,23 @@ const EditorPane = ({
         total,
         answers,
         results,
-        isChecking,
-        errorFor,
-        selectSingleOption,
-        toggleMultiSelectOption,
-        updateDragOrderAnswer,
-        updateMatchingAnswer,
-        setTrueFalse,
-        updateFillBlank,
+        checkingId,
+        errors,
+        setAnswer,
     } = session;
 
     if (!currentQuestion) return null;
 
     const answer = answers[currentQuestion.id];
     const result = results[currentQuestion.id];
-    const checking = isChecking(currentQuestion.id);
-    const error = errorFor(currentQuestion.id);
-    const canCheck = canCheckAnswer(currentQuestion, answer, result, checking);
+    const checking = checkingId === currentQuestion.id;
+    const error = errors[currentQuestion.id];
+    const canCheck = canCheckAnswer(
+        currentQuestion,
+        answer,
+        result,
+        checkingId !== null,
+    );
 
     return (
         <section className="pane editor">
@@ -72,12 +72,7 @@ const EditorPane = ({
                     <QuestionRenderer
                         question={currentQuestion}
                         answer={answer}
-                        onSelectSingle={selectSingleOption}
-                        onToggleMulti={toggleMultiSelectOption}
-                        onUpdateDragOrder={updateDragOrderAnswer}
-                        onUpdateMatching={updateMatchingAnswer}
-                        onSetTrueFalse={setTrueFalse}
-                        onUpdateFillBlank={updateFillBlank}
+                        onAnswer={(next) => setAnswer(currentQuestion.id, next)}
                         onCheck={onCheck}
                     />
                 )}
