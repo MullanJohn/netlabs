@@ -1,6 +1,9 @@
 import MultipleChoiceResultView from "./results/MultipleChoiceResultView";
 import MultiSelectResultView from "./results/MultiSelectResultView";
-import DragDropResultView from "./results/DragDropResultView";
+import DragOrderField from "./fields/DragOrderField";
+import MatchingField from "./fields/MatchingField";
+import MultiTfResultView from "./results/MultiTfResultView";
+import FillBlankField from "./fields/FillBlankField";
 
 import type {
     QuizAnswer,
@@ -22,6 +25,7 @@ const AnswerResultRenderer = ({
     switch (question.question_type) {
         case "mcq-single": {
             if (submittedAnswer.type !== "mcq-single") return null;
+            if (result.type !== "mcq-single") return null;
 
             return (
                 <MultipleChoiceResultView
@@ -34,6 +38,7 @@ const AnswerResultRenderer = ({
 
         case "mcq-multi": {
             if (submittedAnswer.type !== "mcq-multi") return null;
+            if (result.type !== "mcq-multi") return null;
 
             return (
                 <MultiSelectResultView
@@ -44,11 +49,40 @@ const AnswerResultRenderer = ({
             );
         }
 
-        case "drag-drop": {
-            if (submittedAnswer.type !== "drag-drop") return null;
+        case "drag-order": {
+            if (submittedAnswer.type !== "drag-order") return null;
+            if (result.type !== "drag-order") return null;
 
             return (
-                <DragDropResultView
+                <DragOrderField
+                    mode="graded"
+                    question={question}
+                    pairs={submittedAnswer.pairs}
+                    result={result}
+                />
+            );
+        }
+
+        case "matching": {
+            if (submittedAnswer.type !== "matching") return null;
+            if (result.type !== "matching") return null;
+
+            return (
+                <MatchingField
+                    mode="graded"
+                    question={question}
+                    pairs={submittedAnswer.pairs}
+                    result={result}
+                />
+            );
+        }
+
+        case "multi-tf": {
+            if (submittedAnswer.type !== "multi-tf") return null;
+            if (result.type !== "multi-tf") return null;
+
+            return (
+                <MultiTfResultView
                     question={question}
                     submittedAnswer={submittedAnswer}
                     result={result}
@@ -56,8 +90,24 @@ const AnswerResultRenderer = ({
             );
         }
 
-        default:
-            return null;
+        case "fill-blank": {
+            if (submittedAnswer.type !== "fill-blank") return null;
+            if (result.type !== "fill-blank") return null;
+
+            return (
+                <FillBlankField
+                    mode="graded"
+                    question={question}
+                    text={submittedAnswer.text}
+                    result={result}
+                />
+            );
+        }
+
+        default: {
+            const _exhaustive: never = question;
+            return _exhaustive;
+        }
     }
 };
 

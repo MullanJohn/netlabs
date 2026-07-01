@@ -30,6 +30,7 @@
     flex: 1;
     min-height: 0;
     overflow: auto;
+    scrollbar-gutter: stable;
     padding: 32px var(--page-pad) 56px;
 }
 

@@ -1,57 +1,89 @@
-export function validateAnswer(
+import type {
+    QuizAnswer,
+    QuizQuestion,
+    SubmissionResult,
+} from "./types/quiz-types";
+
+export function canCheckAnswer(
     question: QuizQuestion,
     answer: QuizAnswer | undefined,
-): string | null {
-    switch (question.question_type) {
-        case "mcq-single": {
-            if (!answer || answer.type !== "mcq-single") {
-                return "Please select one option.";
-            }
+    result: SubmissionResult | undefined,
+    checking: boolean,
+): boolean {
+    return (
+        !result &&
+        !checking &&
+        answer !== undefined &&
+        isAnswerComplete(question, answer)
+    );
+}
 
-            return null;
+export function hasSelection(answer: QuizAnswer | undefined): boolean {
+    if (!answer) return false;
+    switch (answer.type) {
+        case "mcq-single":
+            return answer.optionId !== null;
+        case "mcq-multi":
+            return answer.optionIds.length > 0;
+        case "drag-order":
+            return Object.keys(answer.pairs).length > 0;
+        case "matching":
+            return Object.keys(answer.pairs).length > 0;
+        case "multi-tf":
+            return Object.keys(answer.verdicts).length > 0;
+        case "fill-blank":
+            return answer.text.trim().length > 0;
+        default: {
+            const _exhaustive: never = answer;
+            void _exhaustive;
+            return false;
         }
-
-        case "mcq-multi": {
-            if (!answer || answer.type !== "mcq-multi") {
-                return `Please select ${question.select_count} option(s).`;
-            }
-
-            if (answer.optionIds.length !== question.select_count) {
-                return `Please select exactly ${question.select_count} option(s).`;
-            }
-
-            return null;
-        }
-
-        case "drag-drop": {
-            if (!answer || answer.type !== "drag-drop") {
-                return "Please complete the matching question.";
-            }
-
-            const selectedPairCount = Object.keys(answer.pairs).length;
-            const requiredPairCount = question.options.length;
-
-            if (selectedPairCount !== requiredPairCount) {
-                return "Please match all items before submitting.";
-            }
-
-            return null;
-        }
-
-        default:
-            return "Unsupported question type.";
     }
 }
 
-export async function submitAnswer(
-    quizId: string,
-    questionId: string,
-    answer: QuizAnswer | undefined,
-) {
-    console.log("Submitting answer", {
-        questionId,
-        answer,
-    });
+export function isAnswerComplete(
+    question: QuizQuestion,
+    answer: QuizAnswer,
+): boolean {
+    switch (question.question_type) {
+        case "mcq-single":
+            return answer.type === "mcq-single" && answer.optionId !== null;
 
-    return {};
+        case "mcq-multi":
+            return (
+                answer.type === "mcq-multi" &&
+                answer.optionIds.length === question.select_count
+            );
+
+        case "drag-order":
+            return (
+                answer.type === "drag-order" &&
+                Object.keys(answer.pairs).length === question.options.length
+            );
+
+        case "matching":
+            return (
+                answer.type === "matching" &&
+                question.premises.every(
+                    (premise) => answer.pairs[premise.id] !== undefined,
+                )
+            );
+
+        case "multi-tf":
+            return (
+                answer.type === "multi-tf" &&
+                question.options.every(
+                    (option) => answer.verdicts[option.id] !== undefined,
+                )
+            );
+
+        case "fill-blank":
+            return answer.type === "fill-blank" && answer.text.trim().length > 0;
+
+        default: {
+            const _exhaustive: never = question;
+            void _exhaustive;
+            return false;
+        }
+    }
 }

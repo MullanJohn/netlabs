@@ -3,19 +3,37 @@ import json
 import logging
 import os
 import sys
-from typing import Any
+from typing import Any, assert_never
+from urllib.parse import quote
 
 import asyncpg
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 
 from models import (
     AnswerRequest,
+    DragOrderAnswer,
+    DragOrderResult,
+    FillBlankAnswer,
+    FillBlankKey,
+    FillBlankResult,
+    MatchingAnswer,
+    MatchingKey,
+    MatchingResult,
+    McqMultiAnswer,
+    McqMultiResult,
+    McqSingleAnswer,
+    McqSingleResult,
+    MultiTfAnswer,
+    MultiTfResult,
     CatalogCategoryListResponse,
     CatalogCategoryPreviewResponse,
     CatalogDrillListResponse,
+    OptionsKey,
     Quiz,
     QuizQuestion,
-    SubmitAnswerResponse,
+    SubmissionResult,
 )
 
 logging.basicConfig(
@@ -35,6 +53,7 @@ SELECT
     q.sub_topic_id,
     q.question_type,
     q.select_count,
+    q.premises,
     q.stem,
     CASE
         WHEN q.exhibit_type IS NULL THEN NULL
@@ -58,6 +77,7 @@ GROUP BY
     q.sub_topic_id,
     q.question_type,
     q.select_count,
+    q.premises,
     q.stem,
     q.exhibit_type,
     q.exhibit_content
@@ -79,6 +99,17 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        origin.strip()
+        for origin in os.getenv("CORS_ALLOW_ORIGINS", "*").split(",")
+        if origin.strip()
+    ],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 async def get_conn(request: Request):
     async with request.app.state.pool.acquire() as conn:
         yield conn
@@ -92,9 +123,15 @@ def decode_json(value: Any) -> Any:
             return value
     return value
 
-def decode_correct_answer(value: Any) -> list[str]:
-    decoded = decode_json(value)
-    return [str(option_id) for option_id in decoded]
+def catalog_drill(row: asyncpg.Record) -> dict[str, Any]:
+    return {
+        "slug": row["slug"],
+        "name": row["name"],
+        "description": row["description"],
+        "href": f"/quiz?quiz={quote(row['slug'], safe='')}",
+        "quiz_slug": row["slug"],
+        "item_count": row["item_count"],
+    }
 
 def question_from_row(row: asyncpg.Record | None) -> dict[str, Any] | None:
     if row is None:
@@ -102,109 +139,89 @@ def question_from_row(row: asyncpg.Record | None) -> dict[str, Any] | None:
     data = dict(row)
     data["options"] = decode_json(data.get("options")) or []
     data["exhibit"] = decode_json(data.get("exhibit"))
+    data["premises"] = decode_json(data.get("premises"))
     return data
 
-def catalog_drill(row: asyncpg.Record) -> dict[str, Any]:
-    return {
-        "slug": row["slug"],
-        "name": row["name"],
-        "description": row["description"],
-        "href": f"/quiz/{row['slug']}",
-        "quiz_slug": row["slug"],
-        "item_count": row["item_count"],
-    }
-
-async def fetch_first_question(
+async def fetch_quiz_questions(
     quiz_slug: str,
     conn: asyncpg.Connection,
-) -> dict[str, Any] | None:
-    row = await conn.fetchrow(
+) -> list[dict[str, Any]]:
+    rows = await conn.fetch(
         f"""
         {QUESTION_ROW_SELECT}
-        JOIN (
-            SELECT question_id, position
-            FROM quiz_template_items
-            WHERE template_slug = $1
-            ORDER BY position
-            LIMIT 1
-        ) qti ON qti.question_id = q.id
+        JOIN quiz_template_items qti ON qti.question_id = q.id
+        WHERE qti.template_slug = $1
         {QUESTION_ROW_GROUP_BY},
             qti.position
         ORDER BY qti.position
         """,
         quiz_slug,
     )
-    return question_from_row(row)
+    return [question_from_row(row) for row in rows]
 
-async def fetch_next_question(
-    quiz_slug: str,
-    question_id: str,
-    conn: asyncpg.Connection,
-) -> dict[str, Any] | None:
-    row = await conn.fetchrow(
-        f"""
-        {QUESTION_ROW_SELECT}
-        JOIN (
-            SELECT question_id, position
-            FROM quiz_template_items
-            WHERE template_slug = $1
-              AND position > (
-                  SELECT position
-                  FROM quiz_template_items
-                  WHERE template_slug = $1
-                    AND question_id = $2
-              )
-            ORDER BY position
-            LIMIT 1
-        ) qti ON qti.question_id = q.id
-        {QUESTION_ROW_GROUP_BY},
-            qti.position
-        ORDER BY qti.position
-        """,
-        quiz_slug,
-        question_id,
-    )
-    return question_from_row(row)
-
-def check_answer(
-    answer: AnswerRequest,
-    correct_answer: list[str],
-) -> bool:
-    logger.debug("Checking answer type=%s", answer.type)
-    match answer.type:
-        case "mcq-single":
-            return check_answer_single(answer, correct_answer)
-        case "mcq-multi":
-            return check_answer_multi(answer, correct_answer)
-        case "drag-drop":
-            return check_answer_drag_drop(answer, correct_answer)
+def grade_submission(
+    submission: AnswerRequest,
+    key_json: Any,
+    explanation: str,
+) -> SubmissionResult:
+    match submission:
+        case McqSingleAnswer():
+            key = OptionsKey.model_validate(key_json)
+            return McqSingleResult(
+                isCorrect=submission.answer == key.correct[0],
+                correctOptionIds=key.correct,
+                explanation=explanation,
+            )
+        case McqMultiAnswer():
+            key = OptionsKey.model_validate(key_json)
+            return McqMultiResult(
+                isCorrect=frozenset(submission.answer) == frozenset(key.correct),
+                correctOptionIds=key.correct,
+                explanation=explanation,
+            )
+        case MultiTfAnswer():
+            key = OptionsKey.model_validate(key_json)
+            return MultiTfResult(
+                isCorrect=frozenset(submission.answer) == frozenset(key.correct),
+                correctOptionIds=key.correct,
+                explanation=explanation,
+            )
+        case DragOrderAnswer():
+            key = OptionsKey.model_validate(key_json)
+            if len(submission.answer) != len(key.correct):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Answer must order exactly the question's options",
+                )
+            return DragOrderResult(
+                isCorrect=submission.answer == key.correct,
+                correctOrder=key.correct,
+                explanation=explanation,
+            )
+        case MatchingAnswer():
+            key = MatchingKey.model_validate(key_json)
+            correct_pairs = string_map(key.correct)
+            return MatchingResult(
+                isCorrect=string_map(submission.answer) == correct_pairs,
+                correctPairs=correct_pairs,
+                explanation=explanation,
+            )
+        case FillBlankAnswer():
+            key = FillBlankKey.model_validate(key_json)
+            return FillBlankResult(
+                isCorrect=normalize_text_answer(submission.answer)
+                in {normalize_text_answer(a) for a in key.accepted},
+                acceptedAnswers=key.accepted,
+                explanation=explanation,
+            )
         case _:
-            logger.warning("Unsupported answer type: %s", answer.type)
-            return False
+            assert_never(submission)
 
-def check_answer_single(
-    answer: AnswerRequest,
-    correct_answer: list[str],
-) -> bool:
-    return answer.optionId == correct_answer[0]
+def string_map(mapping: dict[Any, Any]) -> dict[str, str]:
+    return {str(key): str(value) for key, value in mapping.items()}
 
-def check_answer_multi(
-    answer: AnswerRequest,
-    correct_answer: list[str],
-) -> bool:
-    return frozenset(answer.optionIds or []) == frozenset(correct_answer)
-
-def correct_drag_drop_pairs(correct_answer: list[str]) -> dict[str, str]:
-    return {
-        f"answer-{position}": option_id
-        for position, option_id in enumerate(correct_answer)
-    }
-
-def check_answer_drag_drop(
-    answer: AnswerRequest,
-    correct_answer: list[str],
-) -> bool:
-    return (answer.pairs or {}) == correct_drag_drop_pairs(correct_answer)
+def normalize_text_answer(value: str) -> str:
+    return " ".join(value.split()).casefold()
 
 @app.get("/quizzes", response_model=list[Quiz])
 async def list_quizzes(conn: asyncpg.Connection = Depends(get_conn)):
@@ -344,38 +361,38 @@ async def list_catalog_drills(
         )
         raise HTTPException(status_code=500, detail="Internal server error") from e
 
-@app.get("/{quiz_slug}/start", response_model=QuizQuestion)
-async def start_quiz(
+@app.get("/quizzes/{quiz_slug}/questions", response_model=list[QuizQuestion])
+async def list_quiz_questions(
     quiz_slug: str,
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     try:
-        question = await fetch_first_question(quiz_slug, conn)
-        if question is None:
+        questions = await fetch_quiz_questions(quiz_slug, conn)
+        if not questions:
             logger.warning("Quiz not found: quiz_slug=%s", quiz_slug)
             raise HTTPException(status_code=404, detail="Quiz not found")
-        logger.info("Started quiz: quiz_slug=%s first_question_id=%s", quiz_slug, question["id"])
-        return question
+        logger.info("Listed quiz questions: quiz_slug=%s count=%d", quiz_slug, len(questions))
+        return questions
     except HTTPException:
         raise
     except Exception as e:
-        logger.exception("Failed to start quiz: quiz_slug=%s", quiz_slug)
+        logger.exception("Failed to list quiz questions: quiz_slug=%s", quiz_slug)
         raise HTTPException(status_code=500, detail="Internal server error") from e
 
 @app.post(
-    "/{quiz_slug}/{question_id}/answer",
-    response_model=SubmitAnswerResponse,
+    "/quizzes/{quiz_slug}/questions/{question_id}/answer",
+    response_model=SubmissionResult,
 )
 async def submit_answer(
     quiz_slug: str,
     question_id: str,
-    answer: AnswerRequest,
+    submission: AnswerRequest,
     conn: asyncpg.Connection = Depends(get_conn),
 ):
     try:
         row = await conn.fetchrow(
             """
-            SELECT q.question_type, q.answer_correct, q.rationale
+            SELECT q.question_type, q.answer, q.rationale
             FROM questions q
             JOIN quiz_template_items qti ON qti.question_id = q.id
             WHERE q.id = $1
@@ -392,40 +409,43 @@ async def submit_answer(
             )
             raise HTTPException(status_code=404, detail="Question not found in quiz")
         expected_answer_type = row["question_type"]
-        if answer.type != expected_answer_type:
+        if submission.type != expected_answer_type:
             logger.warning(
                 "Answer type mismatch: quiz_slug=%s question_id=%s expected=%s received=%s",
                 quiz_slug,
                 question_id,
                 expected_answer_type,
-                answer.type,
+                submission.type,
             )
             raise HTTPException(
                 status_code=400,
                 detail="Answer type does not match question type",
             )
-        correct_answer = decode_correct_answer(row["answer_correct"])
-        is_correct = check_answer(answer, correct_answer)
-        next_q = await fetch_next_question(quiz_slug, question_id, conn)
-        result_data: dict[str, Any] = {
-            "isCorrect": is_correct,
-            "explanation": row["rationale"],
-        }
-        if answer.type == "drag-drop":
-            result_data["correctPairs"] = correct_drag_drop_pairs(correct_answer)
-        elif answer.type in {"mcq-single", "mcq-multi"}:
-            result_data["correctOptionIds"] = correct_answer
+        try:
+            result = grade_submission(
+                submission,
+                decode_json(row["answer"]),
+                row["rationale"],
+            )
+        except ValidationError as e:
+            logger.error(
+                "Malformed answer key: quiz_slug=%s question_id=%s error=%s",
+                quiz_slug,
+                question_id,
+                e,
+            )
+            raise HTTPException(
+                status_code=500,
+                detail="Malformed question data",
+            ) from e
         logger.info(
             "Submitted answer: quiz_slug=%s question_id=%s type=%s is_correct=%s",
             quiz_slug,
             question_id,
-            answer.type,
-            is_correct,
+            submission.type,
+            result.isCorrect,
         )
-        return {
-            "result": result_data,
-            "nextQuestion": next_q,
-        }
+        return result
     except HTTPException:
         raise
     except Exception as e:

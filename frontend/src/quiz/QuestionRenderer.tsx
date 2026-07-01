@@ -1,41 +1,35 @@
-import DragDropQuestionView from "./questions/DragDropQuestionView";
+import DragOrderField from "./fields/DragOrderField";
+import FillBlankField from "./fields/FillBlankField";
+import MatchingField from "./fields/MatchingField";
+import MultiTfQuestionView from "./questions/MultiTfQuestionView";
 import MultipleChoiceQuestionView from "./questions/MultipleChoiceQuestionView";
-import MultipleSelectQuestionView from "./questions/MultiSelectQuestionView";
+import MultipleSelectQuestionView from "./questions/MultipleSelectQuestionView";
 import type { QuizAnswer, QuizQuestion } from "./types/quiz-types";
 
 type QuestionRendererProps = {
     question: QuizQuestion;
     answer: QuizAnswer | undefined;
-    onSelectSingle: (questionId: string, optionId: string) => void;
-    onToggleMulti: (
-        questionId: string,
-        optionId: string,
-        selectCount: number,
-    ) => void;
-    onUpdateDragDrop: (
-        questionId: string,
-        pairs: Partial<Record<string, string>>,
-    ) => void;
+    onAnswer: (answer: QuizAnswer) => void;
+    onCheck: () => void;
 };
 
 const QuestionRenderer = ({
     question,
     answer,
-    onSelectSingle,
-    onToggleMulti,
-    onUpdateDragDrop,
+    onAnswer,
+    onCheck,
 }: QuestionRendererProps) => {
     switch (question.question_type) {
         case "mcq-single": {
             const selectedOptionId =
-                answer?.type === "mcq-single" ? answer.optionId : undefined;
+                answer?.type === "mcq-single" ? answer.optionId : null;
 
             return (
                 <MultipleChoiceQuestionView
                     question={question}
                     selectedOptionId={selectedOptionId}
                     onSelect={(optionId) =>
-                        onSelectSingle(question.id, optionId)
+                        onAnswer({ type: "mcq-single", optionId })
                     }
                 />
             );
@@ -49,31 +43,91 @@ const QuestionRenderer = ({
                 <MultipleSelectQuestionView
                     question={question}
                     selectedOptionIds={selectedOptionIds}
-                    onSelect={(optionId) =>
-                        onToggleMulti(
-                            question.id,
-                            optionId,
-                            question.select_count,
-                        )
+                    onSelect={(optionId) => {
+                        const isSelected = selectedOptionIds.includes(optionId);
+                        if (
+                            !isSelected &&
+                            selectedOptionIds.length >= question.select_count
+                        ) {
+                            return;
+                        }
+                        onAnswer({
+                            type: "mcq-multi",
+                            optionIds: isSelected
+                                ? selectedOptionIds.filter(
+                                      (id) => id !== optionId,
+                                  )
+                                : [...selectedOptionIds, optionId],
+                        });
+                    }}
+                />
+            );
+        }
+
+        case "drag-order": {
+            const pairs = answer?.type === "drag-order" ? answer.pairs : {};
+
+            return (
+                <DragOrderField
+                    mode="attempt"
+                    question={question}
+                    pairs={pairs}
+                    onSelect={(pairs) => onAnswer({ type: "drag-order", pairs })}
+                />
+            );
+        }
+
+        case "matching": {
+            const pairs = answer?.type === "matching" ? answer.pairs : {};
+
+            return (
+                <MatchingField
+                    mode="attempt"
+                    question={question}
+                    pairs={pairs}
+                    onSelect={(pairs) => onAnswer({ type: "matching", pairs })}
+                />
+            );
+        }
+
+        case "multi-tf": {
+            const verdicts =
+                answer?.type === "multi-tf" ? answer.verdicts : {};
+
+            return (
+                <MultiTfQuestionView
+                    question={question}
+                    verdicts={verdicts}
+                    onSelect={(optionId, value) =>
+                        onAnswer({
+                            type: "multi-tf",
+                            verdicts: { ...verdicts, [optionId]: value },
+                        })
                     }
                 />
             );
         }
 
-        case "drag-drop": {
-            const pairs = answer?.type === "drag-drop" ? answer.pairs : {};
+        case "fill-blank": {
+            const text = answer?.type === "fill-blank" ? answer.text : "";
 
             return (
-                <DragDropQuestionView
+                <FillBlankField
+                    mode="attempt"
                     question={question}
-                    pairs={pairs}
-                    onSelect={(pairs) => onUpdateDragDrop(question.id, pairs)}
+                    text={text}
+                    onChange={(value) =>
+                        onAnswer({ type: "fill-blank", text: value })
+                    }
+                    onSubmit={onCheck}
                 />
             );
         }
 
-        default:
-            return null;
+        default: {
+            const _exhaustive: never = question;
+            return _exhaustive;
+        }
     }
 };
 

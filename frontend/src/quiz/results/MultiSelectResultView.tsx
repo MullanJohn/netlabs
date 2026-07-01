@@ -1,55 +1,35 @@
 import type {
     McqMultiQuestion,
+    McqMultiResult,
     QuizAnswer,
-    QuizQuestion,
-    SubmissionResult,
-} from "./types/quiz-types";
+} from "../types/quiz-types";
+import QuestionPrompt, { optionLetter } from "../questions/QuestionPrompt";
+import { mcqMultiHint } from "../questions/MultipleSelectQuestionView";
+import ResultOption from "./ResultOption";
+import Verdict from "./Verdict";
 
-type MultiSelectResultViewProps = {
+type Props = {
     question: McqMultiQuestion;
     submittedAnswer: Extract<QuizAnswer, { type: "mcq-multi" }>;
-    result: SubmissionResult;
+    result: McqMultiResult;
 };
 
-const MultiSelectResultView = ({
-    question,
-    submittedAnswer,
-    result,
-}: MultiSelectResultViewProps) => {
-    return (
-        <div>
-            <h2>{question.stem}</h2>
-
-            <p>{result.isCorrect ? "Correct" : "Incorrect"}</p>
-
-            <div className="space-y-2">
-                {question.options.map((option) => {
-                    const isSelected = submittedAnswer.optionIds.includes(
-                        option.id,
-                    );
-                    const isCorrect =
-                        result.correctOptionIds?.includes(option.id) ?? false;
-
-                    return (
-                        <div
-                            key={option.id}
-                            className={
-                                isCorrect
-                                    ? "rounded border border-green-500 p-2"
-                                    : isSelected
-                                      ? "rounded border border-red-500 p-2"
-                                      : "rounded border border-gray-300 p-2"
-                            }
-                        >
-                            {option.text}
-                        </div>
-                    );
-                })}
-            </div>
-
-            {result.explanation && <p>{result.explanation}</p>}
+const MultiSelectResultView = ({ question, submittedAnswer, result }: Props) => (
+    <>
+        <QuestionPrompt question={question} sub={mcqMultiHint(question)} />
+        <div className="opts">
+            {question.options.map((option, index) => (
+                <ResultOption
+                    key={option.id}
+                    letter={optionLetter(index)}
+                    text={option.text}
+                    isCorrect={result.correctOptionIds.includes(option.id)}
+                    isSelected={submittedAnswer.optionIds.includes(option.id)}
+                />
+            ))}
         </div>
-    );
-};
+        <Verdict isCorrect={result.isCorrect} explanation={result.explanation} />
+    </>
+);
 
 export default MultiSelectResultView;
