@@ -313,7 +313,7 @@ async def list_catalog_drills(
         )
         raise HTTPException(status_code=500, detail="Internal server error") from e
 
-@app.get("/{quiz_slug}/questions", response_model=list[QuizQuestion])
+@app.get("/quizzes/{quiz_slug}/questions", response_model=list[QuizQuestion])
 async def list_quiz_questions(
     quiz_slug: str,
     conn: asyncpg.Connection = Depends(get_conn),
@@ -332,7 +332,7 @@ async def list_quiz_questions(
         raise HTTPException(status_code=500, detail="Internal server error") from e
 
 @app.post(
-    "/{quiz_slug}/{question_id}/answer",
+    "/quizzes/{quiz_slug}/questions/{question_id}/answer",
     response_model=SubmissionResult,
 )
 async def submit_answer(

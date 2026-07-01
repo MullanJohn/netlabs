@@ -8,7 +8,7 @@ import type {
 
 export function fetchQuizQuestions(quizSlug: string, signal?: AbortSignal) {
     return apiFetch<QuizQuestion[]>(
-        `/${encodeURIComponent(quizSlug)}/questions`,
+        `/quizzes/${encodeURIComponent(quizSlug)}/questions`,
         { signal },
     );
 }
@@ -20,7 +20,7 @@ export function submitAnswer(
     signal?: AbortSignal,
 ) {
     return apiFetch<SubmissionResult>(
-        `/${encodeURIComponent(quizSlug)}/${encodeURIComponent(questionId)}/answer`,
+        `/quizzes/${encodeURIComponent(quizSlug)}/questions/${encodeURIComponent(questionId)}/answer`,
         { method: "POST", body: request, signal },
     );
 }
