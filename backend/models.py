@@ -19,8 +19,11 @@ class CatalogDrill(BaseModel):
     quiz_slug: str | None = None
     item_count: int | None = None
 
+class CatalogCategory(BaseModel):
+    slug: str
+
 class CatalogCategoryListResponse(BaseModel):
-    categories: list[str]
+    categories: list[CatalogCategory]
 
 class CatalogCategoryPreviewResponse(BaseModel):
     category_slug: str
