@@ -21,7 +21,7 @@ const QuestionPrompt = ({ question, sub }: Props) => (
             {question.stem}
         </h2>
         {sub && (
-            <p id={subDomId(question.id)} className="q-prompt-sub hint">
+            <p id={subDomId(question.id)} className="q-prompt-sub">
                 {sub}
             </p>
         )}

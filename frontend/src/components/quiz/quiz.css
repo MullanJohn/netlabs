@@ -324,18 +324,14 @@
 .q-prompt-sub {
     margin: 0 0 24px;
     max-width: 60ch;
-    color: var(--fg-3);
     font-size: 13px;
     line-height: 1.55;
-}
-
-.q-prompt-sub.hint {
     padding-left: 14px;
     border-left: 2px solid var(--accent);
     color: var(--fg-2);
 }
 
-.q-prompt-sub.hint b {
+.q-prompt-sub b {
     color: var(--accent);
     font-weight: 600;
 }

@@ -32,9 +32,6 @@
         "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
         monospace;
 
-    /* --font-ui: "Geist", "Inter", system-ui, sans-serif; */
-    /* --font-code: "JetBrains Mono", "IBM Plex Mono", "SFMono-Regular", Consolas, monospace; */
-
     --page-pad: clamp(20px, 5vw, 56px);
     --sidebar-width: 280px;
     --nav-height: 60px;
