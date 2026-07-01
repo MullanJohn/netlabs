@@ -1,9 +1,9 @@
 import MultipleChoiceResultView from "./results/MultipleChoiceResultView";
 import MultiSelectResultView from "./results/MultiSelectResultView";
-import DragOrderResultView from "./results/DragOrderResultView";
-import MatchingQuestionView from "./questions/MatchingQuestionView";
+import DragOrderField from "./fields/DragOrderField";
+import MatchingField from "./fields/MatchingField";
 import MultiTfResultView from "./results/MultiTfResultView";
-import FillBlankQuestionView from "./questions/FillBlankQuestionView";
+import FillBlankField from "./fields/FillBlankField";
 
 import type {
     QuizAnswer,
@@ -51,12 +51,13 @@ const AnswerResultRenderer = ({
 
         case "drag-order": {
             if (submittedAnswer.type !== "drag-order") return null;
-            if (!("correctPairs" in result)) return null;
+            if (result.type !== "drag-order") return null;
 
             return (
-                <DragOrderResultView
+                <DragOrderField
+                    mode="graded"
                     question={question}
-                    submittedAnswer={submittedAnswer}
+                    pairs={submittedAnswer.pairs}
                     result={result}
                 />
             );
@@ -64,10 +65,11 @@ const AnswerResultRenderer = ({
 
         case "matching": {
             if (submittedAnswer.type !== "matching") return null;
-            if (!("correctPairs" in result)) return null;
+            if (result.type !== "matching") return null;
 
             return (
-                <MatchingQuestionView
+                <MatchingField
+                    mode="graded"
                     question={question}
                     pairs={submittedAnswer.pairs}
                     result={result}
@@ -90,10 +92,11 @@ const AnswerResultRenderer = ({
 
         case "fill-blank": {
             if (submittedAnswer.type !== "fill-blank") return null;
-            if (!("acceptedAnswers" in result)) return null;
+            if (result.type !== "fill-blank") return null;
 
             return (
-                <FillBlankQuestionView
+                <FillBlankField
+                    mode="graded"
                     question={question}
                     text={submittedAnswer.text}
                     result={result}

@@ -457,9 +457,10 @@
 }
 
 .q-zone {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1.6em minmax(0, 1fr) 1.4em;
     align-items: center;
-    gap: 12px;
+    column-gap: 12px;
     min-height: 52px;
     padding: 8px 12px;
     border: 1px dashed var(--line);
@@ -476,18 +477,19 @@
 }
 
 .q-zone .pos {
-    flex: 0 0 1.6em;
+    grid-column: 1;
     color: var(--fg-3);
     font-weight: 600;
     text-align: center;
 }
 
 .q-zone .q-chip {
-    flex: 1;
+    grid-column: 2;
+    min-width: 0;
 }
 
 .q-zone-empty {
-    flex: 1;
+    grid-column: 2;
     color: var(--fg-3);
     font-size: 12px;
     font-style: italic;
@@ -524,6 +526,11 @@
 
 .q-chip.dragging {
     opacity: 0.4;
+}
+
+.q-chip.is-static {
+    cursor: default;
+    pointer-events: none;
 }
 
 .q-chip .handle {
@@ -591,14 +598,42 @@
     background: var(--err-bg);
 }
 
-.q-zone .placed {
-    flex: 1;
-    color: var(--fg);
+.q-corrections {
+    margin-top: 16px;
+    max-width: 820px;
 }
 
-.q-zone-correct {
-    color: var(--ok);
+.q-corrections h4 {
+    margin: 0 0 8px;
     font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-3);
+}
+
+.q-corrections ul {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.q-corrections li {
+    color: var(--fg-2);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.q-corrections .you {
+    color: var(--fg-3);
+}
+
+.q-corrections .ok {
+    color: var(--ok);
+    font-weight: 500;
 }
 
 .check-error {
@@ -617,6 +652,11 @@
     font-size: 14px;
     font-weight: 700;
     line-height: 1;
+}
+
+.q-zone .verdict-mark {
+    grid-column: 3;
+    text-align: center;
 }
 
 .q-opt.is-correct .verdict-mark,
@@ -923,18 +963,6 @@
     color: var(--err);
 }
 
-.q-match-correct {
-    grid-column: 1 / 4;
-    grid-row: 2;
-    min-height: 1.4em;
-    overflow: hidden;
-    color: var(--ok);
-    font-size: 12px;
-    line-height: 1.4;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
 @media (max-width: 640px) {
     .q-match-row {
         grid-template-columns: minmax(0, 1fr) 1.4em;
@@ -953,10 +981,5 @@
     .q-match-mark {
         grid-column: 2;
         grid-row: 2;
-    }
-
-    .q-match-correct {
-        grid-column: 1 / 3;
-        grid-row: 3;
     }
 }

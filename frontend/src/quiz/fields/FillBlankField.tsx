@@ -1,26 +1,23 @@
 import type { FillBlankQuestion, SubmissionResult } from "../types/quiz-types";
-import QuestionPrompt, { stemDomId, subDomId } from "./QuestionPrompt";
+import QuestionPrompt, { stemDomId, subDomId } from "../questions/QuestionPrompt";
 import Verdict from "../results/Verdict";
 
 export const FILL_HINT = "Type your answer.";
 
 type GradedResult = Extract<SubmissionResult, { type: "fill-blank" }>;
 
-type Props = {
-    question: FillBlankQuestion;
-    text: string;
-    onChange?: (value: string) => void;
-    onSubmit?: () => void;
-    result?: GradedResult;
-};
+type Base = { question: FillBlankQuestion; text: string };
+type Props =
+    | (Base & {
+          mode: "attempt";
+          onChange: (value: string) => void;
+          onSubmit: () => void;
+      })
+    | (Base & { mode: "graded"; result: GradedResult });
 
-const FillBlankQuestionView = ({
-    question,
-    text,
-    onChange,
-    onSubmit,
-    result,
-}: Props) => {
+const FillBlankField = (props: Props) => {
+    const { question, text } = props;
+    const result = props.mode === "graded" ? props.result : null;
     const isCorrect = result?.isCorrect ?? false;
     const rowClass = !result
         ? "q-fill-row"
@@ -35,7 +32,7 @@ const FillBlankQuestionView = ({
                 className="q-fill-wrap"
                 onSubmit={(event) => {
                     event.preventDefault();
-                    if (!result) onSubmit?.();
+                    if (props.mode === "attempt") props.onSubmit();
                 }}
             >
                 <div className={rowClass}>
@@ -54,8 +51,8 @@ const FillBlankQuestionView = ({
                         spellCheck={false}
                         enterKeyHint="go"
                         onChange={(event) => {
-                            if (result) return;
-                            onChange?.(event.target.value);
+                            if (props.mode !== "attempt") return;
+                            props.onChange(event.target.value);
                         }}
                     />
                     <span className="q-fill-mark" aria-hidden="true">
@@ -68,7 +65,7 @@ const FillBlankQuestionView = ({
                     </span>
                 )}
             </form>
-            {result && !isCorrect && (
+            {result && !result.isCorrect && (
                 <p className="q-fill-accepted">
                     <span className="label">accepted</span>
                     {result.acceptedAnswers.map((accepted) => (
@@ -88,4 +85,4 @@ const FillBlankQuestionView = ({
     );
 };
 
-export default FillBlankQuestionView;
+export default FillBlankField;

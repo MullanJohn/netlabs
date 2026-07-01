@@ -1,26 +1,42 @@
 import type { MatchingQuestion, SubmissionResult } from "../types/quiz-types";
-import QuestionPrompt, { stemDomId, subDomId } from "./QuestionPrompt";
+import QuestionPrompt, { stemDomId, subDomId } from "../questions/QuestionPrompt";
 import Verdict from "../results/Verdict";
 
 export const MATCH_HINT = "Choose the best match for each item.";
 
 const optionLetter = (index: number) => String.fromCharCode(65 + index);
 
-type GradedResult = Extract<SubmissionResult, { type: "drag-order" | "matching" }>;
+type Pairs = Partial<Record<string, string>>;
+type GradedResult = Extract<SubmissionResult, { type: "matching" }>;
 
-type Props = {
-    question: MatchingQuestion;
-    pairs: Partial<Record<string, string>>;
-    onSelect?: (pairs: Partial<Record<string, string>>) => void;
-    result?: GradedResult;
-};
+type Base = { question: MatchingQuestion; pairs: Pairs };
+type Props =
+    | (Base & { mode: "attempt"; onSelect: (pairs: Pairs) => void })
+    | (Base & { mode: "graded"; result: GradedResult });
 
-const MatchingQuestionView = ({ question, pairs, onSelect, result }: Props) => {
+const MatchingField = (props: Props) => {
+    const { question, pairs } = props;
+    const result = props.mode === "graded" ? props.result : null;
+
     const labelFor = (id: string | undefined) => {
         const index = question.options.findIndex((option) => option.id === id);
         if (index === -1) return "—";
         return `${optionLetter(index)}. ${question.options[index].text}`;
     };
+
+    const corrections =
+        result === null
+            ? []
+            : question.premises
+                  .map((premise) => ({
+                      premise,
+                      picked: pairs[premise.id],
+                      correct: result.correctPairs[premise.id],
+                  }))
+                  .filter(
+                      ({ picked, correct }) =>
+                          correct !== undefined && picked !== correct,
+                  );
 
     return (
         <>
@@ -52,20 +68,23 @@ const MatchingQuestionView = ({ question, pairs, onSelect, result }: Props) => {
                         : isCorrect
                           ? "q-match-row is-correct"
                           : "q-match-row is-wrong";
+                    const premiseId = `premise-${premise.id}`;
 
                     return (
                         <div className={rowClass} key={premise.id}>
-                            <span className="premise">{premise.text}</span>
+                            <span id={premiseId} className="premise">
+                                {premise.text}
+                            </span>
                             <select
                                 className="q-match-value"
                                 value={picked}
                                 data-empty={picked ? undefined : "true"}
-                                aria-label={`Match for: ${premise.text}`}
+                                aria-labelledby={premiseId}
                                 aria-disabled={result ? true : undefined}
                                 tabIndex={result ? -1 : undefined}
                                 onChange={(event) => {
-                                    if (result) return;
-                                    onSelect?.({
+                                    if (props.mode !== "attempt") return;
+                                    props.onSelect({
                                         ...pairs,
                                         [premise.id]: event.target.value,
                                     });
@@ -83,11 +102,6 @@ const MatchingQuestionView = ({ question, pairs, onSelect, result }: Props) => {
                             <span className="q-match-mark" aria-hidden="true">
                                 {result ? (isCorrect ? "✓" : "✗") : ""}
                             </span>
-                            <span className="q-match-correct">
-                                {result && !isCorrect
-                                    ? `correct: ${labelFor(correct)}`
-                                    : ""}
-                            </span>
                             {result && (
                                 <span className="visually-hidden">
                                     {isCorrect ? "correct" : "incorrect"}
@@ -97,6 +111,21 @@ const MatchingQuestionView = ({ question, pairs, onSelect, result }: Props) => {
                     );
                 })}
             </div>
+            {corrections.length > 0 && (
+                <div className="q-corrections">
+                    <h4>Corrections</h4>
+                    <ul>
+                        {corrections.map(({ premise, picked, correct }) => (
+                            <li key={premise.id}>
+                                {premise.text}: you chose{" "}
+                                <span className="you">{labelFor(picked)}</span>,
+                                correct answer is{" "}
+                                <span className="ok">{labelFor(correct)}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
             {result && (
                 <Verdict
                     isCorrect={result.isCorrect}
@@ -107,4 +136,4 @@ const MatchingQuestionView = ({ question, pairs, onSelect, result }: Props) => {
     );
 };
 
-export default MatchingQuestionView;
+export default MatchingField;

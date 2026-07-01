@@ -1,6 +1,6 @@
-import DragOrderQuestionView from "./questions/DragOrderQuestionView";
-import FillBlankQuestionView from "./questions/FillBlankQuestionView";
-import MatchingQuestionView from "./questions/MatchingQuestionView";
+import DragOrderField from "./fields/DragOrderField";
+import FillBlankField from "./fields/FillBlankField";
+import MatchingField from "./fields/MatchingField";
 import MultiTfQuestionView from "./questions/MultiTfQuestionView";
 import MultipleChoiceQuestionView from "./questions/MultipleChoiceQuestionView";
 import MultipleSelectQuestionView from "./questions/MultipleSelectQuestionView";
@@ -82,7 +82,8 @@ const QuestionRenderer = ({
             const pairs = answer?.type === "drag-order" ? answer.pairs : {};
 
             return (
-                <DragOrderQuestionView
+                <DragOrderField
+                    mode="attempt"
                     question={question}
                     pairs={pairs}
                     onSelect={(pairs) => onUpdateDragOrder(question.id, pairs)}
@@ -94,7 +95,8 @@ const QuestionRenderer = ({
             const pairs = answer?.type === "matching" ? answer.pairs : {};
 
             return (
-                <MatchingQuestionView
+                <MatchingField
+                    mode="attempt"
                     question={question}
                     pairs={pairs}
                     onSelect={(pairs) => onUpdateMatching(question.id, pairs)}
@@ -121,7 +123,8 @@ const QuestionRenderer = ({
             const text = answer?.type === "fill-blank" ? answer.text : "";
 
             return (
-                <FillBlankQuestionView
+                <FillBlankField
+                    mode="attempt"
                     question={question}
                     text={text}
                     onChange={(value) => onUpdateFillBlank(question.id, value)}

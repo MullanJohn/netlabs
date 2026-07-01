@@ -112,7 +112,11 @@ export type SubmissionResult =
           correctOptionIds: string[];
       })
     | (SubmissionResultBase & {
-          type: "drag-order" | "matching";
+          type: "drag-order";
+          correctPairs: Record<string, string>;
+      })
+    | (SubmissionResultBase & {
+          type: "matching";
           correctPairs: Record<string, string>;
       })
     | (SubmissionResultBase & {

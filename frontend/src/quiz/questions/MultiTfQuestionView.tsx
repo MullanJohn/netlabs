@@ -27,11 +27,13 @@ const MultiTfQuestionView = ({ question, verdicts, onSelect }: Props) => (
 
                 return (
                     <div className="q-tf-row" key={option.id}>
-                        <span className="txt">{option.text}</span>
+                        <span id={`stmt-${option.id}`} className="txt">
+                            {option.text}
+                        </span>
                         <div
                             className="q-tf-controls"
                             role="radiogroup"
-                            aria-label={option.text}
+                            aria-labelledby={`stmt-${option.id}`}
                         >
                             {CHOICES.map((choice) => (
                                 <label
