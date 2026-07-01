@@ -647,6 +647,10 @@
     margin: 0;
 }
 
+.verdict p + p {
+    margin-top: 10px;
+}
+
 .verdict-mark {
     flex-shrink: 0;
     font-size: 14px;
