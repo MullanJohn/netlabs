@@ -35,15 +35,11 @@ jobs:
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
 
-      - run: test -n "$PUBLIC_API_BASE_URL" || { echo "PUBLIC_API_BASE_URL is not set"; exit 1; }
-        env:
-          PUBLIC_API_BASE_URL: ${{ vars.PUBLIC_API_BASE_URL }}
-
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm run build
         env:
-          PUBLIC_API_BASE_URL: ${{ vars.PUBLIC_API_BASE_URL }}
+          PUBLIC_API_BASE_URL: ""
 
       - uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3.15.0
         with:
@@ -51,3 +47,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: frontend
           command: deploy
+          secrets: |
+            DATABASE_URL
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
