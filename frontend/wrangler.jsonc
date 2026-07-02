@@ -1,0 +1,15 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "netlabs",
+    "compatibility_date": "2026-06-01",
+    "assets": {
+        "directory": "./dist",
+        "not_found_handling": "404-page",
+    },
+    "routes": [
+        {
+            "pattern": "networklabs.sh",
+            "custom_domain": true,
+        },
+    ],
+}
