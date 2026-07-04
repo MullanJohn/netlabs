@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 import json
 import logging
 import os
+import re
 import sys
 from typing import Any, assert_never
 from urllib.parse import quote
@@ -132,6 +133,12 @@ def decode_json(value: Any) -> Any:
             return value
     return value
 
+def natural_slug_key(row: asyncpg.Record) -> list[tuple[int, int | str]]:
+    return [
+        (0, int(part)) if part.isdigit() else (1, part)
+        for part in re.split(r"(\d+)", row["slug"])
+    ]
+
 def catalog_drill(row: asyncpg.Record) -> dict[str, Any]:
     return {
         "slug": row["slug"],
@@ -250,7 +257,7 @@ async def list_quizzes(conn: asyncpg.Connection = Depends(get_conn)):
             """
         )
         logger.info("Fetched %d quizzes", len(rows))
-        return [dict(row) for row in rows]
+        return [dict(row) for row in sorted(rows, key=natural_slug_key)]
     except HTTPException:
         raise
     except Exception as e:
@@ -311,14 +318,16 @@ async def preview_catalog_drills(
               AND qt.kind = $2
             GROUP BY qt.slug, qt.name, qt.description
             ORDER BY qt.slug
-            LIMIT 3
             """,
             track_slug,
             category_slug,
         )
         return {
             "category_slug": category_slug,
-            "items": [catalog_drill(row) for row in rows],
+            "items": [
+                catalog_drill(row)
+                for row in sorted(rows, key=natural_slug_key)[:3]
+            ],
         }
     except HTTPException:
         raise
@@ -358,7 +367,9 @@ async def list_catalog_drills(
         )
         return {
             "category_slug": category_slug,
-            "drills": [catalog_drill(row) for row in rows],
+            "drills": [
+                catalog_drill(row) for row in sorted(rows, key=natural_slug_key)
+            ],
         }
     except HTTPException:
         raise

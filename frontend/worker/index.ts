@@ -68,6 +68,15 @@ function questionFromRow(row: Record<string, unknown>): Record<string, unknown> 
     return question;
 }
 
+function naturalSlugCompare(
+    a: Record<string, unknown>,
+    b: Record<string, unknown>,
+): number {
+    return String(a.slug).localeCompare(String(b.slug), undefined, {
+        numeric: true,
+    });
+}
+
 function catalogDrill(row: Record<string, unknown>) {
     const slug = String(row.slug);
     return {
@@ -93,6 +102,7 @@ async function listQuizzes(sql: Sql): Promise<Response> {
         FROM quiz_templates
         ORDER BY slug
     `;
+    rows.sort(naturalSlugCompare);
     return json(rows);
 }
 
@@ -127,9 +137,10 @@ async function listCatalogDrills(
           AND qt.kind = ${categorySlug}
         GROUP BY qt.slug, qt.name, qt.description
         ORDER BY qt.slug
-        LIMIT ${limit === null ? 1_000_000 : limit}
     `;
-    return rows.map(catalogDrill);
+    rows.sort(naturalSlugCompare);
+    const limited = limit === null ? rows : rows.slice(0, limit);
+    return limited.map(catalogDrill);
 }
 
 async function listQuizQuestions(sql: Sql, quizSlug: string): Promise<Response> {
