@@ -1,4 +1,52 @@
 <a class="gh-btn" href="https://github.com/MullanJohn/netlabs" aria-label="netlabs on GitHub">
     <span class="seg">GitHub</span>
-    <span class="seg count">filler</span>
+    <span class="seg count" data-star-count hidden></span>
 </a>
+
+<script>
+    const REPO = "MullanJohn/netlabs";
+    const KEY = "gh-stars";
+    const TTL = 60 * 60 * 1000;
+    const el = document.querySelector<HTMLElement>("[data-star-count]");
+
+    const show = (count: number) => {
+        if (!el || count < 1) return;
+        const compact = new Intl.NumberFormat("en", {
+            notation: "compact",
+            maximumFractionDigits: 1,
+        }).format(count);
+        el.textContent = `★ ${compact}`;
+        el.hidden = false;
+    };
+
+    const readCache = () => {
+        try {
+            const raw = localStorage.getItem(KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch {
+            return null;
+        }
+    };
+
+    const cached = readCache();
+    if (typeof cached?.count === "number") show(cached.count);
+
+    if (!cached || Date.now() - cached.at > TTL) {
+        fetch(`https://api.github.com/repos/${REPO}`)
+            .then((res) => (res.ok ? res.json() : null))
+            .then((repo) => {
+                if (typeof repo?.stargazers_count !== "number") return;
+                show(repo.stargazers_count);
+                try {
+                    localStorage.setItem(
+                        KEY,
+                        JSON.stringify({
+                            count: repo.stargazers_count,
+                            at: Date.now(),
+                        }),
+                    );
+                } catch {}
+            })
+            .catch(() => {});
+    }
+</script>
