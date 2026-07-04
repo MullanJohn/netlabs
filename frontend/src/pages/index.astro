@@ -3,6 +3,7 @@ import AppShell from "../layouts/AppShell.astro";
 import LandingContent from "../components/home/LandingContent.astro";
 import TopNav from "../components/nav/TopNav.astro";
 import StatusBar from "../components/shell/StatusBar.astro";
+import ThemeInit from "../components/shell/ThemeInit.astro";
 ---
 
 <!doctype html>
@@ -12,6 +13,7 @@ import StatusBar from "../components/shell/StatusBar.astro";
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="netlabs is a focused CCNA and CCNP practice bank for network exam preparation." />
         <meta name="generator" content={Astro.generator} />
+        <ThemeInit />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
         <link

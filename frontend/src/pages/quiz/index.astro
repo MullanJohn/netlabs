@@ -2,6 +2,7 @@
 import QuizShell from "../../layouts/QuizShell.astro";
 import TopNav from "../../components/nav/TopNav.astro";
 import StatusBar from "../../components/shell/StatusBar.astro";
+import ThemeInit from "../../components/shell/ThemeInit.astro";
 import QuizAttemptPage from "../../quiz/QuizAttemptPage";
 ---
 
@@ -12,6 +13,7 @@ import QuizAttemptPage from "../../quiz/QuizAttemptPage";
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="description" content="Quiz attempt for netlabs." />
         <meta name="generator" content={Astro.generator} />
+        <ThemeInit />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
         <link
