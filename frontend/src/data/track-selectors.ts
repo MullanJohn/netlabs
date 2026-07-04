@@ -4,7 +4,7 @@ export const selectorCategories = [
         label: "01",
         name: "Domain drills",
         path: "/by-domain",
-        description: "One blueprint domain at a time, from fundamentals through automation.",
+        description: "One full domain per drill.",
         meta: "domain view",
     },
     {
@@ -12,7 +12,7 @@ export const selectorCategories = [
         label: "02",
         name: "Section drills",
         path: "/by-section",
-        description: "A tighter slice of the blueprint when one section needs attention.",
+        description: "One blueprint section per drill.",
         meta: "section view",
     },
     {
@@ -20,7 +20,7 @@ export const selectorCategories = [
         label: "03",
         name: "Topic drills",
         path: "/by-topic",
-        description: "Focused topic sets for concepts that cut across sections.",
+        description: "Focused topics that cut across sections.",
         meta: "topic view",
     },
     {
@@ -28,7 +28,7 @@ export const selectorCategories = [
         label: "04",
         name: "Skill sets",
         path: "/skill",
-        description: "Curated practice for repeatable exam moves and fast recognition.",
+        description: "Repeatable exam moves, drilled for speed.",
         meta: "skill view",
     },
     {
@@ -36,7 +36,7 @@ export const selectorCategories = [
         label: "05",
         name: "Mixed reviews",
         path: "/review",
-        description: "Blueprint-weighted review sets when no single domain is locked in.",
+        description: "Blueprint-weighted mixes from all six domains.",
         meta: "review view",
     },
     {
@@ -44,7 +44,7 @@ export const selectorCategories = [
         label: "06",
         name: "Practice exams",
         path: "/exam",
-        description: "Timed forms for pacing, endurance, and readiness checks.",
+        description: "Timed forms for pacing and readiness.",
         meta: "exam view",
     },
 ] as const;
