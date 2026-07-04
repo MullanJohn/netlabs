@@ -17,9 +17,9 @@
 }
 
 .pane {
+    min-width: 0;
     min-height: 0;
     overflow: auto;
-    will-change: transform;
 }
 
 .editor {
@@ -36,8 +36,14 @@
     min-height: 0;
     overflow: auto;
     scrollbar-gutter: stable;
-    will-change: transform;
     padding: 32px var(--page-pad) 56px;
+}
+
+@media (min-width: 981px) {
+    .pane,
+    .editor-body {
+        will-change: transform;
+    }
 }
 
 .top-bar {
@@ -143,7 +149,11 @@
     }
 
     .main {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .main .sidebar {
+        display: none;
     }
 
     .pane {
@@ -157,13 +167,7 @@
     }
 
     .top-bar {
-        flex-wrap: wrap;
-        gap: 8px 16px;
-    }
-
-    .top-bar .right {
-        width: 100%;
-        margin-left: 0;
+        display: none;
     }
 
     .status {

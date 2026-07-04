@@ -158,10 +158,12 @@ dialog.finish-dialog[open]::backdrop {
         background 100ms;
 }
 
-.finish-dialog .modal-list button:hover {
-    border-color: var(--warn);
-    background: color-mix(in srgb, var(--warn) 5%, transparent);
-    color: var(--fg);
+@media (hover: hover) {
+    .finish-dialog .modal-list button:hover {
+        border-color: var(--warn);
+        background: color-mix(in srgb, var(--warn) 5%, transparent);
+        color: var(--fg);
+    }
 }
 
 .finish-dialog .modal-list button .n {
@@ -183,8 +185,10 @@ dialog.finish-dialog[open]::backdrop {
     font-size: 13px;
 }
 
-.finish-dialog .modal-list button:hover .arrow {
-    color: var(--warn);
+@media (hover: hover) {
+    .finish-dialog .modal-list button:hover .arrow {
+        color: var(--warn);
+    }
 }
 
 .finish-dialog .modal-score {

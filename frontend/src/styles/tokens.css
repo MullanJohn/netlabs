@@ -178,10 +178,12 @@ button {
         color 90ms;
 }
 
-.q-opt:hover:not(.is-selected):not(.is-correct):not(.is-wrong):not(.is-muted):not(:disabled) {
-    border-color: var(--line-2);
-    background: var(--surface);
-    color: var(--fg);
+@media (hover: hover) {
+    .q-opt:hover:not(.is-selected):not(.is-correct):not(.is-wrong):not(.is-muted):not(:disabled) {
+        border-color: var(--line-2);
+        background: var(--surface);
+        color: var(--fg);
+    }
 }
 
 .q-opt:disabled {

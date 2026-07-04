@@ -148,10 +148,12 @@
         color 100ms;
 }
 
-.selector-preview-row:hover {
-    border-color: var(--accent-ln);
-    background: color-mix(in srgb, var(--bg) 90%, var(--accent-bg));
-    color: var(--fg);
+@media (hover: hover) {
+    .selector-preview-row:hover {
+        border-color: var(--accent-ln);
+        background: color-mix(in srgb, var(--bg) 90%, var(--accent-bg));
+        color: var(--fg);
+    }
 }
 
 .selector-preview-id {
@@ -162,8 +164,10 @@
     letter-spacing: 0.02em;
 }
 
-.selector-preview-row:hover .selector-preview-id {
-    color: var(--accent);
+@media (hover: hover) {
+    .selector-preview-row:hover .selector-preview-id {
+        color: var(--accent);
+    }
 }
 
 .selector-preview-name {
@@ -217,8 +221,16 @@
     border-bottom: 1px dashed var(--accent-ln);
 }
 
-.selector-card-foot .more:hover {
-    color: var(--fg);
+@media (hover: hover) {
+    .selector-card-foot .more:hover {
+        color: var(--fg);
+    }
+}
+
+@media (hover: none) {
+    .selector-card-keys {
+        display: none;
+    }
 }
 
 @media (max-width: 640px) {

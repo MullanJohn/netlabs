@@ -108,9 +108,11 @@
         border-color 140ms;
 }
 
-.drill-row:hover {
-    border-color: var(--accent-ln);
-    background: color-mix(in srgb, var(--bg-2) 88%, var(--accent-bg));
+@media (hover: hover) {
+    .drill-row:hover {
+        border-color: var(--accent-ln);
+        background: color-mix(in srgb, var(--bg-2) 88%, var(--accent-bg));
+    }
 }
 
 .drill-row .body,
@@ -186,9 +188,11 @@
     font-weight: 500;
 }
 
-.drill-row:hover .start {
-    border-bottom-color: var(--fg);
-    color: var(--fg);
+@media (hover: hover) {
+    .drill-row:hover .start {
+        border-bottom-color: var(--fg);
+        color: var(--fg);
+    }
 }
 
 @media (max-width: 980px) {

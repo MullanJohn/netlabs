@@ -115,9 +115,11 @@
         color 100ms;
 }
 
-.nav-cell:hover {
-    border-color: var(--line-2);
-    color: var(--fg-2);
+@media (hover: hover) {
+    .nav-cell:hover {
+        border-color: var(--line-2);
+        color: var(--fg-2);
+    }
 }
 
 .nav-cell .qtype {
@@ -514,9 +516,11 @@
         opacity 100ms;
 }
 
-.q-chip:hover {
-    border-color: var(--accent-ln);
-    background: var(--surface);
+@media (hover: hover) {
+    .q-chip:hover {
+        border-color: var(--accent-ln);
+        background: var(--surface);
+    }
 }
 
 .q-chip:active {
@@ -704,8 +708,10 @@
     color: var(--fg-4);
 }
 
-.q-fill:hover:not([readonly]) {
-    border-color: var(--accent-ln);
+@media (hover: hover) {
+    .q-fill:hover:not([readonly]) {
+        border-color: var(--accent-ln);
+    }
 }
 
 .q-fill:focus-visible {
@@ -922,9 +928,11 @@
     font-weight: 400;
 }
 
-.q-match-value:hover {
-    border-color: var(--accent-ln);
-    background-color: var(--surface);
+@media (hover: hover) {
+    .q-match-value:hover {
+        border-color: var(--accent-ln);
+        background-color: var(--surface);
+    }
 }
 
 .q-match-value:focus-visible {
@@ -987,5 +995,22 @@
     .q-match-mark {
         grid-column: 2;
         grid-row: 2;
+    }
+}
+
+@media (max-width: 980px) {
+    .quiz-host .main .sidebar {
+        display: flex;
+    }
+
+    .quiz-host .top-bar {
+        display: flex;
+    }
+}
+
+@media (max-width: 640px) {
+    .q-fill,
+    .q-match-value {
+        font-size: 16px;
     }
 }

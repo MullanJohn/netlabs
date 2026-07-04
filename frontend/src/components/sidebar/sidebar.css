@@ -59,9 +59,11 @@
         color 100ms;
 }
 
-.track-switch a:hover {
-    border-color: var(--line-2);
-    color: var(--fg);
+@media (hover: hover) {
+    .track-switch a:hover {
+        border-color: var(--line-2);
+        color: var(--fg);
+    }
 }
 
 .track-switch a.active {
@@ -108,8 +110,10 @@
     font-size: 12px;
 }
 
-.dom-row:hover {
-    background: var(--surface);
+@media (hover: hover) {
+    .dom-row:hover {
+        background: var(--surface);
+    }
 }
 
 .dom-num {
@@ -129,8 +133,10 @@
     white-space: nowrap;
 }
 
-.dom-row:hover .dom-name {
-    color: var(--fg);
+@media (hover: hover) {
+    .dom-row:hover .dom-name {
+        color: var(--fg);
+    }
 }
 
 .dom-bar {
@@ -170,9 +176,11 @@
         color 100ms;
 }
 
-.back-row:hover {
-    background: var(--surface);
-    color: var(--fg);
+@media (hover: hover) {
+    .back-row:hover {
+        background: var(--surface);
+        color: var(--fg);
+    }
 }
 
 .back-row .arr {
@@ -203,9 +211,11 @@
         color 100ms;
 }
 
-.catnav a:hover {
-    background: var(--surface);
-    color: var(--fg);
+@media (hover: hover) {
+    .catnav a:hover {
+        background: var(--surface);
+        color: var(--fg);
+    }
 }
 
 .catnav a.active {

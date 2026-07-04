@@ -302,8 +302,10 @@ pre.syn .cmt {
     border-bottom: 1px dashed var(--accent-ln);
 }
 
-.seealso a:hover {
-    color: var(--fg);
+@media (hover: hover) {
+    .seealso a:hover {
+        color: var(--fg);
+    }
 }
 
 .landing-footer {
@@ -354,8 +356,10 @@ pre.syn .cmt {
     transition: color 100ms;
 }
 
-.f-links a:hover {
-    color: var(--fg);
+@media (hover: hover) {
+    .f-links a:hover {
+        color: var(--fg);
+    }
 }
 
 .f-links small {
