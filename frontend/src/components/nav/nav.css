@@ -68,6 +68,21 @@
     opacity: 0;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .fade-pre,
+    .fade-mid,
+    .fade-end {
+        transition: none;
+    }
+}
+
+.nav-collapsed .fade-pre,
+.nav-collapsed .fade-mid,
+.nav-collapsed .fade-end {
+    max-width: 0;
+    opacity: 0;
+}
+
 .nav-items {
     display: flex;
     align-items: center;
