@@ -8,7 +8,6 @@ interface Props {
 }
 
 const { track } = Astro.props;
-const heroLabel = `${track.slug === "ccnp-encor" ? "ccnp encor" : track.slug} ${track.exam} · pick a drill`;
 ---
 
 <div class="top-bar">
@@ -16,42 +15,17 @@ const heroLabel = `${track.slug === "ccnp-encor" ? "ccnp encor" : track.slug} ${
         netlabs <span class="chev">/</span> tracks <span class="chev">/</span>
         <b>{track.statusLabel}</b>
     </div>
-
-    <div class="right">
-        <span
-            >jump to section <span class="kbd">1</span>-<span class="kbd"
-                >6</span
-            ></span
-        >
-    </div>
 </div>
 
 <div class="editor-body selector-page">
     <section class="selector-hero">
         <div>
-            <div class="label"><span class="live"></span>{heroLabel}</div>
-            <h1>
-                {track.title}
-                <span>/</span>
-                <b>{track.tag}</b>
-            </h1>
+            <h1>{track.title}</h1>
             <p>{track.description}</p>
-        </div>
-
-        <div class="selector-facts">
-            <div>
-                <span>mode</span>
-                <b>practice</b>
-            </div>
         </div>
     </section>
 
-    <h2 class="sec">
-        drills
-        <span class="sec-meta"
-            >six kinds · each opens to the drills inside it</span
-        >
-    </h2>
+    <h2 class="sec">drills</h2>
 
     <div class="selector-grid">
         {
@@ -147,7 +121,10 @@ const heroLabel = `${track.slug === "ccnp-encor" ? "ccnp encor" : track.slug} ${
             scroller.scrollTop -
             12;
 
-        scroller.scrollTo({ top, behavior: "smooth" });
+        const reduceMotion = matchMedia(
+            "(prefers-reduced-motion: reduce)",
+        ).matches;
+        scroller.scrollTo({ top, behavior: reduceMotion ? "auto" : "smooth" });
         category.classList.add("shortcut-hit");
 
         window.setTimeout(() => {

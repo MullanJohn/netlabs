@@ -53,15 +53,11 @@ export const trackSelectors = {
     ccna: {
         slug: "ccna",
         name: "CCNA",
-        exam: "200-301",
         switchName: "CCNA",
         switchMeta: "200-301",
-        summaryName: "CCNA 200-301",
-        summary: "The implementing-and-administering blueprint, 6 domains.",
         title: "ccna",
-        tag: "six ways in.",
         description:
-            "Pick how you want to practice. Every category pulls from the same CCNA bank; only the slicing changes.",
+            "Each category slices the same question bank differently.",
         branch: "ccna/select",
         statusLabel: "ccna",
         domains: [
@@ -76,15 +72,11 @@ export const trackSelectors = {
     "ccnp-encor": {
         slug: "ccnp-encor",
         name: "CCNP ENCOR",
-        exam: "350-401",
         switchName: "CCNP",
         switchMeta: "ENCOR 350-401",
-        summaryName: "CCNP ENCOR 350-401",
-        summary: "The enterprise core blueprint, 6 domains.",
         title: "ccnp",
-        tag: "encor, six ways in.",
         description:
-            "Choose the ENCOR practice path that matches the session: domain review, topic work, skills, or timed exams.",
+            "Each category slices the same question bank differently.",
         branch: "ccnp/select",
         statusLabel: "ccnp encor",
         domains: [
