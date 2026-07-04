@@ -31,6 +31,7 @@
     --font-code:
         "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
         monospace;
+    --font-prose: "iA Writer Quattro S", system-ui, sans-serif;
 
     --page-pad: clamp(20px, 5vw, 56px);
     --sidebar-width: 280px;
@@ -64,9 +65,9 @@
 
     --ok: #29794a;
     --ok-bg: rgba(41, 121, 74, 0.08);
-    --err: #c44a55;
-    --err-bg: rgba(196, 74, 85, 0.08);
-    --warn: #a87a1a;
+    --err: #b03340;
+    --err-bg: rgba(176, 51, 64, 0.08);
+    --warn: #8a6414;
 
     color-scheme: light;
 }

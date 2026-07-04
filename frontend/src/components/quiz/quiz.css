@@ -311,6 +311,7 @@
     margin: 0 0 12px;
     max-width: 60ch;
     color: var(--fg);
+    font-family: var(--font-prose);
     font-size: 24px;
     line-height: 1.35;
     font-weight: 500;
@@ -324,7 +325,8 @@
 .q-prompt-sub {
     margin: 0 0 24px;
     max-width: 60ch;
-    font-size: 13px;
+    font-family: var(--font-prose);
+    font-size: 14px;
     line-height: 1.55;
     padding-left: 14px;
     border-left: 2px solid var(--accent);
@@ -641,6 +643,8 @@
 
 .verdict p {
     margin: 0;
+    font-family: var(--font-prose);
+    font-size: 14px;
 }
 
 .verdict p + p {
@@ -770,7 +774,8 @@
 .q-tf-row .txt {
     flex: 1;
     color: var(--fg-2);
-    font-size: 13px;
+    font-family: var(--font-prose);
+    font-size: 14px;
     line-height: 1.45;
 }
 
