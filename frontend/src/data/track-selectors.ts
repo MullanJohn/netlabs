@@ -4,7 +4,7 @@ export const selectorCategories = [
         label: "01",
         name: "Domain drills",
         path: "/by-domain",
-        description: "One blueprint domain at a time, from fundamentals through automation.",
+        description: "One full domain per drill.",
         meta: "domain view",
     },
     {
@@ -12,7 +12,7 @@ export const selectorCategories = [
         label: "02",
         name: "Section drills",
         path: "/by-section",
-        description: "A tighter slice of the blueprint when one section needs attention.",
+        description: "One blueprint section per drill.",
         meta: "section view",
     },
     {
@@ -20,7 +20,7 @@ export const selectorCategories = [
         label: "03",
         name: "Topic drills",
         path: "/by-topic",
-        description: "Focused topic sets for concepts that cut across sections.",
+        description: "Focused topics that cut across sections.",
         meta: "topic view",
     },
     {
@@ -28,7 +28,7 @@ export const selectorCategories = [
         label: "04",
         name: "Skill sets",
         path: "/skill",
-        description: "Curated practice for repeatable exam moves and fast recognition.",
+        description: "Repeatable exam moves, drilled for speed.",
         meta: "skill view",
     },
     {
@@ -36,7 +36,7 @@ export const selectorCategories = [
         label: "05",
         name: "Mixed reviews",
         path: "/review",
-        description: "Blueprint-weighted review sets when no single domain is locked in.",
+        description: "Blueprint-weighted mixes from all six domains.",
         meta: "review view",
     },
     {
@@ -44,7 +44,7 @@ export const selectorCategories = [
         label: "06",
         name: "Practice exams",
         path: "/exam",
-        description: "Timed forms for pacing, endurance, and readiness checks.",
+        description: "Timed forms for pacing and readiness.",
         meta: "exam view",
     },
 ] as const;
@@ -53,15 +53,11 @@ export const trackSelectors = {
     ccna: {
         slug: "ccna",
         name: "CCNA",
-        exam: "200-301",
         switchName: "CCNA",
         switchMeta: "200-301",
-        summaryName: "CCNA 200-301",
-        summary: "The implementing-and-administering blueprint, 6 domains.",
         title: "ccna",
-        tag: "six ways in.",
         description:
-            "Pick how you want to practice. Every category pulls from the same CCNA bank; only the slicing changes.",
+            "Each category slices the same question bank differently.",
         branch: "ccna/select",
         statusLabel: "ccna",
         domains: [
@@ -76,15 +72,11 @@ export const trackSelectors = {
     "ccnp-encor": {
         slug: "ccnp-encor",
         name: "CCNP ENCOR",
-        exam: "350-401",
         switchName: "CCNP",
         switchMeta: "ENCOR 350-401",
-        summaryName: "CCNP ENCOR 350-401",
-        summary: "The enterprise core blueprint, 6 domains.",
         title: "ccnp",
-        tag: "encor, six ways in.",
         description:
-            "Choose the ENCOR practice path that matches the session: domain review, topic work, skills, or timed exams.",
+            "Each category slices the same question bank differently.",
         branch: "ccnp/select",
         statusLabel: "ccnp encor",
         domains: [

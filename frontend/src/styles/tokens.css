@@ -31,11 +31,13 @@
     --font-code:
         "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
         monospace;
+    --font-prose: "iA Writer Quattro S", system-ui, sans-serif;
 
     --page-pad: clamp(20px, 5vw, 56px);
     --sidebar-width: 280px;
     --nav-height: 60px;
     --status-height: 22px;
+    --measure: 70ch;
 
     color-scheme: dark;
 }
@@ -63,9 +65,9 @@
 
     --ok: #29794a;
     --ok-bg: rgba(41, 121, 74, 0.08);
-    --err: #c44a55;
-    --err-bg: rgba(196, 74, 85, 0.08);
-    --warn: #a87a1a;
+    --err: #b03340;
+    --err-bg: rgba(176, 51, 64, 0.08);
+    --warn: #8a6414;
 
     color-scheme: light;
 }
@@ -137,6 +139,12 @@ button {
     }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .cursor {
+        animation: none;
+    }
+}
+
 .kbd {
     display: inline-block;
     padding: 1px 6px;
@@ -162,7 +170,7 @@ button {
     color: var(--fg-2);
     text-align: left;
     font-size: 13px;
-    line-height: 1.45;
+    line-height: 19px;
     cursor: pointer;
     transition:
         background 90ms,
@@ -170,10 +178,12 @@ button {
         color 90ms;
 }
 
-.q-opt:hover:not(.is-selected):not(.is-correct):not(.is-wrong):not(.is-muted):not(:disabled) {
-    border-color: var(--line-2);
-    background: var(--surface);
-    color: var(--fg);
+@media (hover: hover) {
+    .q-opt:hover:not(.is-selected):not(.is-correct):not(.is-wrong):not(.is-muted):not(:disabled) {
+        border-color: var(--line-2);
+        background: var(--surface);
+        color: var(--fg);
+    }
 }
 
 .q-opt:disabled {
@@ -212,7 +222,12 @@ button {
 }
 
 .q-opt.is-muted {
-    opacity: 0.55;
+    border-color: var(--line);
+    color: var(--fg-4);
+}
+
+.q-opt.is-muted .k {
+    color: var(--fg-4);
 }
 
 .q-opt.is-correct,

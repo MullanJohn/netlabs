@@ -38,6 +38,13 @@
     white-space: nowrap;
 }
 
+.brand-cursor {
+    width: 5px;
+    height: 12px;
+    margin-left: 4px;
+    background: var(--accent);
+}
+
 .fade-pre,
 .fade-mid,
 .fade-end {
@@ -68,6 +75,21 @@
     opacity: 0;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .fade-pre,
+    .fade-mid,
+    .fade-end {
+        transition: none;
+    }
+}
+
+.nav-collapsed .fade-pre,
+.nav-collapsed .fade-mid,
+.nav-collapsed .fade-end {
+    max-width: 0;
+    opacity: 0;
+}
+
 .nav-items {
     display: flex;
     align-items: center;
@@ -81,8 +103,10 @@
     transition: color 100ms;
 }
 
-.nav-items a:hover {
-    color: var(--fg);
+@media (hover: hover) {
+    .nav-items a:hover {
+        color: var(--fg);
+    }
 }
 
 .nav-items small {
@@ -120,10 +144,12 @@
         color 100ms;
 }
 
-.btn:hover,
-.gh-btn:hover {
-    border-color: var(--fg-3);
-    color: var(--fg);
+@media (hover: hover) {
+    .btn:hover,
+    .gh-btn:hover {
+        border-color: var(--fg-3);
+        color: var(--fg);
+    }
 }
 
 .btn.primary {
@@ -133,10 +159,12 @@
     font-weight: 600;
 }
 
-.btn.primary:hover {
-    border-color: color-mix(in srgb, var(--accent) 80%, white);
-    background: color-mix(in srgb, var(--accent) 80%, white);
-    color: var(--on-accent);
+@media (hover: hover) {
+    .btn.primary:hover {
+        border-color: color-mix(in srgb, var(--accent) 80%, white);
+        background: color-mix(in srgb, var(--accent) 80%, white);
+        color: var(--on-accent);
+    }
 }
 
 .gh-btn {
@@ -181,10 +209,16 @@
         color 120ms;
 }
 
-.theme-switch button:hover,
 .theme-switch button.active {
     background: var(--accent-bg);
     color: var(--accent);
+}
+
+@media (hover: hover) {
+    .theme-switch button:hover {
+        background: var(--accent-bg);
+        color: var(--accent);
+    }
 }
 
 .theme-switch button + button {
@@ -193,10 +227,10 @@
 
 @media (max-width: 980px) {
     .nav-row {
-        min-height: var(--nav-height);
+        min-height: 0;
         flex-wrap: wrap;
         gap: 10px 18px;
-        padding: 10px var(--page-pad);
+        padding: 12px var(--page-pad) 0;
     }
 
     .logo {
@@ -205,10 +239,12 @@
 
     .nav-items {
         order: 3;
-        width: 100%;
-        gap: 18px;
+        width: calc(100% + 2 * var(--page-pad));
+        margin: 2px calc(-1 * var(--page-pad)) 0;
+        padding: 10px var(--page-pad);
+        border-top: 1px solid var(--line);
+        gap: 22px;
         overflow-x: auto;
-        padding-bottom: 2px;
         scrollbar-width: none;
     }
 
@@ -223,20 +259,41 @@
 
 @media (max-width: 640px) {
     .nav-row {
-        gap: 10px;
+        gap: 8px 10px;
+        padding-top: 10px;
     }
 
     .nav-cta {
         gap: 6px;
     }
 
+    .fade-end,
     .gh-btn .count,
     .nav-items a:nth-child(n + 4) {
         display: none;
     }
 
+    .logo {
+        gap: 0;
+    }
+
+    .theme-switch {
+        min-height: 26px;
+    }
+
     .theme-switch button {
-        padding: 0 7px;
+        padding: 0 6px;
+        font-size: 10px;
+    }
+
+    .gh-btn .seg {
+        padding-block: 4px;
+    }
+
+    .nav-items {
+        justify-content: safe center;
+        gap: 18px;
+        font-size: 12px;
     }
 
     .btn {

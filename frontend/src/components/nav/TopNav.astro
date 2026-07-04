@@ -19,3 +19,17 @@ import ThemeSwitch from "./ThemeSwitch.astro";
         <!-- <a class="btn primary">View</a> -->
     </div>
 </div>
+
+<script>
+    const nav = document.querySelector("nav.top");
+    const pane = document.querySelector(".editor-body");
+
+    const update = () => {
+        const y = Math.max(window.scrollY, pane ? pane.scrollTop : 0);
+        nav?.classList.toggle("nav-collapsed", y > 24);
+    };
+
+    window.addEventListener("scroll", update, { passive: true });
+    pane?.addEventListener("scroll", update, { passive: true });
+    update();
+</script>

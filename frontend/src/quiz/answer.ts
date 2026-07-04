@@ -4,6 +4,8 @@ import type {
     SubmissionResult,
 } from "./types/quiz-types";
 
+export const slotId = (index: number) => `answer-${index}`;
+
 export function canCheckAnswer(
     question: QuizQuestion,
     answer: QuizAnswer | undefined,

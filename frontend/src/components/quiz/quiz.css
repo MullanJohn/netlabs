@@ -115,9 +115,11 @@
         color 100ms;
 }
 
-.nav-cell:hover {
-    border-color: var(--line-2);
-    color: var(--fg-2);
+@media (hover: hover) {
+    .nav-cell:hover {
+        border-color: var(--line-2);
+        color: var(--fg-2);
+    }
 }
 
 .nav-cell .qtype {
@@ -240,7 +242,8 @@
 }
 
 .btn:disabled {
-    opacity: 0.4;
+    border-color: var(--line);
+    color: var(--fg-4);
     cursor: not-allowed;
     pointer-events: none;
 }
@@ -311,8 +314,9 @@
     margin: 0 0 12px;
     max-width: 60ch;
     color: var(--fg);
-    font-size: 24px;
-    line-height: 1.35;
+    font-family: var(--font-prose);
+    font-size: 18px;
+    line-height: 26px;
     font-weight: 500;
     letter-spacing: -0.01em;
 }
@@ -324,7 +328,8 @@
 .q-prompt-sub {
     margin: 0 0 24px;
     max-width: 60ch;
-    font-size: 13px;
+    font-family: var(--font-prose);
+    font-size: 14px;
     line-height: 1.55;
     padding-left: 14px;
     border-left: 2px solid var(--accent);
@@ -511,9 +516,11 @@
         opacity 100ms;
 }
 
-.q-chip:hover {
-    border-color: var(--accent-ln);
-    background: var(--surface);
+@media (hover: hover) {
+    .q-chip:hover {
+        border-color: var(--accent-ln);
+        background: var(--surface);
+    }
 }
 
 .q-chip:active {
@@ -641,6 +648,8 @@
 
 .verdict p {
     margin: 0;
+    font-family: var(--font-prose);
+    font-size: 14px;
 }
 
 .verdict p + p {
@@ -699,8 +708,10 @@
     color: var(--fg-4);
 }
 
-.q-fill:hover:not([readonly]) {
-    border-color: var(--accent-ln);
+@media (hover: hover) {
+    .q-fill:hover:not([readonly]) {
+        border-color: var(--accent-ln);
+    }
 }
 
 .q-fill:focus-visible {
@@ -770,8 +781,9 @@
 .q-tf-row .txt {
     flex: 1;
     color: var(--fg-2);
-    font-size: 13px;
-    line-height: 1.45;
+    font-family: var(--font-prose);
+    font-size: 14px;
+    line-height: 20px;
 }
 
 .q-tf-controls {
@@ -916,9 +928,11 @@
     font-weight: 400;
 }
 
-.q-match-value:hover {
-    border-color: var(--accent-ln);
-    background-color: var(--surface);
+@media (hover: hover) {
+    .q-match-value:hover {
+        border-color: var(--accent-ln);
+        background-color: var(--surface);
+    }
 }
 
 .q-match-value:focus-visible {
@@ -981,5 +995,22 @@
     .q-match-mark {
         grid-column: 2;
         grid-row: 2;
+    }
+}
+
+@media (max-width: 980px) {
+    .quiz-host .main .sidebar {
+        display: flex;
+    }
+
+    .quiz-host .top-bar {
+        display: flex;
+    }
+}
+
+@media (max-width: 640px) {
+    .q-fill,
+    .q-match-value {
+        font-size: 16px;
     }
 }

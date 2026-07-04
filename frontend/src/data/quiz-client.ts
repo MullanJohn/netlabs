@@ -1,5 +1,5 @@
 import { apiFetch } from "./api-client";
-import { slotId } from "../quiz/fields/DragOrderField";
+import { slotId } from "../quiz/answer";
 import type {
     AnswerRequest,
     QuizAnswer,
@@ -10,6 +10,20 @@ import type {
 export function fetchQuizQuestions(quizSlug: string, signal?: AbortSignal) {
     return apiFetch<QuizQuestion[]>(
         `/quizzes/${encodeURIComponent(quizSlug)}/questions`,
+        { signal },
+    );
+}
+
+export function fetchSampleQuestions(
+    quizSlug: string,
+    count: number,
+    types: readonly string[],
+    signal?: AbortSignal,
+) {
+    const params = new URLSearchParams({ count: String(count) });
+    if (types.length > 0) params.set("types", types.join(","));
+    return apiFetch<QuizQuestion[]>(
+        `/quizzes/${encodeURIComponent(quizSlug)}/questions/sample?${params}`,
         { signal },
     );
 }

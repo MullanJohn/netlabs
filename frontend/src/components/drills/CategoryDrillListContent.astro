@@ -29,10 +29,6 @@ const { track, category } = Astro.props;
 >
     <section class="inner-hero">
         <div>
-            <div class="label">
-                <span class="num">{category.label}</span>
-                <span>{track.statusLabel} {track.exam}</span>
-            </div>
             <h1>
                 {category.name}
                 <span>{category.path}</span>
@@ -76,14 +72,10 @@ const { track, category } = Astro.props;
             return;
         }
 
-        drills.forEach((drill, index) => {
+        drills.forEach((drill) => {
             const row = document.createElement("a");
             row.className = "drill-row";
             row.href = drill.href;
-
-            const badge = document.createElement("span");
-            badge.className = "badge";
-            badge.textContent = String(index + 1).padStart(2, "0");
 
             const body = document.createElement("span");
             body.className = "body";
@@ -96,19 +88,7 @@ const { track, category } = Astro.props;
             desc.className = "desc";
             desc.textContent = drill.description;
 
-            const tags = document.createElement("span");
-            tags.className = "tags";
-
-            const categoryTag = document.createElement("span");
-            categoryTag.className = "tag accent";
-            categoryTag.textContent = categorySlug;
-
-            const bankTag = document.createElement("span");
-            bankTag.className = "tag";
-            bankTag.textContent = trackSlug;
-
-            tags.append(categoryTag, bankTag);
-            body.append(name, desc, tags);
+            body.append(name, desc);
 
             const meta = document.createElement("span");
             meta.className = "meta";
@@ -116,16 +96,13 @@ const { track, category } = Astro.props;
             const items = document.createElement("span");
             items.innerHTML = `<span class="lab">items</span><b>${drill.item_count ?? "--"}</b>`;
 
-            const format = document.createElement("span");
-            format.innerHTML = `<span class="lab">format</span><b>practice</b>`;
-
-            meta.append(items, format);
+            meta.append(items);
 
             const cta = document.createElement("span");
             cta.className = "cta";
-            cta.innerHTML = `<span class="start">start drill →</span><span class="est">opens quiz</span>`;
+            cta.innerHTML = `<span class="start">start drill →</span>`;
 
-            row.append(badge, body, meta, cta);
+            row.append(body, meta, cta);
             list.append(row);
         });
     }
