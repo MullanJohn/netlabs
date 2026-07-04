@@ -38,6 +38,13 @@
     white-space: nowrap;
 }
 
+.brand-cursor {
+    width: 5px;
+    height: 12px;
+    margin-left: 4px;
+    background: var(--accent);
+}
+
 .fade-pre,
 .fade-mid,
 .fade-end {
