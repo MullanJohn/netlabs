@@ -39,17 +39,21 @@ const SampleQuiz = ({
 
     if (failed || questions?.length === 0) {
         return (
-            <p className="sample-status" role="status">
-                The sample is unavailable right now — the question bank lives
-                at <a href="/ccna">/ccna</a>.
-            </p>
+            <div className="sample-quiz">
+                <p className="sample-status" role="status">
+                    The sample is unavailable right now — the question bank
+                    lives at <a href="/ccna">/ccna</a>.
+                </p>
+            </div>
         );
     }
     if (!questions) {
         return (
-            <p className="sample-status" role="status">
-                Loading sample questions…
-            </p>
+            <div className="sample-quiz pending">
+                <p className="sample-status" role="status">
+                    Loading sample questions…
+                </p>
+            </div>
         );
     }
 

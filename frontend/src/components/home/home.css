@@ -189,12 +189,24 @@ pre.syn .cmt {
 .track p {
     margin: 0;
     color: var(--fg-3);
-    font-size: 12.5px;
-    line-height: 1.55;
+    font-size: 13px;
+    line-height: 20px;
 }
 
-.track.upcoming {
-    opacity: 0.72;
+.track.upcoming .label {
+    color: var(--fg-5);
+}
+
+.track.upcoming h3 {
+    color: var(--fg-3);
+}
+
+.track.upcoming .count {
+    color: var(--fg-3);
+}
+
+.track.upcoming p {
+    color: var(--fg-4);
 }
 
 .sample-quiz {
@@ -203,6 +215,16 @@ pre.syn .cmt {
     border: 1px solid var(--line);
     border-left: 2px solid var(--accent);
     background: var(--bg-2);
+}
+
+.sample-quiz.pending {
+    display: grid;
+    place-items: center;
+    min-height: 340px;
+}
+
+.sample-quiz.pending .sample-status {
+    margin: 0;
 }
 
 .sample-status {
@@ -233,7 +255,6 @@ pre.syn .cmt {
 
 .sample-quiz .q-opt {
     padding: 8px 10px;
-    font-size: 12.5px;
 }
 
 .sample-quiz .q-fill {

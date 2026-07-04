@@ -19,6 +19,7 @@
 .pane {
     min-height: 0;
     overflow: auto;
+    will-change: transform;
 }
 
 .editor {
@@ -35,6 +36,7 @@
     min-height: 0;
     overflow: auto;
     scrollbar-gutter: stable;
+    will-change: transform;
     padding: 32px var(--page-pad) 56px;
 }
 

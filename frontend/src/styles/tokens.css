@@ -139,6 +139,12 @@ button {
     }
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .cursor {
+        animation: none;
+    }
+}
+
 .kbd {
     display: inline-block;
     padding: 1px 6px;
@@ -164,7 +170,7 @@ button {
     color: var(--fg-2);
     text-align: left;
     font-size: 13px;
-    line-height: 1.45;
+    line-height: 19px;
     cursor: pointer;
     transition:
         background 90ms,
@@ -214,7 +220,12 @@ button {
 }
 
 .q-opt.is-muted {
-    opacity: 0.55;
+    border-color: var(--line);
+    color: var(--fg-4);
+}
+
+.q-opt.is-muted .k {
+    color: var(--fg-4);
 }
 
 .q-opt.is-correct,
