@@ -41,11 +41,6 @@
     overflow: hidden;
 }
 
-.selector-card.feature {
-    border-color: var(--accent-ln);
-    background: color-mix(in srgb, var(--accent-bg) 34%, var(--bg-2));
-}
-
 .selector-card-head {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
