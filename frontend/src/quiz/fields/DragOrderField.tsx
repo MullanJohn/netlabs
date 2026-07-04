@@ -8,13 +8,12 @@ import {
 import { Accessibility, defaultPreset } from "@dnd-kit/dom";
 import type { ReactNode } from "react";
 import type { DragOrderQuestion, SubmissionResult } from "../types/quiz-types";
+import { slotId } from "../answer";
 import QuestionPrompt from "../questions/QuestionPrompt";
 import Corrections from "../results/Corrections";
 import Verdict from "../results/Verdict";
 
 export const DRAG_HINT = "Drag each item into the correct position.";
-
-export const slotId = (index: number) => `answer-${index}`;
 
 const BANK_ID = "options";
 const SENSORS = [PointerSensor];

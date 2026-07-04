@@ -83,6 +83,15 @@ GROUP BY
     q.exhibit_content
 """
 
+QUESTION_TYPES = {
+    "mcq-single",
+    "mcq-multi",
+    "drag-order",
+    "matching",
+    "multi-tf",
+    "fill-blank",
+}
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Creating database connection pool")
@@ -377,6 +386,63 @@ async def list_quiz_questions(
         raise
     except Exception as e:
         logger.exception("Failed to list quiz questions: quiz_slug=%s", quiz_slug)
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+@app.get(
+    "/quizzes/{quiz_slug}/questions/sample",
+    response_model=list[QuizQuestion],
+)
+async def sample_quiz_questions(
+    quiz_slug: str,
+    count: int = 3,
+    types: str | None = None,
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    try:
+        count = min(10, max(1, count))
+        type_list: list[str] = []
+        if types:
+            type_list = [
+                value.strip()
+                for value in types.split(",")
+                if value.strip() in QUESTION_TYPES
+            ]
+            if not type_list:
+                logger.warning(
+                    "Invalid question types: quiz_slug=%s types=%s",
+                    quiz_slug,
+                    types,
+                )
+                raise HTTPException(status_code=400, detail="Invalid question types")
+        type_filter = "AND q.question_type = ANY($2::text[])" if type_list else ""
+        limit_param = "$3" if type_list else "$2"
+        params = [quiz_slug, type_list, count] if type_list else [quiz_slug, count]
+        rows = await conn.fetch(
+            f"""
+            {QUESTION_ROW_SELECT}
+            JOIN quiz_template_items qti ON qti.question_id = q.id
+            WHERE qti.template_slug = $1
+            {type_filter}
+            {QUESTION_ROW_GROUP_BY}
+            ORDER BY random()
+            LIMIT {limit_param}
+            """,
+            *params,
+        )
+        questions = [question_from_row(row) for row in rows]
+        if not questions:
+            logger.warning("Quiz not found: quiz_slug=%s", quiz_slug)
+            raise HTTPException(status_code=404, detail="Quiz not found")
+        logger.info(
+            "Sampled quiz questions: quiz_slug=%s count=%d",
+            quiz_slug,
+            len(questions),
+        )
+        return questions
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Failed to sample quiz questions: quiz_slug=%s", quiz_slug)
         raise HTTPException(status_code=500, detail="Internal server error") from e
 
 @app.post(

@@ -4,6 +4,7 @@ import Footer from "./Footer.astro";
 import OptionsList from "./OptionsList.astro";
 import TopBar from "./TopBar.astro";
 import TrackCards from "./TrackCards.astro";
+import SampleQuiz from "../../quiz/sample/SampleQuiz";
 ---
 
 <TopBar />
@@ -50,8 +51,11 @@ import TrackCards from "./TrackCards.astro";
 
         <ManSection title="examples">
             <p>
-                A sample quiz will load from the question API.
+                Three random questions from the CCNA bank, graded live by the
+                question API.
             </p>
+
+            <SampleQuiz client:visible />
         </ManSection>
 
         <ManSection title="sections" flush>

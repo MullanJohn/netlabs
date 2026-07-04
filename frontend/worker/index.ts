@@ -49,6 +49,15 @@ GROUP BY
     q.exhibit_content
 `;
 
+const QUESTION_TYPES = new Set([
+    "mcq-single",
+    "mcq-multi",
+    "drag-order",
+    "matching",
+    "multi-tf",
+    "fill-blank",
+]);
+
 const json = (data: unknown, status = 200) => Response.json(data, { status });
 const error = (detail: string, status: number) => json({ detail }, status);
 
@@ -137,6 +146,46 @@ async function listQuizQuestions(sql: Sql, quizSlug: string): Promise<Response> 
     return json(rows.map(questionFromRow));
 }
 
+async function sampleQuizQuestions(
+    sql: Sql,
+    quizSlug: string,
+    url: URL,
+): Promise<Response> {
+    const count = Math.min(
+        10,
+        Math.max(
+            1,
+            Number.parseInt(url.searchParams.get("count") ?? "", 10) || 3,
+        ),
+    );
+    const typesParam = url.searchParams.get("types");
+    let types: string[] = [];
+    if (typesParam) {
+        types = typesParam
+            .split(",")
+            .map((value) => value.trim())
+            .filter((value) => QUESTION_TYPES.has(value));
+        if (types.length === 0) return error("Invalid question types", 400);
+    }
+    const typeFilter =
+        types.length > 0 ? "AND q.question_type = ANY($2)" : "";
+    const limitParam = types.length > 0 ? "$3" : "$2";
+    const params: unknown[] =
+        types.length > 0 ? [quizSlug, types, count] : [quizSlug, count];
+    const rows = await sql.query(
+        `${QUESTION_ROW_SELECT}
+        JOIN quiz_template_items qti ON qti.question_id = q.id
+        WHERE qti.template_slug = $1
+        ${typeFilter}
+        ${QUESTION_ROW_GROUP_BY}
+        ORDER BY random()
+        LIMIT ${limitParam}`,
+        params,
+    );
+    if (rows.length === 0) return error("Quiz not found", 404);
+    return json(rows.map(questionFromRow));
+}
+
 async function submitAnswer(
     sql: Sql,
     request: Request,
@@ -187,6 +236,13 @@ export default {
                 if (segments.length === 1) return await listQuizzes(sql);
                 if (segments.length === 3 && third === "questions") {
                     return await listQuizQuestions(sql, second);
+                }
+                if (
+                    segments.length === 4 &&
+                    third === "questions" &&
+                    fourth === "sample"
+                ) {
+                    return await sampleQuizQuestions(sql, second, url);
                 }
             }
             if (
