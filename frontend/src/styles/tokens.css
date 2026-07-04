@@ -36,6 +36,7 @@
     --sidebar-width: 280px;
     --nav-height: 60px;
     --status-height: 22px;
+    --measure: 70ch;
 
     color-scheme: dark;
 }

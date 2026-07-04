@@ -31,7 +31,7 @@
 }
 
 .editor p {
-    max-width: 70ch;
+    max-width: var(--measure);
     margin: 0 0 12px;
     color: var(--fg-2);
 }
@@ -39,6 +39,10 @@
 .editor p.lede {
     color: var(--fg);
     font-size: 15px;
+}
+
+.landing-col p {
+    max-width: none;
 }
 
 .name-block {
@@ -137,7 +141,6 @@ pre.syn .cmt {
 }
 
 .opt-grid dd {
-    max-width: 60ch;
     margin: 0;
     color: var(--fg-2);
 }
@@ -195,7 +198,6 @@ pre.syn .cmt {
 }
 
 .sample-quiz {
-    max-width: 72ch;
     margin-top: 16px;
     padding: 20px;
     border: 1px solid var(--line);
@@ -204,9 +206,44 @@ pre.syn .cmt {
 }
 
 .sample-status {
-    max-width: 70ch;
     margin: 16px 0 0;
     color: var(--fg-4);
+}
+
+.sample-quiz .q-meta-row {
+    margin-bottom: 12px;
+}
+
+.sample-quiz .q-prompt {
+    max-width: none;
+    font-size: 16px;
+}
+
+.sample-quiz .q-prompt-sub {
+    margin-bottom: 14px;
+    max-width: none;
+    font-size: 12px;
+}
+
+.sample-quiz .opts,
+.sample-quiz .verdict,
+.sample-quiz .q-fill-wrap {
+    max-width: none;
+}
+
+.sample-quiz .q-opt {
+    padding: 8px 10px;
+    font-size: 12.5px;
+}
+
+.sample-quiz .q-fill {
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+.sample-quiz .verdict {
+    margin-top: 16px;
+    padding: 12px 14px;
 }
 
 .sample-foot {
