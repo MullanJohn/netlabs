@@ -1,3 +1,8 @@
+.landing-col {
+    max-width: 900px;
+    margin-inline: auto;
+}
+
 .man-section + .man-section {
     margin-top: 48px;
 }

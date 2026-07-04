@@ -1,5 +1,7 @@
 ---
 import "../styles/global.css";
+
+const hasSidebar = Astro.slots.has("sidebar");
 ---
 
 <div class="win">
@@ -7,10 +9,14 @@ import "../styles/global.css";
         <slot name="nav" />
     </nav>
 
-    <div class="main">
-        <aside class="pane sidebar">
-            <slot name="sidebar" />
-        </aside>
+    <div class:list={["main", { "no-sidebar": !hasSidebar }]}>
+        {
+            hasSidebar && (
+                <aside class="pane sidebar">
+                    <slot name="sidebar" />
+                </aside>
+            )
+        }
 
         <section class="pane editor">
             <slot />

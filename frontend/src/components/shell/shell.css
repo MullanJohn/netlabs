@@ -12,6 +12,10 @@
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
 }
 
+.main.no-sidebar {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .pane {
     min-height: 0;
     overflow: auto;
