@@ -92,7 +92,7 @@ function without(state: QuizState, questionId: string): QuizState {
     return { ...state, answers, results, errors };
 }
 
-export function useQuizState(quizSlug: string) {
+export function useQuizState(quizSlug: string | null) {
     const [state, dispatch] = useReducer(reducer, initialState);
     const answersRef = useRef(state.answers);
     answersRef.current = state.answers;

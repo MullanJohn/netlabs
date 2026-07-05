@@ -14,6 +14,13 @@ export function fetchQuizQuestions(quizSlug: string, signal?: AbortSignal) {
     );
 }
 
+export function fetchQuestion(questionId: string, signal?: AbortSignal) {
+    return apiFetch<QuizQuestion>(
+        `/questions/${encodeURIComponent(questionId)}`,
+        { signal },
+    );
+}
+
 export function fetchSampleQuestions(
     quizSlug: string,
     count: number,
@@ -29,15 +36,19 @@ export function fetchSampleQuestions(
 }
 
 export function submitAnswer(
-    quizSlug: string,
+    quizSlug: string | null,
     questionId: string,
     request: AnswerRequest,
     signal?: AbortSignal,
 ) {
-    return apiFetch<SubmissionResult>(
-        `/quizzes/${encodeURIComponent(quizSlug)}/questions/${encodeURIComponent(questionId)}/answer`,
-        { method: "POST", body: request, signal },
-    );
+    const path = quizSlug
+        ? `/quizzes/${encodeURIComponent(quizSlug)}/questions/${encodeURIComponent(questionId)}/answer`
+        : `/questions/${encodeURIComponent(questionId)}/answer`;
+    return apiFetch<SubmissionResult>(path, {
+        method: "POST",
+        body: request,
+        signal,
+    });
 }
 
 export function toAnswerRequest(answer: QuizAnswer): AnswerRequest | null {
