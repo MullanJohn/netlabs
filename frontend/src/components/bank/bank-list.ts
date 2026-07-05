@@ -6,7 +6,24 @@ export type BankFilters = {
     query: string;
 };
 
-export type BankSort = "id" | "domain" | "type" | "stem";
+export type BankSortKey = "id" | "domain" | "type" | "stem";
+export type BankSort = BankSortKey | `${BankSortKey}-desc`;
+
+export const BANK_SORTS: ReadonlySet<string> = new Set([
+    "id",
+    "id-desc",
+    "domain",
+    "domain-desc",
+    "type",
+    "type-desc",
+    "stem",
+    "stem-desc",
+]);
+
+export function sortParts(sort: BankSort): { key: BankSortKey; desc: boolean } {
+    const desc = sort.endsWith("-desc");
+    return { key: (desc ? sort.slice(0, -5) : sort) as BankSortKey, desc };
+}
 
 export function buildSearchIndex(
     questions: readonly BankQuestion[],
@@ -27,7 +44,7 @@ export function tokenize(query: string): string[] {
     return query.trim().toLowerCase().split(/\s+/).filter(Boolean);
 }
 
-export type BankView = {
+type BankView = {
     visible: BankQuestion[];
     domainCounts: Map<string, number>;
     typeCounts: Map<string, number>;
@@ -73,31 +90,27 @@ export function sortQuestions(
     questions: readonly BankQuestion[],
     sort: BankSort,
 ): BankQuestion[] {
+    const { key, desc } = sortParts(sort);
     const byId = (a: BankQuestion, b: BankQuestion) =>
         a.id.localeCompare(b.id, undefined, { numeric: true });
+    const primary =
+        key === "domain"
+            ? (a: BankQuestion, b: BankQuestion) =>
+                  a.topic_id.localeCompare(b.topic_id, undefined, {
+                      numeric: true,
+                  })
+            : key === "type"
+              ? (a: BankQuestion, b: BankQuestion) =>
+                    a.question_type.localeCompare(b.question_type)
+              : key === "stem"
+                ? (a: BankQuestion, b: BankQuestion) =>
+                      a.stem.localeCompare(b.stem)
+                : byId;
     const sorted = [...questions];
-    switch (sort) {
-        case "domain":
-            sorted.sort(
-                (a, b) =>
-                    a.topic_id.localeCompare(b.topic_id, undefined, {
-                        numeric: true,
-                    }) || byId(a, b),
-            );
-            break;
-        case "type":
-            sorted.sort(
-                (a, b) =>
-                    a.question_type.localeCompare(b.question_type) ||
-                    byId(a, b),
-            );
-            break;
-        case "stem":
-            sorted.sort((a, b) => a.stem.localeCompare(b.stem) || byId(a, b));
-            break;
-        default:
-            sorted.sort(byId);
-    }
+    sorted.sort((a, b) => {
+        const order = primary(a, b);
+        return (desc ? -order : order) || byId(a, b);
+    });
     return sorted;
 }
 
@@ -122,7 +135,7 @@ export function boostIdMatches(
     return hits.length > 0 ? [...hits, ...rest] : rest;
 }
 
-export type MatchRange = { start: number; end: number };
+type MatchRange = { start: number; end: number };
 
 export function matchRanges(
     text: string,

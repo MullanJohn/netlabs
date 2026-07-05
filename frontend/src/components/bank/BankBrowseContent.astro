@@ -77,15 +77,6 @@ const questionTypes: QuizQuestion["question_type"][] = [
             <span class="visually-hidden" role="status" data-bank-status></span>
             <span class="bank-spacer"></span>
             <label class="selecta">
-                sort
-                <select data-bank-filter="sort">
-                    <option value="id">catalog #</option>
-                    <option value="domain">domain</option>
-                    <option value="type">type</option>
-                    <option value="stem">a → z</option>
-                </select>
-            </label>
-            <label class="selecta">
                 type
                 <select data-bank-filter="type">
                     <option value="all">all</option>
@@ -144,11 +135,43 @@ const questionTypes: QuizQuestion["question_type"][] = [
 
     <div class="qtable">
         <div class="qhead">
-            <span class="qnum">#</span>
-            <span class="qstem">question</span>
-            <span class="qdom">domain</span>
+            <span class="qnum">
+                <button type="button" class="qsort" data-bank-sort="id" data-dir="asc">
+                    <span class="visually-hidden">sort by catalog </span>#<span
+                        class="qsort-arrow"
+                        aria-hidden="true"
+                        data-bank-arrow>▲</span
+                    ><span class="visually-hidden" data-bank-note>, sorted ascending</span>
+                </button>
+            </span>
+            <span class="qstem">
+                <button type="button" class="qsort" data-bank-sort="stem">
+                    <span class="visually-hidden">sort by </span>question<span
+                        class="qsort-arrow"
+                        aria-hidden="true"
+                        data-bank-arrow>↕</span
+                    ><span class="visually-hidden" data-bank-note></span>
+                </button>
+            </span>
+            <span class="qdom">
+                <button type="button" class="qsort" data-bank-sort="domain">
+                    <span class="visually-hidden">sort by </span>domain<span
+                        class="qsort-arrow"
+                        aria-hidden="true"
+                        data-bank-arrow>↕</span
+                    ><span class="visually-hidden" data-bank-note></span>
+                </button>
+            </span>
             <span class="qtopic">topic</span>
-            <span class="qtype">type</span>
+            <span class="qtype">
+                <button type="button" class="qsort" data-bank-sort="type">
+                    <span class="visually-hidden">sort by </span>type<span
+                        class="qsort-arrow"
+                        aria-hidden="true"
+                        data-bank-arrow>↕</span
+                    ><span class="visually-hidden" data-bank-note></span>
+                </button>
+            </span>
         </div>
         <div class="qbody" data-bank-list>
             <span class="drill-state">loading questions...</span>
@@ -161,15 +184,18 @@ const questionTypes: QuizQuestion["question_type"][] = [
     import { fetchBankQuestions } from "../../data/bank-client";
     import { questionTypeShort } from "../../quiz/session/labels";
     import {
+        BANK_SORTS,
         boostIdMatches,
         buildSearchIndex,
         computeBankView,
         matchRanges,
         snippetStart,
+        sortParts,
         sortQuestions,
         tokenize,
         type BankFilters,
         type BankSort,
+        type BankSortKey,
     } from "./bank-list";
     import type { BankQuestion } from "../../data/bank-types";
 
@@ -188,9 +214,9 @@ const questionTypes: QuizQuestion["question_type"][] = [
     const typeSelect = document.querySelector<HTMLSelectElement>(
         '[data-bank-filter="type"]',
     )!;
-    const sortSelect = document.querySelector<HTMLSelectElement>(
-        '[data-bank-filter="sort"]',
-    )!;
+    const sortButtons = Array.from(
+        document.querySelectorAll<HTMLButtonElement>("[data-bank-sort]"),
+    );
     const searchInput =
         document.querySelector<HTMLInputElement>("[data-bank-search]")!;
     const statusEl = document.querySelector<HTMLElement>("[data-bank-status]")!;
@@ -280,6 +306,7 @@ const questionTypes: QuizQuestion["question_type"][] = [
         type: "all",
         query: "",
     };
+    let sort: BankSort = "id";
 
     function practiceHref(question: BankQuestion): string {
         return `/quiz?question=${encodeURIComponent(question.id)}`;
@@ -429,7 +456,7 @@ const questionTypes: QuizQuestion["question_type"][] = [
     }
 
     function resort() {
-        sorted = sortQuestions(questions, sortSelect.value as BankSort);
+        sorted = sortQuestions(questions, sort);
     }
 
     let statusTimer = 0;
@@ -537,11 +564,54 @@ const questionTypes: QuizQuestion["question_type"][] = [
         syncUrl(true);
         refresh();
     });
-    sortSelect.addEventListener("change", () => {
+    const SORT_LABELS: Record<BankSortKey, string> = {
+        id: "catalog #",
+        stem: "question",
+        domain: "domain",
+        type: "type",
+    };
+
+    function renderSortHeaders() {
+        const { key, desc } = sortParts(sort);
+        for (const button of sortButtons) {
+            const active = button.dataset.bankSort === key;
+            const arrow = button.querySelector("[data-bank-arrow]")!;
+            const note = button.querySelector("[data-bank-note]")!;
+            if (active) {
+                button.dataset.dir = desc ? "desc" : "asc";
+                arrow.textContent = desc ? "▼" : "▲";
+                note.textContent = desc
+                    ? ", sorted descending"
+                    : ", sorted ascending";
+            } else {
+                delete button.dataset.dir;
+                arrow.textContent = "↕";
+                note.textContent = "";
+            }
+        }
+    }
+
+    function announceSort() {
+        const { key, desc } = sortParts(sort);
+        window.clearTimeout(statusTimer);
+        statusEl.textContent = `sorted by ${SORT_LABELS[key]}, ${desc ? "descending" : "ascending"}`;
+    }
+
+    function setSort(key: BankSortKey) {
+        const current = sortParts(sort);
+        sort = current.key === key && !current.desc ? `${key}-desc` : key;
+        renderSortHeaders();
         syncUrl(true);
         resort();
         refresh();
-    });
+        announceSort();
+    }
+
+    for (const button of sortButtons) {
+        button.addEventListener("click", () => {
+            setSort(button.dataset.bankSort as BankSortKey);
+        });
+    }
 
     let searchFrame = 0;
     searchInput.addEventListener("input", () => {
@@ -557,19 +627,20 @@ const questionTypes: QuizQuestion["question_type"][] = [
         if (event.persisted) applyUrlState();
     });
 
-    const DEFAULT_SORT = "id";
-    const VALID_SORTS = new Set(["id", "domain", "type", "stem"]);
+    const DEFAULT_SORT: BankSort = "id";
 
-    function currentUrl(): string {
+    function contextParams(): URLSearchParams {
         const params = new URLSearchParams();
         if (filters.domain !== "all") params.set("domain", filters.domain);
         if (filters.type !== "all") params.set("type", filters.type);
-        if (sortSelect.value !== DEFAULT_SORT) {
-            params.set("sort", sortSelect.value);
-        }
+        if (sort !== DEFAULT_SORT) params.set("sort", sort);
         const query = filters.query.trim();
         if (query) params.set("q", query);
-        const encoded = params.toString();
+        return params;
+    }
+
+    function currentUrl(): string {
+        const encoded = contextParams().toString();
         return encoded
             ? `${location.pathname}?${encoded}`
             : location.pathname;
@@ -598,8 +669,11 @@ const questionTypes: QuizQuestion["question_type"][] = [
         const type = params.get("type") ?? "all";
         filters.type = typeLabels.has(type) ? type : "all";
         typeSelect.value = filters.type;
-        const sort = params.get("sort") ?? DEFAULT_SORT;
-        sortSelect.value = VALID_SORTS.has(sort) ? sort : DEFAULT_SORT;
+        const sortParam = params.get("sort") ?? DEFAULT_SORT;
+        sort = BANK_SORTS.has(sortParam)
+            ? (sortParam as BankSort)
+            : DEFAULT_SORT;
+        renderSortHeaders();
         filters.query = params.get("q") ?? "";
         searchInput.value = filters.query;
         syncClearButton();

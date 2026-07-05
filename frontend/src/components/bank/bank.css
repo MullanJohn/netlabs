@@ -357,6 +357,46 @@
     text-transform: uppercase;
 }
 
+.qsort {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+    transition: color 100ms;
+}
+
+@media (hover: hover) {
+    .qsort:hover {
+        color: var(--fg-2);
+    }
+
+    .qsort:hover .qsort-arrow {
+        color: var(--fg-3);
+    }
+}
+
+.qsort[data-dir] {
+    color: var(--fg-2);
+}
+
+.qsort-arrow {
+    color: var(--fg-5);
+    font-size: 8px;
+    transition: color 100ms;
+}
+
+.qsort[data-dir] .qsort-arrow {
+    color: var(--accent);
+}
+
 .qbody {
     display: flex;
     flex-direction: column;
