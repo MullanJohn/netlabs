@@ -27,23 +27,46 @@ export function tokenize(query: string): string[] {
     return query.trim().toLowerCase().split(/\s+/).filter(Boolean);
 }
 
-export function filterQuestions(
+export type BankView = {
+    visible: BankQuestion[];
+    domainCounts: Map<string, number>;
+    typeCounts: Map<string, number>;
+};
+
+export function computeBankView(
     questions: readonly BankQuestion[],
     filters: BankFilters,
     searchIndex: ReadonlyMap<string, string>,
-): BankQuestion[] {
+): BankView {
     const tokens = tokenize(filters.query);
-    return questions.filter((question) => {
-        if (filters.domain !== "all" && question.topic_id !== filters.domain) {
-            return false;
+    const visible: BankQuestion[] = [];
+    const domainCounts = new Map<string, number>();
+    const typeCounts = new Map<string, number>();
+    for (const question of questions) {
+        if (tokens.length > 0) {
+            const haystack = searchIndex.get(question.id) ?? "";
+            if (!tokens.every((token) => haystack.includes(token))) continue;
         }
-        if (filters.type !== "all" && question.question_type !== filters.type) {
-            return false;
+        const inDomain =
+            filters.domain === "all" || question.topic_id === filters.domain;
+        const inType =
+            filters.type === "all" ||
+            question.question_type === filters.type;
+        if (inType) {
+            domainCounts.set(
+                question.topic_id,
+                (domainCounts.get(question.topic_id) ?? 0) + 1,
+            );
         }
-        if (tokens.length === 0) return true;
-        const haystack = searchIndex.get(question.id) ?? "";
-        return tokens.every((token) => haystack.includes(token));
-    });
+        if (inDomain) {
+            typeCounts.set(
+                question.question_type,
+                (typeCounts.get(question.question_type) ?? 0) + 1,
+            );
+        }
+        if (inDomain && inType) visible.push(question);
+    }
+    return { visible, domainCounts, typeCounts };
 }
 
 export function sortQuestions(
@@ -76,19 +99,6 @@ export function sortQuestions(
             sorted.sort(byId);
     }
     return sorted;
-}
-
-export function domainCounts(
-    questions: readonly BankQuestion[],
-): Map<string, number> {
-    const counts = new Map<string, number>();
-    for (const question of questions) {
-        counts.set(
-            question.topic_id,
-            (counts.get(question.topic_id) ?? 0) + 1,
-        );
-    }
-    return counts;
 }
 
 export function boostIdMatches(
