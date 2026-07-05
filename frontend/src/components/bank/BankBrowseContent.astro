@@ -1,0 +1,114 @@
+---
+import type { TrackSelector } from "../../data/track-selectors";
+import type { QuizQuestion } from "../../quiz/types/quiz-types";
+import { questionTypeLabel } from "../../quiz/session/labels";
+
+interface Props {
+    track: TrackSelector;
+}
+
+const { track } = Astro.props;
+const questionTypes: QuizQuestion["question_type"][] = [
+    "mcq-single",
+    "mcq-multi",
+    "multi-tf",
+    "matching",
+    "drag-order",
+    "fill-blank",
+];
+---
+
+<div class="top-bar">
+    <div class="breadcrumb">
+        netlabs <span class="chev">/</span>
+        <b>{track.statusLabel}</b>
+        <span class="chev">/</span>
+        question bank
+        <span class="chev">/</span>
+        <b>browse</b>
+    </div>
+    <div class="right">
+        <span><span class="kbd">/</span> search</span>
+    </div>
+</div>
+
+<div class="editor-body inner-page bank-page" data-bank-page data-track-slug={track.slug}>
+    <section class="inner-hero">
+        <div>
+            <h1>Question bank<span>/all</span></h1>
+            <p>Every question in the bank, one row each.</p>
+        </div>
+    </section>
+
+    <div class="bank-controls">
+        <div class="chip-row" data-bank-domains>
+            <button class="chip-f on" data-domain="all" aria-pressed="true">
+                all domains
+            </button>
+            {
+                track.domains.map((domain) => (
+                    <button
+                        class="chip-f"
+                        data-domain={domain.number}
+                        title={domain.name}
+                        aria-pressed="false"
+                    >
+                        {domain.number} {domain.short}
+                        <span class="c" />
+                    </button>
+                ))
+            }
+        </div>
+        <div class="bank-toolbar">
+            <span class="count">
+                showing <b data-bank-shown>0</b> of <b data-bank-count>0</b> items
+            </span>
+            <span class="bank-spacer"></span>
+            <label class="selecta">
+                sort
+                <select data-bank-filter="sort">
+                    <option value="id">catalog #</option>
+                    <option value="domain">domain</option>
+                    <option value="type">type</option>
+                    <option value="stem">a → z</option>
+                </select>
+            </label>
+            <label class="selecta">
+                type
+                <select data-bank-filter="type">
+                    <option value="all">all</option>
+                    {
+                        questionTypes.map((type) => (
+                            <option value={type}>{questionTypeLabel(type)}</option>
+                        ))
+                    }
+                </select>
+            </label>
+            <span class="bank-search">
+                <input
+                    type="search"
+                    data-bank-search
+                    placeholder="search items..."
+                    aria-label="Search questions"
+                    autocomplete="off"
+                    spellcheck="false"
+                />
+                <span class="kbd">/</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="qtable">
+        <div class="qhead">
+            <span class="qnum">#</span>
+            <span class="qstem">question</span>
+            <span class="qdom">domain</span>
+            <span class="qtopic">topic</span>
+            <span class="qtype">type</span>
+        </div>
+        <div class="qbody" data-bank-list>
+            <span class="drill-state">loading questions...</span>
+        </div>
+        <div class="bank-sentinel" data-bank-sentinel></div>
+    </div>
+</div>

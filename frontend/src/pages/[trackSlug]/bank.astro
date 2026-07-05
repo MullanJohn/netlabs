@@ -1,0 +1,48 @@
+---
+import AppShell from "../../layouts/AppShell.astro";
+import TopNav from "../../components/nav/TopNav.astro";
+import StatusBar from "../../components/shell/StatusBar.astro";
+import ThemeInit from "../../components/shell/ThemeInit.astro";
+import BankBrowseContent from "../../components/bank/BankBrowseContent.astro";
+import { trackSelectors } from "../../data/track-selectors";
+
+export function getStaticPaths() {
+    return Object.values(trackSelectors).map((track) => ({
+        params: { trackSlug: track.slug },
+        props: { track },
+    }));
+}
+
+const { track } = Astro.props;
+const branch = `${track.slug}/bank`;
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content={`${track.name} question bank browser for netlabs.`} />
+        <meta name="generator" content={Astro.generator} />
+        <ThemeInit />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <link
+            rel="preload"
+            href="/fonts/jetbrains-mono-latin-wght-normal.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <title>netlabs · {track.name} · question bank</title>
+    </head>
+    <body>
+        <AppShell>
+            <TopNav slot="nav" />
+
+            <BankBrowseContent track={track} />
+
+            <StatusBar slot="status" branch={branch} />
+        </AppShell>
+    </body>
+</html>
