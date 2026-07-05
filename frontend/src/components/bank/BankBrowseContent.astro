@@ -71,9 +71,10 @@ const questionTypes: QuizQuestion["question_type"][] = [
             }
         </div>
         <div class="bank-toolbar">
-            <span class="count">
+            <span class="count" aria-hidden="true">
                 showing <b data-bank-shown>0</b> of <b data-bank-count>0</b> items
             </span>
+            <span class="visually-hidden" role="status" data-bank-status></span>
             <span class="bank-spacer"></span>
             <label class="selecta">
                 sort
@@ -106,6 +107,28 @@ const questionTypes: QuizQuestion["question_type"][] = [
                 />
                 <span class="kbd">/</span>
             </span>
+            <button
+                class="bank-random"
+                type="button"
+                aria-label="Pick one"
+                data-bank-random
+            >
+                <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                >
+                    <path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.8-1.1 2-1.7 3.3-1.7H22" />
+                    <path d="m18 2 4 4-4 4" />
+                    <path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2" />
+                    <path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8" />
+                    <path d="m18 14 4 4-4 4" />
+                </svg>
+            </button>
         </div>
     </div>
 
@@ -157,6 +180,10 @@ const questionTypes: QuizQuestion["question_type"][] = [
     )!;
     const searchInput =
         document.querySelector<HTMLInputElement>("[data-bank-search]")!;
+    const statusEl = document.querySelector<HTMLElement>("[data-bank-status]")!;
+    const randomButton = document.querySelector<HTMLButtonElement>(
+        "[data-bank-random]",
+    )!;
 
     const topicTitles = new Map<string, string>(
         Object.entries(
@@ -173,8 +200,11 @@ const questionTypes: QuizQuestion["question_type"][] = [
     let visible: BankQuestion[] = [];
     let searchIndex: ReadonlyMap<string, string> = new Map();
     let rendered = 0;
-    let selected = -1;
     let selectedRow: HTMLElement | null = null;
+
+    function rowIndex(row: Element | null): number {
+        return row ? Array.prototype.indexOf.call(list.children, row) : -1;
+    }
     const filters: BankFilters = {
         domain: "all",
         type: "all",
@@ -189,6 +219,7 @@ const questionTypes: QuizQuestion["question_type"][] = [
         const row = document.createElement("a");
         row.className = "qrow";
         row.href = practiceHref(question);
+        row.tabIndex = -1;
         const cells: [string, string][] = [
             ["qnum", question.id],
             ["qstem", question.stem],
@@ -244,8 +275,23 @@ const questionTypes: QuizQuestion["question_type"][] = [
         sorted = sortQuestions(questions, sortSelect.value as BankSort);
     }
 
+    let statusTimer = 0;
+    function announceCount() {
+        window.clearTimeout(statusTimer);
+        statusTimer = window.setTimeout(() => {
+            statusEl.textContent =
+                visible.length === 0
+                    ? "no matching questions"
+                    : `${visible.length} results`;
+        }, 500);
+    }
+
     function refresh() {
         if (!loaded) return;
+        const hadListFocus =
+            document.activeElement !== null &&
+            list.contains(document.activeElement);
+        const previousIndex = rowIndex(selectedRow);
         const countsBase = filterQuestions(
             sorted,
             { ...filters, domain: "all" },
@@ -257,32 +303,40 @@ const questionTypes: QuizQuestion["question_type"][] = [
                 question.topic_id === filters.domain,
         );
         rendered = 0;
-        selected = -1;
         selectedRow = null;
         list.replaceChildren();
         if (visible.length === 0) {
             showState("no matching questions");
+            if (hadListFocus) searchInput.focus();
         } else {
             renderMore();
             fillViewport();
+            if (hadListFocus) {
+                select(Math.max(previousIndex, 0));
+            } else {
+                (list.children[0] as HTMLElement).tabIndex = 0;
+            }
         }
         updateCounts(countsBase);
+        announceCount();
     }
 
     function select(index: number) {
         if (visible.length === 0) return;
         const clamped = Math.min(Math.max(index, 0), visible.length - 1);
         while (rendered <= clamped) renderMore();
-        selectedRow?.classList.remove("sel");
-        selected = clamped;
+        if (selectedRow) selectedRow.tabIndex = -1;
+        (list.children[0] as HTMLElement).tabIndex = -1;
         selectedRow = list.children[clamped] as HTMLElement;
-        selectedRow.classList.add("sel");
+        selectedRow.tabIndex = 0;
+        selectedRow.focus({ preventScroll: true });
         selectedRow.scrollIntoView({ block: "nearest" });
     }
 
-    function openSelected() {
-        const question = selected >= 0 ? visible[selected] : undefined;
-        if (question) window.location.href = practiceHref(question);
+    function pickRandom() {
+        if (visible.length === 0) return;
+        const question = visible[Math.floor(Math.random() * visible.length)];
+        window.location.href = practiceHref(question);
     }
 
     chipRow.addEventListener("click", (event) => {
@@ -314,21 +368,47 @@ const questionTypes: QuizQuestion["question_type"][] = [
         searchFrame = requestAnimationFrame(refresh);
     });
 
-    document.addEventListener("keydown", (event) => {
+    randomButton.addEventListener("click", pickRandom);
+
+    list.addEventListener("keydown", (event) => {
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
         const target =
             event.target instanceof HTMLElement ? event.target : null;
+        const focusedRow = target?.closest(".qrow");
+        if (!focusedRow) return;
+        const index = rowIndex(focusedRow);
+        if (event.key === "ArrowDown") {
+            event.preventDefault();
+            select(index + 1);
+        } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            if (index <= 0) searchInput.focus();
+            else select(index - 1);
+        } else if (event.key === "Home") {
+            event.preventDefault();
+            select(0);
+        } else if (event.key === "End") {
+            event.preventDefault();
+            select(visible.length - 1);
+        } else if (event.key === "/") {
+            event.preventDefault();
+            searchInput.focus();
+        } else if (event.key.toLowerCase() === "r") {
+            pickRandom();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.isComposing || event.keyCode === 229) return;
+        const target =
+            event.target instanceof HTMLElement ? event.target : null;
+        if (target && list.contains(target)) return;
         if (target === searchInput) {
             if (event.key === "Escape") {
                 searchInput.blur();
             } else if (event.key === "ArrowDown") {
                 event.preventDefault();
-                select(selected + 1);
-            } else if (event.key === "ArrowUp") {
-                event.preventDefault();
-                select(selected - 1);
-            } else if (event.key === "Enter") {
-                event.preventDefault();
-                openSelected();
+                select(Math.max(rowIndex(selectedRow), 0));
             }
             return;
         }
@@ -343,22 +423,6 @@ const questionTypes: QuizQuestion["question_type"][] = [
         if (event.key === "/") {
             event.preventDefault();
             searchInput.focus();
-        } else if (event.key === "ArrowDown") {
-            event.preventDefault();
-            select(selected + 1);
-        } else if (event.key === "ArrowUp") {
-            event.preventDefault();
-            select(selected - 1);
-        } else if (event.key === "Enter") {
-            if (target?.closest("a, button")) return;
-            event.preventDefault();
-            openSelected();
-        } else if (event.key.toLowerCase() === "r") {
-            if (visible.length > 0) {
-                const question =
-                    visible[Math.floor(Math.random() * visible.length)];
-                window.location.href = practiceHref(question);
-            }
         }
     });
 
@@ -378,5 +442,6 @@ const questionTypes: QuizQuestion["question_type"][] = [
         })
         .catch(() => {
             showState("questions unavailable", true);
+            statusEl.textContent = "questions unavailable";
         });
 </script>
