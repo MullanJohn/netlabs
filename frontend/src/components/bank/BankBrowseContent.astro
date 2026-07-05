@@ -2,12 +2,17 @@
 import type { TrackSelector } from "../../data/track-selectors";
 import type { QuizQuestion } from "../../quiz/types/quiz-types";
 import { questionTypeLabel } from "../../quiz/session/labels";
+import { blueprintTopics } from "../../data/blueprint-topics";
 
 interface Props {
     track: TrackSelector;
 }
 
 const { track } = Astro.props;
+const topics = blueprintTopics[track.slug] ?? [];
+const topicTitlesJson = JSON.stringify(
+    Object.fromEntries(topics.map((topic) => [topic.id, topic.title])),
+).replace(/</g, "\\u003c");
 const questionTypes: QuizQuestion["question_type"][] = [
     "mcq-single",
     "mcq-multi",
@@ -29,10 +34,16 @@ const questionTypes: QuizQuestion["question_type"][] = [
     </div>
     <div class="right">
         <span><span class="kbd">/</span> search</span>
+        <span><span class="kbd">↑</span><span class="kbd">↓</span> move</span>
     </div>
 </div>
 
 <div class="editor-body inner-page bank-page" data-bank-page data-track-slug={track.slug}>
+    <script
+        type="application/json"
+        data-bank-topics
+        set:html={topicTitlesJson}
+    />
     <section class="inner-hero">
         <div>
             <h1>Question bank<span>/all</span></h1>
@@ -112,3 +123,260 @@ const questionTypes: QuizQuestion["question_type"][] = [
         <div class="bank-sentinel" data-bank-sentinel></div>
     </div>
 </div>
+
+<script>
+    import { fetchBankQuestions } from "../../data/bank-client";
+    import { questionTypeShort } from "../../quiz/session/labels";
+    import {
+        buildSearchIndex,
+        domainCounts,
+        filterQuestions,
+        sortQuestions,
+        type BankFilters,
+        type BankSort,
+    } from "./bank-list";
+    import type { BankQuestion } from "../../data/bank-types";
+
+    const CHUNK = 100;
+
+    const page = document.querySelector<HTMLElement>("[data-bank-page]")!;
+    const list = document.querySelector<HTMLElement>("[data-bank-list]")!;
+    const sentinel = document.querySelector<HTMLElement>(
+        "[data-bank-sentinel]",
+    )!;
+    const shownEl = document.querySelector<HTMLElement>("[data-bank-shown]")!;
+    const countEl = document.querySelector<HTMLElement>("[data-bank-count]")!;
+    const chipRow = document.querySelector<HTMLElement>(
+        "[data-bank-domains]",
+    )!;
+    const typeSelect = document.querySelector<HTMLSelectElement>(
+        '[data-bank-filter="type"]',
+    )!;
+    const sortSelect = document.querySelector<HTMLSelectElement>(
+        '[data-bank-filter="sort"]',
+    )!;
+    const searchInput =
+        document.querySelector<HTMLInputElement>("[data-bank-search]")!;
+
+    const topicTitles = new Map<string, string>(
+        Object.entries(
+            JSON.parse(
+                document.querySelector("[data-bank-topics]")?.textContent ??
+                    "{}",
+            ) as Record<string, string>,
+        ),
+    );
+
+    let loaded = false;
+    let questions: BankQuestion[] = [];
+    let sorted: BankQuestion[] = [];
+    let visible: BankQuestion[] = [];
+    let searchIndex: ReadonlyMap<string, string> = new Map();
+    let rendered = 0;
+    let selected = -1;
+    let selectedRow: HTMLElement | null = null;
+    const filters: BankFilters = {
+        domain: "all",
+        type: "all",
+        query: "",
+    };
+
+    function practiceHref(question: BankQuestion): string {
+        return `/quiz?question=${encodeURIComponent(question.id)}`;
+    }
+
+    function buildRow(question: BankQuestion): HTMLAnchorElement {
+        const row = document.createElement("a");
+        row.className = "qrow";
+        row.href = practiceHref(question);
+        const cells: [string, string][] = [
+            ["qnum", question.id],
+            ["qstem", question.stem],
+            ["qdom", question.topic_id],
+            ["qtopic", question.sub_topic_id],
+            ["qtype", questionTypeShort(question.question_type)],
+        ];
+        for (const [className, text] of cells) {
+            const cell = document.createElement("span");
+            cell.className = className;
+            cell.textContent = text;
+            row.append(cell);
+        }
+        return row;
+    }
+
+    function renderMore() {
+        const next = visible.slice(rendered, rendered + CHUNK);
+        list.append(...next.map((question) => buildRow(question)));
+        rendered += next.length;
+    }
+
+    function fillViewport() {
+        const viewportBottom =
+            window.innerHeight || document.documentElement.clientHeight;
+        while (
+            rendered < visible.length &&
+            sentinel.getBoundingClientRect().top <= viewportBottom
+        ) {
+            renderMore();
+        }
+    }
+
+    function showState(text: string, isError = false) {
+        const span = document.createElement("span");
+        span.className = isError ? "drill-state error" : "drill-state";
+        span.textContent = text;
+        list.replaceChildren(span);
+    }
+
+    function updateCounts(countsBase: readonly BankQuestion[]) {
+        shownEl.textContent = String(visible.length);
+        countEl.textContent = String(questions.length);
+        const counts = domainCounts(countsBase);
+        for (const chip of chipRow.querySelectorAll<HTMLElement>(".chip-f")) {
+            const badge = chip.querySelector(".c");
+            if (!badge || !chip.dataset.domain) continue;
+            badge.textContent = String(counts.get(chip.dataset.domain) ?? 0);
+        }
+    }
+
+    function resort() {
+        sorted = sortQuestions(questions, sortSelect.value as BankSort);
+    }
+
+    function refresh() {
+        if (!loaded) return;
+        const countsBase = filterQuestions(
+            sorted,
+            { ...filters, domain: "all" },
+            searchIndex,
+        );
+        visible = countsBase.filter(
+            (question) =>
+                filters.domain === "all" ||
+                question.topic_id === filters.domain,
+        );
+        rendered = 0;
+        selected = -1;
+        selectedRow = null;
+        list.replaceChildren();
+        if (visible.length === 0) {
+            showState("no matching questions");
+        } else {
+            renderMore();
+            fillViewport();
+        }
+        updateCounts(countsBase);
+    }
+
+    function select(index: number) {
+        if (visible.length === 0) return;
+        const clamped = Math.min(Math.max(index, 0), visible.length - 1);
+        while (rendered <= clamped) renderMore();
+        selectedRow?.classList.remove("sel");
+        selected = clamped;
+        selectedRow = list.children[clamped] as HTMLElement;
+        selectedRow.classList.add("sel");
+        selectedRow.scrollIntoView({ block: "nearest" });
+    }
+
+    function openSelected() {
+        const question = selected >= 0 ? visible[selected] : undefined;
+        if (question) window.location.href = practiceHref(question);
+    }
+
+    chipRow.addEventListener("click", (event) => {
+        const chip = (event.target as HTMLElement).closest<HTMLElement>(
+            ".chip-f",
+        );
+        if (!chip) return;
+        filters.domain = chip.dataset.domain ?? "all";
+        for (const other of chipRow.querySelectorAll(".chip-f")) {
+            other.classList.toggle("on", other === chip);
+            other.setAttribute("aria-pressed", String(other === chip));
+        }
+        refresh();
+    });
+
+    typeSelect.addEventListener("change", () => {
+        filters.type = typeSelect.value;
+        refresh();
+    });
+    sortSelect.addEventListener("change", () => {
+        resort();
+        refresh();
+    });
+
+    let searchFrame = 0;
+    searchInput.addEventListener("input", () => {
+        filters.query = searchInput.value;
+        cancelAnimationFrame(searchFrame);
+        searchFrame = requestAnimationFrame(refresh);
+    });
+
+    document.addEventListener("keydown", (event) => {
+        const target =
+            event.target instanceof HTMLElement ? event.target : null;
+        if (target === searchInput) {
+            if (event.key === "Escape") {
+                searchInput.blur();
+            } else if (event.key === "ArrowDown") {
+                event.preventDefault();
+                select(selected + 1);
+            } else if (event.key === "ArrowUp") {
+                event.preventDefault();
+                select(selected - 1);
+            } else if (event.key === "Enter") {
+                event.preventDefault();
+                openSelected();
+            }
+            return;
+        }
+        if (
+            target?.matches(
+                "input, textarea, select, [contenteditable='true']",
+            )
+        ) {
+            return;
+        }
+        if (event.altKey || event.ctrlKey || event.metaKey) return;
+        if (event.key === "/") {
+            event.preventDefault();
+            searchInput.focus();
+        } else if (event.key === "ArrowDown") {
+            event.preventDefault();
+            select(selected + 1);
+        } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            select(selected - 1);
+        } else if (event.key === "Enter") {
+            if (target?.closest("a, button")) return;
+            event.preventDefault();
+            openSelected();
+        } else if (event.key.toLowerCase() === "r") {
+            if (visible.length > 0) {
+                const question =
+                    visible[Math.floor(Math.random() * visible.length)];
+                window.location.href = practiceHref(question);
+            }
+        }
+    });
+
+    new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+            fillViewport();
+        }
+    }).observe(sentinel);
+
+    fetchBankQuestions(page.dataset.trackSlug!)
+        .then((data) => {
+            questions = data.questions;
+            searchIndex = buildSearchIndex(questions, topicTitles);
+            loaded = true;
+            resort();
+            refresh();
+        })
+        .catch(() => {
+            showState("questions unavailable", true);
+        });
+</script>
