@@ -27,7 +27,7 @@ export type QuizSessionApi = {
 };
 
 export function useQuizSession(
-    quizId: string | null,
+    quizId: string,
     questions: QuizQuestion[],
 ): QuizSessionApi {
     const { answers, results, checkingId, errors, setAnswer, checkAnswer, reset } =

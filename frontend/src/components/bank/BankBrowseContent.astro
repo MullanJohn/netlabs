@@ -309,7 +309,11 @@ const questionTypes: QuizQuestion["question_type"][] = [
     let sort: BankSort = "id";
 
     function practiceHref(question: BankQuestion): string {
-        return `/quiz?question=${encodeURIComponent(question.id)}`;
+        const params = contextParams();
+        if (visible.length < 2) params.delete("q");
+        params.set("question", question.id);
+        params.set("track", page.dataset.trackSlug!);
+        return `/quiz?${params.toString()}`;
     }
 
     function buildCell(className: string): HTMLSpanElement {

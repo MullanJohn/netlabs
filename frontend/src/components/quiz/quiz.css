@@ -241,6 +241,53 @@
     white-space: nowrap;
 }
 
+.qfoot .nav-btns a.btn,
+.sb-bottom a.btn {
+    text-decoration: none;
+}
+
+.qfoot .nav-btns a.btn {
+    color: inherit;
+}
+
+.qfoot .btn[aria-disabled="true"] {
+    border-color: var(--line);
+    color: var(--fg-4);
+    pointer-events: none;
+}
+
+.scope-link {
+    padding-bottom: 1px;
+    border-bottom: 1px dashed var(--accent-ln);
+    color: var(--accent);
+    font-size: 12px;
+    text-decoration: none;
+}
+
+@media (hover: hover) {
+    .scope-link:hover {
+        border-bottom-color: var(--fg);
+        color: var(--fg);
+    }
+}
+
+.top-bar .breadcrumb a {
+    color: inherit;
+    text-decoration: none;
+}
+
+@media (hover: hover) {
+    .top-bar .breadcrumb a:hover {
+        color: var(--accent);
+    }
+}
+
+.bank-random:disabled {
+    color: var(--fg-5);
+    cursor: default;
+    pointer-events: none;
+}
+
 .btn:disabled {
     border-color: var(--line);
     color: var(--fg-4);

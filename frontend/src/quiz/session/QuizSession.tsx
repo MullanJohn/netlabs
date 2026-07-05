@@ -9,13 +9,13 @@ import { stemDomId } from "../questions/QuestionPrompt";
 import type { QuizQuestion } from "../types/quiz-types";
 
 type Props = {
-    quizId: string | null;
+    quizId: string;
     questions: QuizQuestion[];
 };
 
 const QuizSession = ({ quizId, questions }: Props) => {
     const session = useQuizSession(quizId, questions);
-    const drillName = quizId ? drillLabel(quizId) : "single question";
+    const drillName = drillLabel(quizId);
     const { currentIndex, currentQuestion, total, goTo, checkAnswer } = session;
     const currentResult = currentQuestion
         ? session.results[currentQuestion.id]
