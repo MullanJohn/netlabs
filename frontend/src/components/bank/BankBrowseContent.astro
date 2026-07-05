@@ -100,12 +100,21 @@ const questionTypes: QuizQuestion["question_type"][] = [
                 <input
                     type="search"
                     data-bank-search
-                    placeholder="search items..."
+                    placeholder="search stems, topics, ids..."
                     aria-label="Search questions"
                     autocomplete="off"
                     spellcheck="false"
                 />
-                <span class="kbd">/</span>
+                <span class="kbd" data-bank-slash>/</span>
+                <button
+                    class="bank-clear"
+                    type="button"
+                    aria-label="Clear search"
+                    data-bank-clear
+                    hidden
+                >
+                    <span aria-hidden="true">✕</span>
+                </button>
             </span>
             <button
                 class="bank-random"
@@ -151,10 +160,14 @@ const questionTypes: QuizQuestion["question_type"][] = [
     import { fetchBankQuestions } from "../../data/bank-client";
     import { questionTypeShort } from "../../quiz/session/labels";
     import {
+        boostIdMatches,
         buildSearchIndex,
         domainCounts,
         filterQuestions,
+        matchRanges,
+        snippetStart,
         sortQuestions,
+        tokenize,
         type BankFilters,
         type BankSort,
     } from "./bank-list";
@@ -184,6 +197,10 @@ const questionTypes: QuizQuestion["question_type"][] = [
     const randomButton = document.querySelector<HTMLButtonElement>(
         "[data-bank-random]",
     )!;
+    const clearButton = document.querySelector<HTMLButtonElement>(
+        "[data-bank-clear]",
+    )!;
+    const slashHint = document.querySelector<HTMLElement>("[data-bank-slash]")!;
 
     const topicTitles = new Map<string, string>(
         Object.entries(
@@ -201,9 +218,52 @@ const questionTypes: QuizQuestion["question_type"][] = [
     let searchIndex: ReadonlyMap<string, string> = new Map();
     let rendered = 0;
     let selectedRow: HTMLElement | null = null;
+    let queryTokens: string[] = [];
 
     function rowIndex(row: Element | null): number {
         return row ? Array.prototype.indexOf.call(list.children, row) : -1;
+    }
+
+    function appendHighlighted(
+        cell: HTMLElement,
+        text: string,
+        snippet = false,
+    ): boolean {
+        if (queryTokens.length === 0) {
+            cell.textContent = text;
+            return false;
+        }
+        const ranges = matchRanges(text, queryTokens);
+        if (ranges.length === 0) {
+            cell.textContent = text;
+            return false;
+        }
+        let display = text;
+        let shift = 0;
+        if (snippet) {
+            const start = snippetStart(text, ranges[0].start);
+            if (start > 0) {
+                display = `…${text.slice(start)}`;
+                shift = start - 1;
+            }
+        }
+        const fragment = document.createDocumentFragment();
+        let cursor = 0;
+        for (const { start, end } of ranges) {
+            const from = start - shift;
+            const to = end - shift;
+            if (to <= cursor) continue;
+            if (from > cursor) {
+                fragment.append(display.slice(cursor, from));
+            }
+            const markEl = document.createElement("mark");
+            markEl.textContent = display.slice(Math.max(from, cursor), to);
+            fragment.append(markEl);
+            cursor = to;
+        }
+        if (cursor < display.length) fragment.append(display.slice(cursor));
+        cell.replaceChildren(fragment);
+        return true;
     }
     const filters: BankFilters = {
         domain: "all",
@@ -215,24 +275,44 @@ const questionTypes: QuizQuestion["question_type"][] = [
         return `/quiz?question=${encodeURIComponent(question.id)}`;
     }
 
+    function buildCell(className: string): HTMLSpanElement {
+        const cell = document.createElement("span");
+        cell.className = className;
+        return cell;
+    }
+
     function buildRow(question: BankQuestion): HTMLAnchorElement {
         const row = document.createElement("a");
         row.className = "qrow";
         row.href = practiceHref(question);
         row.tabIndex = -1;
-        const cells: [string, string][] = [
-            ["qnum", question.id],
-            ["qstem", question.stem],
-            ["qdom", question.topic_id],
-            ["qtopic", question.sub_topic_id],
-            ["qtype", questionTypeShort(question.question_type)],
-        ];
-        for (const [className, text] of cells) {
-            const cell = document.createElement("span");
-            cell.className = className;
-            cell.textContent = text;
-            row.append(cell);
+
+        const num = buildCell("qnum");
+        appendHighlighted(num, question.id);
+
+        const stem = buildCell("qstem");
+        appendHighlighted(stem, question.stem, true);
+
+        const dom = buildCell("qdom");
+        dom.textContent = question.topic_id;
+
+        const topic = buildCell("qtopic");
+        const title = topicTitles.get(question.sub_topic_id) ?? "";
+        topic.title = title;
+        const idMarked = appendHighlighted(topic, question.sub_topic_id);
+        if (!idMarked && title && queryTokens.length > 0) {
+            const lowerTitle = title.toLowerCase();
+            if (queryTokens.some((token) => lowerTitle.includes(token))) {
+                const markEl = document.createElement("mark");
+                markEl.textContent = question.sub_topic_id;
+                topic.replaceChildren(markEl);
+            }
         }
+
+        const type = buildCell("qtype");
+        type.textContent = questionTypeShort(question.question_type);
+
+        row.append(num, stem, dom, topic, type);
         return row;
     }
 
@@ -286,27 +366,63 @@ const questionTypes: QuizQuestion["question_type"][] = [
         }, 500);
     }
 
+    function hasActiveFacets(): boolean {
+        return filters.domain !== "all" || filters.type !== "all";
+    }
+
+    function actionButton(label: string, onClick: () => void) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "bank-action";
+        button.textContent = label;
+        button.addEventListener("click", onClick);
+        return button;
+    }
+
+    function showEmptyState() {
+        const wrap = document.createElement("div");
+        wrap.className = "bank-empty";
+        const message = document.createElement("span");
+        message.className = "drill-state";
+        const query = filters.query.trim();
+        const shortQuery =
+            query.length > 40 ? `${query.slice(0, 40)}…` : query;
+        message.textContent = query
+            ? `no results for "${shortQuery}"`
+            : "no matching questions";
+        wrap.append(message);
+        if (query) wrap.append(actionButton("clear search", clearSearch));
+        if (hasActiveFacets()) {
+            wrap.append(actionButton("clear filters", clearFacets));
+        }
+        list.replaceChildren(wrap);
+    }
+
     function refresh() {
         if (!loaded) return;
         const hadListFocus =
             document.activeElement !== null &&
             list.contains(document.activeElement);
         const previousIndex = rowIndex(selectedRow);
+        queryTokens = tokenize(filters.query);
         const countsBase = filterQuestions(
             sorted,
             { ...filters, domain: "all" },
             searchIndex,
         );
-        visible = countsBase.filter(
-            (question) =>
-                filters.domain === "all" ||
-                question.topic_id === filters.domain,
+        visible = boostIdMatches(
+            countsBase.filter(
+                (question) =>
+                    filters.domain === "all" ||
+                    question.topic_id === filters.domain,
+            ),
+            filters.query,
         );
         rendered = 0;
         selectedRow = null;
         list.replaceChildren();
         if (visible.length === 0) {
-            showState("no matching questions");
+            showEmptyState();
             if (hadListFocus) searchInput.focus();
         } else {
             renderMore();
@@ -364,14 +480,48 @@ const questionTypes: QuizQuestion["question_type"][] = [
     let searchFrame = 0;
     searchInput.addEventListener("input", () => {
         filters.query = searchInput.value;
+        syncClearButton();
         cancelAnimationFrame(searchFrame);
         searchFrame = requestAnimationFrame(refresh);
     });
 
+    function syncClearButton() {
+        const hasText = searchInput.value.length > 0;
+        clearButton.hidden = !hasText;
+        slashHint.hidden = hasText;
+    }
+
+    function clearSearch() {
+        searchInput.value = "";
+        filters.query = "";
+        syncClearButton();
+        searchInput.focus();
+        refresh();
+    }
+
+    function clearFacets() {
+        filters.domain = "all";
+        filters.type = "all";
+        typeSelect.value = "all";
+        for (const chip of chipRow.querySelectorAll(".chip-f")) {
+            const active = chip.dataset.domain === "all";
+            chip.classList.toggle("on", active);
+            chip.setAttribute("aria-pressed", String(active));
+        }
+        searchInput.focus();
+        refresh();
+    }
+
     randomButton.addEventListener("click", pickRandom);
+    clearButton.addEventListener("click", clearSearch);
 
     list.addEventListener("keydown", (event) => {
         if (event.altKey || event.ctrlKey || event.metaKey) return;
+        if (event.key === "/") {
+            event.preventDefault();
+            searchInput.focus();
+            return;
+        }
         const target =
             event.target instanceof HTMLElement ? event.target : null;
         const focusedRow = target?.closest(".qrow");
@@ -390,9 +540,6 @@ const questionTypes: QuizQuestion["question_type"][] = [
         } else if (event.key === "End") {
             event.preventDefault();
             select(visible.length - 1);
-        } else if (event.key === "/") {
-            event.preventDefault();
-            searchInput.focus();
         } else if (event.key.toLowerCase() === "r") {
             pickRandom();
         }
@@ -405,7 +552,9 @@ const questionTypes: QuizQuestion["question_type"][] = [
         if (target && list.contains(target)) return;
         if (target === searchInput) {
             if (event.key === "Escape") {
-                searchInput.blur();
+                event.preventDefault();
+                if (searchInput.value) clearSearch();
+                else searchInput.blur();
             } else if (event.key === "ArrowDown") {
                 event.preventDefault();
                 select(Math.max(rowIndex(selectedRow), 0));
@@ -431,6 +580,8 @@ const questionTypes: QuizQuestion["question_type"][] = [
             fillViewport();
         }
     }).observe(sentinel);
+
+    syncClearButton();
 
     fetchBankQuestions(page.dataset.trackSlug!)
         .then((data) => {

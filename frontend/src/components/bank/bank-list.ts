@@ -23,16 +23,16 @@ export function buildSearchIndex(
     return index;
 }
 
+export function tokenize(query: string): string[] {
+    return query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+}
+
 export function filterQuestions(
     questions: readonly BankQuestion[],
     filters: BankFilters,
     searchIndex: ReadonlyMap<string, string>,
 ): BankQuestion[] {
-    const tokens = filters.query
-        .trim()
-        .toLowerCase()
-        .split(/\s+/)
-        .filter(Boolean);
+    const tokens = tokenize(filters.query);
     return questions.filter((question) => {
         if (filters.domain !== "all" && question.topic_id !== filters.domain) {
             return false;
@@ -89,4 +89,71 @@ export function domainCounts(
         );
     }
     return counts;
+}
+
+export function boostIdMatches(
+    questions: readonly BankQuestion[],
+    query: string,
+): BankQuestion[] {
+    const token = query.trim().toLowerCase();
+    if (token.length < 2 || /\s/.test(token)) return [...questions];
+    const hits: BankQuestion[] = [];
+    const rest: BankQuestion[] = [];
+    for (const question of questions) {
+        if (
+            question.id.toLowerCase().startsWith(token) ||
+            question.sub_topic_id.toLowerCase().startsWith(token)
+        ) {
+            hits.push(question);
+        } else {
+            rest.push(question);
+        }
+    }
+    return hits.length > 0 ? [...hits, ...rest] : rest;
+}
+
+export type MatchRange = { start: number; end: number };
+
+export function matchRanges(
+    text: string,
+    tokens: readonly string[],
+): MatchRange[] {
+    const lower = text.toLowerCase();
+    if (lower.length !== text.length) return [];
+    const found: MatchRange[] = [];
+    for (const token of tokens) {
+        if (!token) continue;
+        let from = 0;
+        while (true) {
+            const at = lower.indexOf(token, from);
+            if (at === -1) break;
+            found.push({ start: at, end: at + token.length });
+            from = at + 1;
+        }
+    }
+    found.sort((a, b) => a.start - b.start || a.end - b.end);
+    const merged: MatchRange[] = [];
+    for (const range of found) {
+        const last = merged[merged.length - 1];
+        if (last && range.start <= last.end) {
+            last.end = Math.max(last.end, range.end);
+        } else {
+            merged.push({ ...range });
+        }
+    }
+    return merged;
+}
+
+export function snippetStart(
+    text: string,
+    firstMatch: number,
+    lead = 24,
+    threshold = 40,
+): number {
+    if (firstMatch <= threshold) return 0;
+    let start = firstMatch - lead;
+    while (start < firstMatch && !/\s/.test(text[start - 1] ?? " ")) {
+        start++;
+    }
+    return start;
 }

@@ -133,7 +133,7 @@
 }
 
 .bank-search input {
-    width: 200px;
+    width: 36ch;
     padding: 5px 30px 5px 10px;
     border: 1px solid var(--line);
     border-radius: 4px;
@@ -151,6 +151,71 @@
 
 .bank-search input::-webkit-search-cancel-button {
     display: none;
+}
+
+.bank-clear {
+    position: absolute;
+    top: 50%;
+    right: 3px;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 3px;
+    background: none;
+    color: var(--fg-4);
+    font-size: 11px;
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: color 100ms;
+}
+
+.bank-clear[hidden],
+.bank-search .kbd[hidden] {
+    display: none;
+}
+
+.bank-clear:hover,
+.bank-clear:focus-visible {
+    color: var(--fg);
+}
+
+.qrow mark {
+    background: var(--accent-bg);
+    color: inherit;
+    border-radius: 2px;
+}
+
+.bank-action {
+    padding: 4px 9px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--bg);
+    color: var(--fg-3);
+    font-family: var(--font-code);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition:
+        border-color 100ms,
+        color 100ms;
+}
+
+@media (hover: hover) {
+    .bank-action:hover {
+        border-color: var(--line-2);
+        color: var(--fg);
+    }
+}
+
+.bank-empty {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 4px 0;
 }
 
 .bank-search .kbd {
