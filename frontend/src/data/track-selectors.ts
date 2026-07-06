@@ -49,9 +49,15 @@ export const selectorCategories = [
     },
 ] as const;
 
+export const vendors = {
+    cisco: { slug: "cisco", label: "cisco" },
+    arista: { slug: "arista", label: "arista" },
+} as const;
+
 export const trackSelectors = {
     ccna: {
         slug: "ccna",
+        vendor: "cisco",
         name: "CCNA",
         switchName: "CCNA",
         switchMeta: "200-301",
@@ -71,6 +77,7 @@ export const trackSelectors = {
     },
     "ccnp-encor": {
         slug: "ccnp-encor",
+        vendor: "cisco",
         name: "CCNP ENCOR",
         switchName: "CCNP",
         switchMeta: "ENCOR 350-401",
@@ -92,3 +99,12 @@ export const trackSelectors = {
 
 export type TrackSelector = (typeof trackSelectors)[keyof typeof trackSelectors];
 export type SelectorCategory = (typeof selectorCategories)[number];
+export type Vendor = (typeof vendors)[keyof typeof vendors];
+
+export function tracksByVendor(): { vendor: Vendor; tracks: TrackSelector[] }[] {
+    const tracks = Object.values(trackSelectors);
+    return Object.values(vendors).map((vendor) => ({
+        vendor,
+        tracks: tracks.filter((track) => track.vendor === vendor.slug),
+    }));
+}
