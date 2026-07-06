@@ -1,0 +1,73 @@
+---
+import { tracksByVendor } from "../../data/track-selectors";
+
+interface Props {
+    label: string;
+    idPrefix: string;
+    section?: string;
+    currentSlug?: string;
+    isActive?: boolean;
+}
+
+const {
+    label,
+    idPrefix,
+    section = "",
+    currentSlug,
+    isActive = false,
+} = Astro.props;
+const groups = tracksByVendor();
+const menuId = `${idPrefix}-menu`;
+---
+
+<div class="track-nav" data-track-nav>
+    <button
+        type="button"
+        class="track-btn"
+        aria-expanded="false"
+        aria-controls={menuId}
+        data-active={isActive ? "" : undefined}
+    >
+        {label}
+        {isActive && <span class="visually-hidden"> (current section)</span>}
+        <span class="track-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="track-menu" id={menuId} hidden>
+        {
+            groups.map(({ vendor, tracks }) => (
+                <Fragment>
+                    <div
+                        class="track-menu-h"
+                        id={`${idPrefix}-group-${vendor.slug}`}
+                    >
+                        {vendor.label}
+                    </div>
+                    {tracks.length > 0 ? (
+                        <ul aria-labelledby={`${idPrefix}-group-${vendor.slug}`}>
+                            {tracks.map((track) => (
+                                <li>
+                                    <a
+                                        href={`/${track.slug}${section}`}
+                                        aria-current={
+                                            isActive &&
+                                            track.slug === currentSlug
+                                                ? "page"
+                                                : undefined
+                                        }
+                                    >
+                                        <span>{track.switchName}</span>
+                                        <span class="meta">
+                                            {track.switchMeta}
+                                        </span>
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p class="track-menu-soon">soon</p>
+                    )}
+                </Fragment>
+            ))
+        }
+    </div>
+</div>

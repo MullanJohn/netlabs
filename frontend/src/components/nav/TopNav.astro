@@ -2,22 +2,40 @@
 import BrandLogo from "./BrandLogo.astro";
 import GitHubStarButton from "./GitHubStarButton.astro";
 import ThemeSwitch from "./ThemeSwitch.astro";
+import TrackDropdown from "./TrackDropdown.astro";
+import { trackSelectors } from "../../data/track-selectors";
+
+const tracks = Object.values(trackSelectors);
+const pathname = Astro.url.pathname.replace(/\/+$/, "");
+const [, firstSegment, secondSegment] = pathname.split("/");
+const current = tracks.find((track) => track.slug === firstSegment);
+const area = !current ? null : secondSegment === "bank" ? "bank" : "quizzes";
 ---
 
 <div class="nav-row">
     <BrandLogo />
 
-    <div class="nav-items" aria-label="Sections">
-        <a href="/ccna">CCNA</a>
-        <a href="/ccnp-encor">CCNP</a>
-        <a href="/ccna/bank">Bank</a>
-        <a href="/labs">Labs <small>soon</small></a>
+    <div class="nav-menus" aria-label="Sections">
+        <TrackDropdown
+            label="Quizzes"
+            idPrefix="quizzes"
+            section=""
+            currentSlug={current?.slug}
+            isActive={area === "quizzes"}
+        />
+        <TrackDropdown
+            label="Questions"
+            idPrefix="questions"
+            section="/bank"
+            currentSlug={current?.slug}
+            isActive={area === "bank"}
+        />
+        <span class="nav-soon">Labs <small>soon</small></span>
     </div>
 
     <div class="nav-cta">
         <ThemeSwitch />
         <GitHubStarButton />
-        <!-- <a class="btn primary">View</a> -->
     </div>
 </div>
 
@@ -33,4 +51,72 @@ import ThemeSwitch from "./ThemeSwitch.astro";
     window.addEventListener("scroll", update, { passive: true });
     pane?.addEventListener("scroll", update, { passive: true });
     update();
+
+    const dropdowns = Array.from(
+        document.querySelectorAll<HTMLElement>("[data-track-nav]"),
+        (root) => ({
+            root,
+            trigger: root.querySelector<HTMLButtonElement>(".track-btn")!,
+            menu: root.querySelector<HTMLElement>(".track-menu")!,
+        }),
+    );
+    type Dropdown = (typeof dropdowns)[number];
+
+    const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
+    let outsideBound = false;
+    let hoverTimer = 0;
+
+    function reflect(d: Dropdown, open: boolean) {
+        d.trigger.setAttribute("aria-expanded", String(open));
+        d.menu.hidden = !open;
+    }
+
+    function onOutsidePress(event: PointerEvent) {
+        const target = event.target as Node;
+        if (!dropdowns.some((d) => d.root.contains(target))) closeAll();
+    }
+
+    function bindOutside(bound: boolean) {
+        if (bound === outsideBound) return;
+        outsideBound = bound;
+        if (bound) document.addEventListener("pointerdown", onOutsidePress);
+        else document.removeEventListener("pointerdown", onOutsidePress);
+    }
+
+    // Only one menu is ever open, so opening one closes the rest.
+    function openOnly(d: Dropdown) {
+        for (const x of dropdowns) reflect(x, x === d);
+        bindOutside(true);
+    }
+
+    function closeAll() {
+        for (const d of dropdowns) reflect(d, false);
+        bindOutside(false);
+    }
+
+    for (const d of dropdowns) {
+        d.trigger.addEventListener("click", () => {
+            if (d.menu.hidden) openOnly(d);
+            else closeAll();
+        });
+        if (canHover) {
+            d.root.addEventListener("mouseenter", () => {
+                window.clearTimeout(hoverTimer);
+                openOnly(d);
+            });
+            d.root.addEventListener("mouseleave", () => {
+                hoverTimer = window.setTimeout(closeAll, 120);
+            });
+        }
+        d.root.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !d.menu.hidden) {
+                event.preventDefault();
+                closeAll();
+                d.trigger.focus();
+            }
+        });
+        d.root.addEventListener("focusout", (event) => {
+            if (!d.root.contains(event.relatedTarget as Node | null)) closeAll();
+        });
+    }
 </script>
