@@ -324,6 +324,14 @@
     padding: 6px 10px;
 }
 
+.gh-btn .seg.icon {
+    padding-inline: 9px;
+}
+
+.gh-btn .seg.icon svg {
+    display: block;
+}
+
 .gh-btn .count {
     border-left: 1px solid var(--line-2);
     background: var(--bg);
@@ -342,12 +350,17 @@
 }
 
 .theme-switch button {
+    display: inline-flex;
+    align-items: center;
     padding: 0 9px;
     color: var(--fg-3);
-    font-size: 11px;
     transition:
         background 120ms,
         color 120ms;
+}
+
+.theme-switch button svg {
+    display: block;
 }
 
 .theme-switch button.active {
@@ -421,7 +434,6 @@
 
     .theme-switch button {
         padding: 0 6px;
-        font-size: 10px;
     }
 
     .gh-btn .seg {
