@@ -9,7 +9,6 @@ export const LAB_EXAMS = [
     { id: "ccna", label: "CCNA", pattern: /\bccna\b|200-301/i },
     { id: "encor", label: "ENCOR", pattern: /\bencor\b|350-401/i },
     { id: "enarsi", label: "ENARSI", pattern: /\benarsi\b|300-410/i },
-    { id: "ensld", label: "ENSLD", pattern: /\bensld\b|300-420/i },
     { id: "ccie", label: "CCIE", pattern: /\bccie\b/i },
     { id: "ace", label: "ACE", pattern: /\bace\b/i },
 ] as const;

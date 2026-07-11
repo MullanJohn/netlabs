@@ -185,3 +185,39 @@
         padding-bottom: 32px;
     }
 }
+
+.kbd-help {
+    min-width: 280px;
+    padding: 0;
+    border: 1px solid var(--line-2);
+    border-radius: 6px;
+    background: var(--bg-2);
+    color: var(--fg-2);
+}
+
+.kbd-help::backdrop {
+    background: rgb(0 0 0 / 45%);
+}
+
+.kbd-help-body {
+    padding: 18px 22px 20px;
+}
+
+.kbd-help dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px 18px;
+    align-items: center;
+    margin: 14px 0 0;
+}
+
+.kbd-help dt {
+    display: flex;
+    gap: 4px;
+}
+
+.kbd-help dd {
+    margin: 0;
+    color: var(--fg-3);
+    font-size: 12px;
+}

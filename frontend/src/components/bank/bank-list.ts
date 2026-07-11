@@ -6,14 +6,12 @@ export type BankFilters = {
     query: string;
 };
 
-export type BankSortKey = "id" | "domain" | "type" | "stem";
+export type BankSortKey = "id" | "type" | "stem";
 export type BankSort = BankSortKey | `${BankSortKey}-desc`;
 
 export const BANK_SORTS: ReadonlySet<string> = new Set([
     "id",
     "id-desc",
-    "domain",
-    "domain-desc",
     "type",
     "type-desc",
     "stem",
@@ -94,18 +92,13 @@ export function sortQuestions(
     const byId = (a: BankQuestion, b: BankQuestion) =>
         a.id.localeCompare(b.id, undefined, { numeric: true });
     const primary =
-        key === "domain"
+        key === "type"
             ? (a: BankQuestion, b: BankQuestion) =>
-                  a.topic_id.localeCompare(b.topic_id, undefined, {
-                      numeric: true,
-                  })
-            : key === "type"
+                  a.question_type.localeCompare(b.question_type)
+            : key === "stem"
               ? (a: BankQuestion, b: BankQuestion) =>
-                    a.question_type.localeCompare(b.question_type)
-              : key === "stem"
-                ? (a: BankQuestion, b: BankQuestion) =>
-                      a.stem.localeCompare(b.stem)
-                : byId;
+                    a.stem.localeCompare(b.stem)
+              : byId;
     const sorted = [...questions];
     sorted.sort((a, b) => {
         const order = primary(a, b);

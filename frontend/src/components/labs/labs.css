@@ -1,0 +1,143 @@
+.lhead,
+.lrow {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) 110px 70px;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 12px;
+}
+
+.lhead {
+    border-bottom: 1px solid var(--line-2);
+    color: var(--fg-4);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.lrow {
+    border-bottom: 1px solid var(--line);
+    color: inherit;
+    font-size: 12.5px;
+    text-decoration: none;
+    transition: background 120ms;
+}
+
+@media (hover: hover) {
+    .lrow:hover {
+        background: color-mix(in srgb, var(--bg-2) 80%, var(--accent-bg));
+    }
+}
+
+.lrow:focus {
+    background: var(--accent-bg);
+    box-shadow: inset 2px 0 0 var(--accent);
+    outline: none;
+}
+
+.lrow > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lrow .lnum {
+    color: var(--fg-4);
+    font-family: var(--font-code);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.lrow:hover .lnum,
+.lrow:focus .lnum {
+    color: var(--accent);
+}
+
+.lrow .lname {
+    color: var(--fg-2);
+}
+
+.lrow .lname small {
+    margin-left: 10px;
+    color: var(--fg-4);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+}
+
+.lrow .ltime {
+    color: var(--fg-3);
+    font-family: var(--font-code);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.lrow mark {
+    background: var(--accent-bg);
+    color: inherit;
+    border-radius: 2px;
+}
+
+.lab-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border: 1px solid;
+    border-radius: 3px;
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.lab-badge.foundation {
+    color: var(--ok);
+    border-color: color-mix(in srgb, var(--ok) 35%, transparent);
+    background: var(--ok-bg);
+}
+
+.lab-badge.advanced {
+    color: var(--warn);
+    border-color: color-mix(in srgb, var(--warn) 35%, transparent);
+    background: color-mix(in srgb, var(--warn) 10%, transparent);
+}
+
+.lab-badge.expert {
+    color: var(--err);
+    border-color: color-mix(in srgb, var(--err) 35%, transparent);
+    background: var(--err-bg);
+}
+
+.labs-guides {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+    color: var(--fg-4);
+    font-size: 12px;
+}
+
+.labs-guides a {
+    padding-bottom: 1px;
+    border-bottom: 1px dashed var(--accent-ln);
+    color: var(--accent);
+}
+
+@media (hover: hover) {
+    .labs-guides a:hover {
+        border-bottom-color: var(--fg);
+        color: var(--fg);
+    }
+}
+
+@media (max-width: 640px) {
+    .lhead,
+    .lrow {
+        grid-template-columns: 44px minmax(0, 1fr) 100px;
+    }
+
+    .lhead .ltime,
+    .lrow .ltime {
+        display: none;
+    }
+}
+

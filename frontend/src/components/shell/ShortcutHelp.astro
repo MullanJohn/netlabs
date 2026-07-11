@@ -1,0 +1,41 @@
+<dialog class="kbd-help" data-kbd-help aria-labelledby="kbd-help-title">
+    <div class="kbd-help-body">
+        <h2 class="sec" id="kbd-help-title">keyboard shortcuts</h2>
+        <dl>
+            <dt><span class="kbd">/</span></dt>
+            <dd>focus search</dd>
+            <dt><span class="kbd">↑</span><span class="kbd">↓</span></dt>
+            <dd>move through rows</dd>
+            <dt><span class="kbd">enter</span></dt>
+            <dd>open the selected row</dd>
+            <dt><span class="kbd">r</span></dt>
+            <dd>open a random result</dd>
+            <dt><span class="kbd">esc</span></dt>
+            <dd>clear search / close</dd>
+        </dl>
+    </div>
+</dialog>
+
+<script>
+    const dialog = document.querySelector<HTMLDialogElement>("[data-kbd-help]")!;
+
+    for (const opener of document.querySelectorAll("[data-kbd-open]")) {
+        opener.addEventListener("click", () => dialog.showModal());
+    }
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key !== "?" || event.altKey || event.ctrlKey || event.metaKey) {
+            return;
+        }
+        const target = event.target instanceof HTMLElement ? event.target : null;
+        if (target?.matches("input, textarea, select, [contenteditable='true']")) {
+            return;
+        }
+        event.preventDefault();
+        if (!dialog.open) dialog.showModal();
+    });
+
+    dialog.addEventListener("click", (event) => {
+        if (event.target === dialog) dialog.close();
+    });
+</script>
