@@ -246,16 +246,6 @@
     white-space: nowrap;
 }
 
-.nav-soon {
-    color: var(--fg-5);
-}
-
-.nav-soon small {
-    margin-left: 3px;
-    color: var(--fg-5);
-    font-size: 10px;
-}
-
 .nav-cta {
     margin-left: auto;
     display: flex;
