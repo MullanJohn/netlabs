@@ -8,12 +8,13 @@ from typing import Any, assert_never
 from urllib.parse import quote
 
 import asyncpg
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 
 from models import (
     AnswerRequest,
+    BankQuestionListResponse,
     DragOrderAnswer,
     DragOrderResult,
     FillBlankAnswer,
@@ -233,6 +234,35 @@ def grade_submission(
         case _:
             assert_never(submission)
 
+def grade_answer_row(
+    submission: AnswerRequest,
+    row: asyncpg.Record,
+    context: str,
+) -> SubmissionResult:
+    if submission.type != row["question_type"]:
+        logger.warning(
+            "Answer type mismatch: %s expected=%s received=%s",
+            context,
+            row["question_type"],
+            submission.type,
+        )
+        raise HTTPException(
+            status_code=400,
+            detail="Answer type does not match question type",
+        )
+    try:
+        return grade_submission(
+            submission,
+            decode_json(row["answer"]),
+            row["rationale"],
+        )
+    except ValidationError as e:
+        logger.error("Malformed answer key: %s error=%s", context, e)
+        raise HTTPException(
+            status_code=500,
+            detail="Malformed question data",
+        ) from e
+
 def string_map(mapping: dict[Any, Any]) -> dict[str, str]:
     return {str(key): str(value) for key, value in mapping.items()}
 
@@ -381,6 +411,149 @@ async def list_catalog_drills(
         )
         raise HTTPException(status_code=500, detail="Internal server error") from e
 
+@app.get("/questions", response_model=BankQuestionListResponse)
+async def list_bank_questions(
+    track: str | None = None,
+    domain: str | None = None,
+    question_type: str | None = Query(None, alias="type"),
+    q: str | None = None,
+    limit: int | None = None,
+    offset: int | None = None,
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    try:
+        if not track:
+            raise HTTPException(status_code=400, detail="Missing track parameter")
+        if question_type and question_type not in QUESTION_TYPES:
+            raise HTTPException(status_code=400, detail="Invalid question type")
+
+        params: list[Any] = [track]
+        clauses: list[str] = []
+        if domain:
+            params.append(domain)
+            clauses.append(f"AND q.topic_id = ${len(params)}")
+        if question_type:
+            params.append(question_type)
+            clauses.append(f"AND q.question_type = ${len(params)}")
+        if q:
+            escaped = re.sub(r"([\\%_])", r"\\\1", q)
+            params.append(f"%{escaped}%")
+            clauses.append(
+                f"""AND (q.stem ILIKE ${len(params)}
+                    OR q.id ILIKE ${len(params)}
+                    OR q.sub_topic_id ILIKE ${len(params)})"""
+            )
+        filter_params = list(params)
+        paging = ""
+        if limit is not None:
+            params.append(min(1000, max(1, limit)))
+            paging += f" LIMIT ${len(params)}"
+        if offset is not None and offset > 0:
+            params.append(offset)
+            paging += f" OFFSET ${len(params)}"
+
+        filter_sql = f"""
+            FROM questions q
+            WHERE q.track_slug = $1
+            {" ".join(clauses)}
+        """
+        rows = await conn.fetch(
+            f"""
+            SELECT q.id,
+                   q.topic_id,
+                   q.sub_topic_id,
+                   q.question_type,
+                   q.stem
+            {filter_sql}
+            ORDER BY q.id{paging}
+            """,
+            *params,
+        )
+        total = len(rows)
+        if paging:
+            counted = await conn.fetchrow(
+                f"SELECT COUNT(*)::int AS total {filter_sql}",
+                *filter_params,
+            )
+            total = counted["total"]
+        questions = [dict(row) for row in rows]
+        logger.info(
+            "Listed bank questions: track=%s count=%d total=%d",
+            track,
+            len(questions),
+            total,
+        )
+        return {"total": total, "questions": questions}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Failed to list bank questions: track=%s", track)
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+@app.get("/questions/{question_id}", response_model=QuizQuestion)
+async def get_question(
+    question_id: str,
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    try:
+        row = await conn.fetchrow(
+            f"""
+            {QUESTION_ROW_SELECT}
+            WHERE q.id = $1
+            {QUESTION_ROW_GROUP_BY}
+            """,
+            question_id,
+        )
+        if row is None:
+            logger.warning("Question not found: question_id=%s", question_id)
+            raise HTTPException(status_code=404, detail="Question not found")
+        logger.info("Fetched question: question_id=%s", question_id)
+        return question_from_row(row)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Failed to fetch question: question_id=%s", question_id)
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
+@app.post("/questions/{question_id}/answer", response_model=SubmissionResult)
+async def submit_standalone_answer(
+    question_id: str,
+    submission: AnswerRequest,
+    conn: asyncpg.Connection = Depends(get_conn),
+):
+    try:
+        row = await conn.fetchrow(
+            """
+            SELECT q.question_type, q.answer, q.rationale
+            FROM questions q
+            WHERE q.id = $1
+            """,
+            question_id,
+        )
+        if row is None:
+            logger.warning("Question not found: question_id=%s", question_id)
+            raise HTTPException(status_code=404, detail="Question not found")
+        result = grade_answer_row(
+            submission,
+            row,
+            f"question_id={question_id}",
+        )
+        logger.info(
+            "Submitted standalone answer: question_id=%s type=%s is_correct=%s",
+            question_id,
+            submission.type,
+            result.isCorrect,
+        )
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(
+            "Failed to submit standalone answer: question_id=%s",
+            question_id,
+        )
+        raise HTTPException(status_code=500, detail="Internal server error") from e
+
 @app.get("/quizzes/{quiz_slug}/questions", response_model=list[QuizQuestion])
 async def list_quiz_questions(
     quiz_slug: str,
@@ -485,36 +658,11 @@ async def submit_answer(
                 question_id,
             )
             raise HTTPException(status_code=404, detail="Question not found in quiz")
-        expected_answer_type = row["question_type"]
-        if submission.type != expected_answer_type:
-            logger.warning(
-                "Answer type mismatch: quiz_slug=%s question_id=%s expected=%s received=%s",
-                quiz_slug,
-                question_id,
-                expected_answer_type,
-                submission.type,
-            )
-            raise HTTPException(
-                status_code=400,
-                detail="Answer type does not match question type",
-            )
-        try:
-            result = grade_submission(
-                submission,
-                decode_json(row["answer"]),
-                row["rationale"],
-            )
-        except ValidationError as e:
-            logger.error(
-                "Malformed answer key: quiz_slug=%s question_id=%s error=%s",
-                quiz_slug,
-                question_id,
-                e,
-            )
-            raise HTTPException(
-                status_code=500,
-                detail="Malformed question data",
-            ) from e
+        result = grade_answer_row(
+            submission,
+            row,
+            f"quiz_slug={quiz_slug} question_id={question_id}",
+        )
         logger.info(
             "Submitted answer: quiz_slug=%s question_id=%s type=%s is_correct=%s",
             quiz_slug,

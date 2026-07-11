@@ -33,6 +33,17 @@ class CatalogDrillListResponse(BaseModel):
     category_slug: str
     drills: list[CatalogDrill]
 
+class BankQuestion(BaseModel):
+    id: str
+    topic_id: str
+    sub_topic_id: str
+    question_type: str
+    stem: str
+
+class BankQuestionListResponse(BaseModel):
+    total: int
+    questions: list[BankQuestion]
+
 class QuestionOption(BaseModel):
     id: str
     text: str

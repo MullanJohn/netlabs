@@ -143,6 +143,85 @@ async function listCatalogDrills(
     return limited.map(catalogDrill);
 }
 
+async function listBankQuestions(sql: Sql, url: URL): Promise<Response> {
+    const track = url.searchParams.get("track");
+    if (!track) return error("Missing track parameter", 400);
+    const type = url.searchParams.get("type");
+    if (type && !QUESTION_TYPES.has(type)) {
+        return error("Invalid question type", 400);
+    }
+    const domain = url.searchParams.get("domain");
+    const search = url.searchParams.get("q");
+
+    const params: unknown[] = [track];
+    const clauses: string[] = [];
+    if (domain) {
+        params.push(domain);
+        clauses.push(`AND q.topic_id = $${params.length}`);
+    }
+    if (type) {
+        params.push(type);
+        clauses.push(`AND q.question_type = $${params.length}`);
+    }
+    if (search) {
+        params.push(`%${search.replace(/[\\%_]/g, (char) => `\\${char}`)}%`);
+        clauses.push(
+            `AND (q.stem ILIKE $${params.length}
+                  OR q.id ILIKE $${params.length}
+                  OR q.sub_topic_id ILIKE $${params.length})`,
+        );
+    }
+    const filterParamCount = params.length;
+    let paging = "";
+    const limit = Number.parseInt(url.searchParams.get("limit") ?? "", 10);
+    if (Number.isFinite(limit)) {
+        params.push(Math.min(1000, Math.max(1, limit)));
+        paging += ` LIMIT $${params.length}`;
+    }
+    const offset = Number.parseInt(url.searchParams.get("offset") ?? "", 10);
+    if (Number.isFinite(offset) && offset > 0) {
+        params.push(offset);
+        paging += ` OFFSET $${params.length}`;
+    }
+
+    const filterSql = `
+        FROM questions q
+        WHERE q.track_slug = $1
+        ${clauses.join("\n        ")}`;
+
+    const rows = await sql.query(
+        `SELECT q.id,
+                q.topic_id,
+                q.sub_topic_id,
+                q.question_type,
+                q.stem
+        ${filterSql}
+        ORDER BY q.id${paging}`,
+        params,
+    );
+    let total = rows.length;
+    if (paging) {
+        const counted = await sql.query(
+            `SELECT COUNT(*)::int AS total ${filterSql}`,
+            params.slice(0, filterParamCount),
+        );
+        total = Number(counted[0].total);
+    }
+    return json({ total, questions: rows });
+}
+
+async function getQuestion(sql: Sql, questionId: string): Promise<Response> {
+    const rows = await sql.query(
+        `${QUESTION_ROW_SELECT}
+        WHERE q.id = $1
+        ${QUESTION_ROW_GROUP_BY}`,
+        [questionId],
+    );
+    const row = rows[0];
+    if (!row) return error("Question not found", 404);
+    return json(questionFromRow(row));
+}
+
 async function listQuizQuestions(sql: Sql, quizSlug: string): Promise<Response> {
     const rows = await sql.query(
         `${QUESTION_ROW_SELECT}
@@ -197,22 +276,10 @@ async function sampleQuizQuestions(
     return json(rows.map(questionFromRow));
 }
 
-async function submitAnswer(
-    sql: Sql,
+async function gradeAnswerRow(
     request: Request,
-    quizSlug: string,
-    questionId: string,
+    row: Record<string, unknown>,
 ): Promise<Response> {
-    const rows = await sql`
-        SELECT q.question_type, q.answer, q.rationale
-        FROM questions q
-        JOIN quiz_template_items qti ON qti.question_id = q.id
-        WHERE q.id = ${questionId}
-          AND qti.template_slug = ${quizSlug}
-    `;
-    const row = rows[0];
-    if (!row) return error("Question not found in quiz", 404);
-
     let body: unknown;
     try {
         body = await request.json();
@@ -229,6 +296,39 @@ async function submitAnswer(
         String(row.rationale),
     );
     return json(result);
+}
+
+async function submitAnswer(
+    sql: Sql,
+    request: Request,
+    quizSlug: string,
+    questionId: string,
+): Promise<Response> {
+    const rows = await sql`
+        SELECT q.question_type, q.answer, q.rationale
+        FROM questions q
+        JOIN quiz_template_items qti ON qti.question_id = q.id
+        WHERE q.id = ${questionId}
+          AND qti.template_slug = ${quizSlug}
+    `;
+    const row = rows[0];
+    if (!row) return error("Question not found in quiz", 404);
+    return gradeAnswerRow(request, row);
+}
+
+async function submitStandaloneAnswer(
+    sql: Sql,
+    request: Request,
+    questionId: string,
+): Promise<Response> {
+    const rows = await sql`
+        SELECT q.question_type, q.answer, q.rationale
+        FROM questions q
+        WHERE q.id = ${questionId}
+    `;
+    const row = rows[0];
+    if (!row) return error("Question not found", 404);
+    return gradeAnswerRow(request, row);
 }
 
 export default {
@@ -264,6 +364,21 @@ export default {
                 fifth === "answer"
             ) {
                 return await submitAnswer(sql, request, second, fourth);
+            }
+            if (first === "questions") {
+                if (request.method === "GET" && segments.length === 1) {
+                    return await listBankQuestions(sql, url);
+                }
+                if (request.method === "GET" && segments.length === 2) {
+                    return await getQuestion(sql, second);
+                }
+                if (
+                    request.method === "POST" &&
+                    segments.length === 3 &&
+                    third === "answer"
+                ) {
+                    return await submitStandaloneAnswer(sql, request, second);
+                }
             }
             if (
                 request.method === "GET" &&

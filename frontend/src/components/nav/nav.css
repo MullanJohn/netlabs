@@ -11,7 +11,7 @@
     min-height: var(--nav-height);
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: 22px;
     padding: 0 28px;
 }
 
@@ -90,26 +90,167 @@
     opacity: 0;
 }
 
-.nav-items {
+.track-nav {
+    position: relative;
+    align-self: stretch;
+    display: inline-flex;
+    align-items: center;
+}
+
+.track-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 0;
+    border: 0;
+    background: none;
+    color: var(--fg-3);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 100ms;
+}
+
+@media (hover: hover) {
+    .track-btn:hover {
+        color: var(--fg);
+    }
+}
+
+.track-btn[data-active] {
+    color: var(--fg);
+}
+
+.track-btn[data-active]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 14px;
+    bottom: 3px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--accent);
+}
+
+.track-btn[aria-expanded="true"] {
+    color: var(--accent);
+}
+
+.track-caret {
+    color: var(--fg-4);
+    font-size: 8px;
+    transition:
+        transform 140ms,
+        color 100ms;
+}
+
+.track-btn:hover .track-caret {
+    color: var(--fg-3);
+}
+
+.track-btn[aria-expanded="true"] .track-caret {
+    color: var(--accent);
+    transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .track-caret {
+        transition: color 100ms;
+    }
+}
+
+.track-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 30;
+    min-width: 210px;
+    padding: 5px;
+    border: 1px solid var(--line-2);
+    border-radius: 5px;
+    background: var(--bg-2);
+    box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+}
+
+.track-menu[hidden] {
+    display: none;
+}
+
+.track-menu-h {
+    padding: 6px 8px 3px;
+    color: var(--fg-4);
+    font-size: 9.5px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.track-menu ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.track-menu a {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 8px;
+    border-radius: 3px;
+    color: var(--fg-2);
+    font-family: var(--font-code);
+    font-size: 12px;
+    transition:
+        background 100ms,
+        color 100ms;
+}
+
+@media (hover: hover) {
+    .track-menu a:hover {
+        background: color-mix(in srgb, var(--fg-4) 12%, transparent);
+        color: var(--fg);
+    }
+}
+
+.track-menu a[aria-current="page"] {
+    background: var(--accent-bg);
+    color: var(--accent);
+}
+
+.track-menu a .meta {
+    color: var(--fg-4);
+    font-size: 10px;
+}
+
+.track-menu a[aria-current="page"] .meta {
+    color: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.track-menu-soon {
+    margin: 0;
+    padding: 2px 8px 6px;
+    color: var(--fg-5);
+    font-family: var(--font-code);
+    font-size: 11px;
+}
+
+.nav-menus {
+    align-self: stretch;
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 22px;
     color: var(--fg-3);
     font-size: 13px;
     white-space: nowrap;
 }
 
-.nav-items a {
-    transition: color 100ms;
+.nav-soon {
+    color: var(--fg-5);
 }
 
-@media (hover: hover) {
-    .nav-items a:hover {
-        color: var(--fg);
-    }
-}
-
-.nav-items small {
+.nav-soon small {
     margin-left: 3px;
     color: var(--fg-5);
     font-size: 10px;
@@ -237,19 +378,13 @@
         min-width: 0;
     }
 
-    .nav-items {
+    .nav-menus {
         order: 3;
         width: calc(100% + 2 * var(--page-pad));
         margin: 2px calc(-1 * var(--page-pad)) 0;
         padding: 10px var(--page-pad);
         border-top: 1px solid var(--line);
         gap: 22px;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-
-    .nav-items::-webkit-scrollbar {
-        display: none;
     }
 
     .nav-cta {
@@ -268,13 +403,16 @@
     }
 
     .fade-end,
-    .gh-btn .count,
-    .nav-items a:nth-child(n + 4) {
+    .gh-btn .count {
         display: none;
     }
 
     .logo {
         gap: 0;
+    }
+
+    .track-btn {
+        font-size: 12px;
     }
 
     .theme-switch {
@@ -290,7 +428,7 @@
         padding-block: 4px;
     }
 
-    .nav-items {
+    .nav-menus {
         justify-content: safe center;
         gap: 18px;
         font-size: 12px;
