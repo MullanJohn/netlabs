@@ -1,0 +1,41 @@
+<div class="lab-doc">
+    <slot />
+</div>
+
+<script>
+    for (const box of document.querySelectorAll<HTMLInputElement>(
+        '.lab-doc input[type="checkbox"]',
+    )) {
+        box.disabled = false;
+    }
+
+    const blocks = document.querySelectorAll<HTMLPreElement>(
+        ".lab-doc pre:not(.lab-ticket)",
+    );
+    for (const pre of blocks) {
+        const wrap = document.createElement("div");
+        wrap.className = "lab-code";
+        pre.replaceWith(wrap);
+        wrap.append(pre);
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "lab-copy";
+        button.textContent = "copy";
+        button.setAttribute("aria-label", "Copy code block");
+        button.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(pre.textContent ?? "");
+                button.textContent = "copied";
+                button.classList.add("done");
+                window.setTimeout(() => {
+                    button.textContent = "copy";
+                    button.classList.remove("done");
+                }, 1600);
+            } catch {
+                button.textContent = "failed";
+            }
+        });
+        wrap.append(button);
+    }
+</script>

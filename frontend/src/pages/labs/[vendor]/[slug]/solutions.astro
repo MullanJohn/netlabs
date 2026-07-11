@@ -1,0 +1,51 @@
+---
+import { getCollection, getEntry } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import LabDocPage from "../../../../components/labs/LabDocPage.astro";
+
+export async function getStaticPaths() {
+    const solutions = await getCollection("labSolutions");
+    return solutions.map((solution) => ({
+        params: { vendor: solution.data.vendor, slug: solution.data.slug },
+        props: { solution },
+    }));
+}
+
+interface Props {
+    solution: CollectionEntry<"labSolutions">;
+}
+
+const { solution } = Astro.props;
+const lab = await getEntry("labs", solution.id);
+if (!lab) throw new Error(`missing lab entry for ${solution.id}`);
+---
+
+<LabDocPage
+    entry={solution}
+    heroTitle={lab.data.title}
+    tabTitle={`${lab.data.title} · solutions`}
+    description={`Solution walkthrough for ${lab.data.title}.`}
+    branch={`labs/${lab.id}/solutions`}
+    crumbs={[
+        { href: "/labs/", label: "labs" },
+        { href: `/labs/${lab.data.vendor}/`, label: lab.data.vendor },
+        { href: `/labs/${lab.id}/`, label: lab.data.slug },
+        { label: "solutions" },
+    ]}
+>
+    <div slot="actions" class="lab-actions">
+        <a href={`/labs/${lab.id}/`}>← back to lab</a>
+        {
+            lab.data.solutionsZipUrl && (
+                <a href={lab.data.solutionsZipUrl} download>
+                    download solution configs
+                </a>
+            )
+        }
+        {
+            lab.data.hasExtra && (
+                <a href={`/labs/${lab.id}/extra/`}>extra exercises →</a>
+            )
+        }
+    </div>
+</LabDocPage>

@@ -25,6 +25,9 @@
     --err-bg: rgba(255, 122, 133, 0.1);
     --warn: #f0c674;
 
+    --diff-1: #82d896;
+    --diff-2: #66b3e3;
+
     --font-ui:
         "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
         monospace;
@@ -68,6 +71,9 @@
     --err: #b03340;
     --err-bg: rgba(176, 51, 64, 0.08);
     --warn: #8a6414;
+
+    --diff-1: #2e7d4f;
+    --diff-2: #2e6e9e;
 
     color-scheme: light;
 }
