@@ -1,6 +1,10 @@
 # build output
 dist/
 
+# synced lab content and staged lab assets
+labs-content/
+frontend/public/labs/
+
 # generated types
 .astro/
 
