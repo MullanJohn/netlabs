@@ -40,6 +40,7 @@ jobs:
       - run: pnpm run build
         env:
           PUBLIC_API_BASE_URL: ""
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3.15.0
         with:

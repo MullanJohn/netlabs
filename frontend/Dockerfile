@@ -4,6 +4,8 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
 RUN pnpm run build
 
 FROM nginx:alpine
