@@ -1,4 +1,4 @@
-import { apiFetch } from "./api-client";
+import { apiFetch, staticFetch } from "./api-client";
 import { slotId } from "../quiz/answer";
 import type {
     AnswerRequest,
@@ -8,30 +8,16 @@ import type {
 } from "../quiz/types/quiz-types";
 
 export function fetchQuizQuestions(quizSlug: string, signal?: AbortSignal) {
-    return apiFetch<QuizQuestion[]>(
-        `/quizzes/${encodeURIComponent(quizSlug)}/questions`,
-        { signal },
+    return staticFetch<QuizQuestion[]>(
+        `/api/quizzes/${encodeURIComponent(quizSlug)}/questions.json`,
+        signal,
     );
 }
 
 export function fetchQuestion(questionId: string, signal?: AbortSignal) {
-    return apiFetch<QuizQuestion>(
-        `/questions/${encodeURIComponent(questionId)}`,
-        { signal },
-    );
-}
-
-export function fetchSampleQuestions(
-    quizSlug: string,
-    count: number,
-    types: readonly string[],
-    signal?: AbortSignal,
-) {
-    const params = new URLSearchParams({ count: String(count) });
-    if (types.length > 0) params.set("types", types.join(","));
-    return apiFetch<QuizQuestion[]>(
-        `/quizzes/${encodeURIComponent(quizSlug)}/questions/sample?${params}`,
-        { signal },
+    return staticFetch<QuizQuestion>(
+        `/api/questions/${encodeURIComponent(questionId)}.json`,
+        signal,
     );
 }
 

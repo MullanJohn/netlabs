@@ -1,7 +1,7 @@
-// Shared HTTP core for all NetLabs API access (catalog + quiz).
-// Owns the base URL and maps responses to typed ApiError kinds.
+// Shared HTTP core: apiFetch for the grading API, staticFetch for
+// build-time JSON assets. Maps responses to typed ApiError kinds.
 
-export const API_BASE_URL =
+const API_BASE_URL =
     import.meta.env.PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
 export type ApiErrorKind = "notFound" | "client" | "server" | "network";
@@ -34,15 +34,29 @@ type RequestOptions = {
     signal?: AbortSignal;
 };
 
-export async function apiFetch<T>(
+export function apiFetch<T>(
     path: string,
     options: RequestOptions = {},
+): Promise<T> {
+    return requestJson<T>(`${API_BASE_URL}${path}`, options);
+}
+
+export function staticFetch<T>(
+    path: string,
+    signal?: AbortSignal,
+): Promise<T> {
+    return requestJson<T>(path, { signal });
+}
+
+async function requestJson<T>(
+    url: string,
+    options: RequestOptions,
 ): Promise<T> {
     const { method = "GET", body, signal } = options;
 
     let response: Response;
     try {
-        response = await fetch(`${API_BASE_URL}${path}`, {
+        response = await fetch(url, {
             method,
             signal,
             headers:

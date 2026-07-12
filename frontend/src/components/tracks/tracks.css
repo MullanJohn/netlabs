@@ -125,10 +125,6 @@
     font-size: 12px;
 }
 
-.selector-preview-state.error {
-    color: var(--warn);
-}
-
 .selector-preview-row {
     min-width: 0;
     display: grid;
