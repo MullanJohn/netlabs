@@ -16,6 +16,17 @@ export class ApiError extends Error {
     }
 }
 
+export function loadErrorMessage(
+    error: unknown,
+    notFound: string,
+    fallback: string,
+): string {
+    if (error instanceof ApiError && error.kind === "notFound") {
+        return notFound;
+    }
+    return transportErrorMessage(error) ?? fallback;
+}
+
 export function transportErrorMessage(error: unknown): string | null {
     if (error instanceof ApiError) {
         if (error.kind === "network") {

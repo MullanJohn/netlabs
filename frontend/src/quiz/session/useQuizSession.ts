@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useQuizState } from "../quiz-hook";
+import { useQuizState } from "../useQuizState";
 import { hasSelection } from "../answer";
 import type {
     QuizAnswer,

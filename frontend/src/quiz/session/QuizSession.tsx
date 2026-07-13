@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from "react";
 import { useQuizSession } from "./useQuizSession";
 import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 import SessionSidebar from "./SessionSidebar";
 import EditorPane from "./EditorPane";
 import { drillLabel } from "./labels";
 import { canCheckAnswer } from "../answer";
-import { stemDomId } from "../questions/QuestionPrompt";
+import { useCheckFeedback } from "../useCheckFeedback";
 import type { QuizQuestion } from "../types/quiz-types";
 
 type Props = {
@@ -23,34 +22,15 @@ const QuizSession = ({ quizId, questions }: Props) => {
     const currentError = currentQuestion
         ? session.errors[currentQuestion.id]
         : undefined;
-    const pendingStemFocus = useRef<FocusOptions | null>(null);
-    const pendingAnnounce = useRef(false);
-    const [liveMessage, setLiveMessage] = useState("");
-
-    useEffect(() => {
-        if (pendingAnnounce.current && (currentResult || currentError)) {
-            pendingAnnounce.current = false;
-            setLiveMessage(
-                currentResult
-                    ? currentResult.isCorrect
-                        ? "Correct"
-                        : "Incorrect"
-                    : "",
-            );
-        }
-        if (pendingStemFocus.current && currentQuestion) {
-            const focusOptions = pendingStemFocus.current;
-            pendingStemFocus.current = null;
-            document
-                .getElementById(stemDomId(currentQuestion.id))
-                ?.focus(focusOptions);
-        }
-    }, [currentIndex, currentQuestion, currentResult, currentError]);
+    const feedback = useCheckFeedback(
+        currentQuestion?.id,
+        currentResult,
+        currentError,
+    );
 
     function navigate(index: number) {
         if (index < 0 || index >= total) return;
-        pendingStemFocus.current = { preventScroll: false };
-        setLiveMessage("");
+        feedback.armNavigate();
         goTo(index);
     }
 
@@ -64,8 +44,7 @@ const QuizSession = ({ quizId, questions }: Props) => {
         if (!canCheckAnswer(currentQuestion, answer, currentResult, checking)) {
             return;
         }
-        pendingStemFocus.current = { preventScroll: true };
-        pendingAnnounce.current = true;
+        feedback.armCheck(currentQuestion.id);
         checkAnswer(currentQuestion);
     }
 
@@ -93,7 +72,7 @@ const QuizSession = ({ quizId, questions }: Props) => {
             <EditorPane
                 session={session}
                 drillName={drillName}
-                liveMessage={liveMessage}
+                liveMessage={feedback.liveMessage}
                 onNavigate={navigate}
                 onCheck={checkCurrent}
             />

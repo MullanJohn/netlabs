@@ -1,7 +1,7 @@
 import { memo, useState } from "react";
 import type { QuizQuestion, SubmissionResult } from "../types/quiz-types";
 import { useStopwatch, formatElapsed } from "./useStopwatch";
-import { questionTypeLabel } from "./labels";
+import QuestionInfo from "../QuestionInfo";
 import QuestionNavigator from "./QuestionNavigator";
 import FinishDrillDialog from "./FinishDrillDialog";
 
@@ -74,18 +74,7 @@ const SessionSidebar = ({
                     <div className="sb-h">
                         <span>This question</span>
                     </div>
-                    <div className="q-info">
-                        <div className="cell">
-                            <div className="lab">type</div>
-                            <div className="val accent">
-                                {questionTypeLabel(currentQuestion.question_type)}
-                            </div>
-                        </div>
-                        <div className="cell">
-                            <div className="lab">topic</div>
-                            <div className="val">{currentQuestion.topic_id}</div>
-                        </div>
-                    </div>
+                    <QuestionInfo question={currentQuestion} />
                 </div>
             )}
 

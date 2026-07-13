@@ -3,7 +3,7 @@ import QuizSession from "./session/QuizSession";
 import QuizStatus from "./QuizStatus";
 import PracticeQuestionPage from "./practice/PracticeQuestionPage";
 import { fetchQuizQuestions } from "../data/quiz-client";
-import { ApiError, transportErrorMessage } from "../data/api-client";
+import { loadErrorMessage } from "../data/api-client";
 import type { QuizQuestion } from "./types/quiz-types";
 
 const QuizAttemptPage = () => {
@@ -28,7 +28,13 @@ const QuizLoader = ({ slug }: { slug: string }) => {
             .then(setQuestions)
             .catch((err: unknown) => {
                 if (controller.signal.aborted) return; // unmounted / slug changed
-                setError(loadErrorMessage(err));
+                setError(
+                    loadErrorMessage(
+                        err,
+                        "Quiz not found.",
+                        "Something went wrong loading this quiz.",
+                    ),
+                );
             });
 
         return () => controller.abort();
@@ -44,15 +50,6 @@ const QuizLoader = ({ slug }: { slug: string }) => {
 function readParam(name: string): string | null {
     if (typeof window === "undefined") return null;
     return new URLSearchParams(window.location.search).get(name) || null;
-}
-
-function loadErrorMessage(error: unknown): string {
-    if (error instanceof ApiError && error.kind === "notFound") {
-        return "Quiz not found.";
-    }
-    return (
-        transportErrorMessage(error) ?? "Something went wrong loading this quiz."
-    );
 }
 
 export default QuizAttemptPage;
