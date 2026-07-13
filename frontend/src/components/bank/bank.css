@@ -204,6 +204,12 @@
         color 100ms;
 }
 
+.bank-random:disabled {
+    color: var(--fg-5);
+    cursor: default;
+    pointer-events: none;
+}
+
 .bank-random svg {
     width: 15px;
     height: 15px;

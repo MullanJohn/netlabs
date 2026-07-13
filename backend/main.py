@@ -171,7 +171,7 @@ def string_map(mapping: dict[Any, Any]) -> dict[str, str]:
     return {str(key): str(value) for key, value in mapping.items()}
 
 def normalize_text_answer(value: str) -> str:
-    return " ".join(value.split()).casefold()
+    return " ".join(value.split()).lower()
 
 @app.post("/questions/{question_id}/answer", response_model=SubmissionResult)
 async def submit_standalone_answer(

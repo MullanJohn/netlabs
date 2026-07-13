@@ -5,6 +5,11 @@ import StatusBar from "../../components/shell/StatusBar.astro";
 import ThemeInit from "../../components/shell/ThemeInit.astro";
 import BankBrowseContent from "../../components/bank/BankBrowseContent.astro";
 import { trackSelectors } from "../../data/track-selectors";
+import type { TrackSelector } from "../../data/track-selectors";
+
+interface Props {
+    track: TrackSelector;
+}
 
 export function getStaticPaths() {
     return Object.values(trackSelectors).map((track) => ({
