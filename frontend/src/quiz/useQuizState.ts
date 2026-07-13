@@ -66,6 +66,7 @@ function reducer(state: QuizState, action: QuizAction): QuizState {
                 errors: { ...state.errors, [action.questionId]: undefined },
             };
         case "check-error":
+            if (state.checkingId !== action.questionId) return state;
             return {
                 ...state,
                 checkingId: null,

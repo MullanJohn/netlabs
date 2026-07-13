@@ -282,12 +282,6 @@
     }
 }
 
-.bank-random:disabled {
-    color: var(--fg-5);
-    cursor: default;
-    pointer-events: none;
-}
-
 .btn:disabled {
     border-color: var(--line);
     color: var(--fg-4);
@@ -708,6 +702,11 @@
     font-size: 14px;
     font-weight: 700;
     line-height: 1;
+}
+
+.q-opt .verdict-mark {
+    width: 1.4em;
+    text-align: center;
 }
 
 .q-zone .verdict-mark {
