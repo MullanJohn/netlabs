@@ -471,6 +471,9 @@
     border: 1px dashed var(--line-2);
     border-radius: 5px;
     background: var(--bg-2);
+    transition:
+        border-color 120ms,
+        background 120ms;
 }
 
 .q-dnd-bank-head {
@@ -513,7 +516,8 @@
         background 120ms;
 }
 
-.q-zone.over {
+.q-zone.over,
+.q-dnd-bank.over {
     border-color: var(--accent);
     background: var(--accent-bg);
 }
