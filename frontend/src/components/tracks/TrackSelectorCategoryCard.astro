@@ -3,13 +3,15 @@ import type {
     SelectorCategory,
     TrackSelector,
 } from "../../data/track-selectors";
+import type { CatalogDrill } from "../../data/catalog-types";
 
 interface Props {
     category: SelectorCategory;
     track: TrackSelector;
+    items: CatalogDrill[];
 }
 
-const { category, track } = Astro.props;
+const { category, track, items } = Astro.props;
 const href = `/${track.slug}/${category.slug}`;
 const shortcut = category.label.slice(1);
 
@@ -45,13 +47,22 @@ const moreLabel = moreLabels[category.slug];
         </div>
     </div>
 
-    <div
-        class="selector-preview"
-        data-category-preview
-        data-track-slug={track.slug}
-        data-category-slug={category.slug}
-    >
-        <span class="selector-preview-state">loading...</span>
+    <div class="selector-preview">
+        {
+            items.length === 0 ? (
+                <span class="selector-preview-state">no drills yet</span>
+            ) : (
+                items.map((item, index) => (
+                    <a class="selector-preview-row" href={item.href}>
+                        <span class="selector-preview-id">
+                            {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <span class="selector-preview-name">{item.name}</span>
+                        <b>{item.item_count} items</b>
+                    </a>
+                ))
+            )
+        }
     </div>
 
     <div class="selector-card-foot">

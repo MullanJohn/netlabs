@@ -1,6 +1,7 @@
 ---
 import { selectorCategories } from "../../data/track-selectors";
 import type { TrackSelector } from "../../data/track-selectors";
+import { loadCatalogDrills } from "../../build/db";
 import TrackSelectorCategoryCard from "./TrackSelectorCategoryCard.astro";
 
 interface Props {
@@ -8,6 +9,12 @@ interface Props {
 }
 
 const { track } = Astro.props;
+
+const previews = await Promise.all(
+    selectorCategories.map((category) =>
+        loadCatalogDrills(track.slug, category.slug, 3),
+    ),
+);
 ---
 
 <div class="top-bar">
@@ -29,67 +36,19 @@ const { track } = Astro.props;
 
     <div class="selector-grid">
         {
-            selectorCategories.map((category) => (
-                <TrackSelectorCategoryCard category={category} track={track} />
+            selectorCategories.map((category, index) => (
+                <TrackSelectorCategoryCard
+                    category={category}
+                    track={track}
+                    items={previews[index]}
+                />
             ))
         }
     </div>
 </div>
 
 <script>
-    import { fetchCatalogCategoryPreview } from "../../data/catalog-client";
-
-    const previews = document.querySelectorAll<HTMLElement>(
-        "[data-category-preview]",
-    );
     const scroller = document.querySelector<HTMLElement>(".editor-body")!;
-
-    for (const preview of previews) {
-        const trackSlug = preview.dataset.trackSlug!;
-        const categorySlug = preview.dataset.categorySlug!;
-
-        fetchCatalogCategoryPreview(trackSlug, categorySlug)
-            .then((data) => {
-                preview.replaceChildren();
-
-                if (data.items.length === 0) {
-                    const empty = document.createElement("span");
-                    empty.className = "selector-preview-state";
-                    empty.textContent = "no drills yet";
-                    preview.append(empty);
-                    return;
-                }
-
-                data.items.forEach((item, index) => {
-                    const link = document.createElement("a");
-                    link.className = "selector-preview-row";
-                    link.href = item.href;
-
-                    const id = document.createElement("span");
-                    id.className = "selector-preview-id";
-                    id.textContent = String(index + 1).padStart(2, "0");
-
-                    const name = document.createElement("span");
-                    name.className = "selector-preview-name";
-                    name.textContent = item.name;
-
-                    const count = document.createElement("b");
-                    count.textContent =
-                        item.item_count === null
-                            ? ""
-                            : `${item.item_count} items`;
-
-                    link.append(id, name, count);
-                    preview.append(link);
-                });
-            })
-            .catch(() => {
-                const error = document.createElement("span");
-                error.className = "selector-preview-state error";
-                error.textContent = "preview unavailable";
-                preview.replaceChildren(error);
-            });
-    }
 
     document.addEventListener("keydown", (event) => {
         const target = event.target;

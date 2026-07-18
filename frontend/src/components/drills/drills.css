@@ -89,10 +89,6 @@
     font-size: 12px;
 }
 
-.drill-state.error {
-    color: var(--warn);
-}
-
 .drill-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 160px 120px;

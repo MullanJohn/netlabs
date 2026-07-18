@@ -1,11 +1,23 @@
-import { useEffect, useState } from "react";
-import { fetchSampleQuestions } from "../../data/quiz-client";
+import { useEffect, useMemo, useState } from "react";
+import { fetchQuizQuestions } from "../../data/quiz-client";
 import { canCheckAnswer } from "../answer";
 import { useQuizState } from "../quiz-hook";
 import SampleQuestion from "./SampleQuestion";
 import type { QuizQuestion } from "../types/quiz-types";
 
 const SAMPLE_TYPES = ["mcq-single", "mcq-multi", "multi-tf", "fill-blank"];
+
+function sampleQuestions(
+    pool: readonly QuizQuestion[],
+    count: number,
+): QuizQuestion[] {
+    const picked = [...pool];
+    for (let i = picked.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [picked[i], picked[j]] = [picked[j], picked[i]];
+    }
+    return picked.slice(0, count);
+}
 
 type Props = {
     quizSlug?: string;
@@ -16,7 +28,7 @@ const SampleQuiz = ({
     quizSlug = "ccna-review-all-domains",
     count = 3,
 }: Props) => {
-    const [questions, setQuestions] = useState<QuizQuestion[] | null>(null);
+    const [pool, setPool] = useState<QuizQuestion[] | null>(null);
     const [failed, setFailed] = useState(false);
     const [index, setIndex] = useState(0);
     const [round, setRound] = useState(0);
@@ -24,18 +36,29 @@ const SampleQuiz = ({
 
     useEffect(() => {
         const controller = new AbortController();
-        setQuestions(null);
+        setPool(null);
         setFailed(false);
         setIndex(0);
 
-        fetchSampleQuestions(quizSlug, count, SAMPLE_TYPES, controller.signal)
-            .then(setQuestions)
+        fetchQuizQuestions(quizSlug, controller.signal)
+            .then((questions) =>
+                setPool(
+                    questions.filter((question) =>
+                        SAMPLE_TYPES.includes(question.question_type),
+                    ),
+                ),
+            )
             .catch(() => {
                 if (!controller.signal.aborted) setFailed(true);
             });
 
         return () => controller.abort();
-    }, [quizSlug, count, round]);
+    }, [quizSlug]);
+
+    const questions = useMemo(
+        () => (pool === null ? null : sampleQuestions(pool, count)),
+        [pool, count, round],
+    );
 
     if (failed || questions?.length === 0) {
         return (
@@ -74,6 +97,7 @@ const SampleQuiz = ({
                         type="button"
                         onClick={() => {
                             quiz.reset();
+                            setIndex(0);
                             setRound((value) => value + 1);
                         }}
                     >
