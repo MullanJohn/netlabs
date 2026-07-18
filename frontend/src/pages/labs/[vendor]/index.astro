@@ -1,0 +1,64 @@
+---
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import AppShell from "../../../layouts/AppShell.astro";
+import TopNav from "../../../components/nav/TopNav.astro";
+import StatusBar from "../../../components/shell/StatusBar.astro";
+import ThemeInit from "../../../components/shell/ThemeInit.astro";
+import LabsBrowseContent from "../../../components/labs/LabsBrowseContent.astro";
+import { LAB_VENDORS, type LabVendor } from "../../../labs/taxonomy";
+
+export async function getStaticPaths() {
+    const labs = await getCollection("labs");
+    return (Object.keys(LAB_VENDORS) as LabVendor[]).map((vendor) => ({
+        params: { vendor },
+        props: {
+            vendor,
+            labs: labs
+                .filter((lab) => lab.data.vendor === vendor)
+                .sort((a, b) => a.data.number - b.data.number),
+        },
+    }));
+}
+
+interface Props {
+    vendor: LabVendor;
+    labs: CollectionEntry<"labs">[];
+}
+
+const { vendor, labs } = Astro.props;
+const vendorInfo = LAB_VENDORS[vendor];
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+            name="description"
+            content={`Hands-on ${vendorInfo.name} ${vendorInfo.platform} Containerlab labs.`}
+        />
+        <meta name="generator" content={Astro.generator} />
+        <ThemeInit />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <link
+            rel="preload"
+            href="/fonts/jetbrains-mono-latin-wght-normal.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <title>netlabs · {vendor} labs</title>
+    </head>
+    <body>
+        <AppShell>
+            <TopNav slot="nav" />
+
+            <LabsBrowseContent vendor={vendor} labs={labs} />
+
+            <StatusBar slot="status" branch={`labs/${vendor}`} />
+        </AppShell>
+    </body>
+</html>

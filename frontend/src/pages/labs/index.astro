@@ -1,0 +1,104 @@
+---
+import { getCollection } from "astro:content";
+import AppShell from "../../layouts/AppShell.astro";
+import TopNav from "../../components/nav/TopNav.astro";
+import StatusBar from "../../components/shell/StatusBar.astro";
+import ThemeInit from "../../components/shell/ThemeInit.astro";
+import { examLabel, LAB_VENDORS, type LabVendor } from "../../labs/taxonomy";
+
+const labs = await getCollection("labs");
+
+const descriptions: Record<LabVendor, string> = {
+    cisco: "IOL-based labs from STP fundamentals through BGP, security, services and automation.",
+    arista: "cEOS-based labs from EOS fundamentals through MLAG, L3LS and EVPN-VXLAN overlays.",
+};
+
+const vendors = (Object.keys(LAB_VENDORS) as LabVendor[]).map((vendor) => {
+    const vendorLabs = labs.filter((lab) => lab.data.vendor === vendor);
+    const exams = [
+        ...new Set(vendorLabs.flatMap((lab) => lab.data.exams)),
+    ].map((exam) => examLabel(exam));
+    return {
+        ...LAB_VENDORS[vendor],
+        description: descriptions[vendor],
+        count: vendorLabs.length,
+        exams,
+    };
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+            name="description"
+            content="Hands-on Containerlab networking labs for Cisco IOS and Arista EOS."
+        />
+        <meta name="generator" content={Astro.generator} />
+        <ThemeInit />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <link
+            rel="preload"
+            href="/fonts/jetbrains-mono-latin-wght-normal.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <title>netlabs · labs</title>
+    </head>
+    <body>
+        <AppShell>
+            <TopNav slot="nav" />
+
+            <div class="top-bar">
+                <div class="breadcrumb">
+                    netlabs <span class="chev">/</span>
+                    <b>labs</b>
+                </div>
+            </div>
+
+            <div class="editor-body inner-page labs-page page-col">
+                <section class="inner-hero">
+                    <div>
+                        <h1>Labs<span>/containerlab</span></h1>
+                        <p>
+                            The lab catalog, split by platform. Labs run
+                            locally with Containerlab.
+                        </p>
+                    </div>
+                </section>
+
+                <div class="drills">
+                    {
+                        vendors.map((vendor) => (
+                            <a class="drill-row" href={`/labs/${vendor.slug}/`}>
+                                <span class="body">
+                                    <span class="name">
+                                        {`${vendor.name} ${vendor.platform}`}
+                                    </span>
+                                    <span class="desc">
+                                        {vendor.description}
+                                    </span>
+                                </span>
+                                <span class="meta">
+                                    <span>
+                                        <b>{vendor.count}</b> labs
+                                    </span>
+                                    <span>{vendor.exams.join(" · ")}</span>
+                                </span>
+                                <span class="cta">
+                                    <span class="start">browse →</span>
+                                </span>
+                            </a>
+                        ))
+                    }
+                </div>
+            </div>
+
+            <StatusBar slot="status" branch="labs" />
+        </AppShell>
+    </body>
+</html>

@@ -1,4 +1,5 @@
 ---
+import ShortcutHelp from "../shell/ShortcutHelp.astro";
 import type { TrackSelector } from "../../data/track-selectors";
 import type { QuizQuestion } from "../../quiz/types/quiz-types";
 import { questionTypeLabel } from "../../quiz/session/labels";
@@ -32,13 +33,9 @@ const questionTypes: QuizQuestion["question_type"][] = [
         <span class="chev">/</span>
         <b>browse</b>
     </div>
-    <div class="right">
-        <span><span class="kbd">/</span> search</span>
-        <span><span class="kbd">↑</span><span class="kbd">↓</span> move</span>
-    </div>
 </div>
 
-<div class="editor-body inner-page bank-page" data-bank-page data-track-slug={track.slug}>
+<div class="editor-body inner-page bank-page page-col" data-bank-page data-track-slug={track.slug}>
     <script
         type="application/json"
         data-bank-topics
@@ -47,7 +44,6 @@ const questionTypes: QuizQuestion["question_type"][] = [
     <section class="inner-hero">
         <div>
             <h1>Question bank<span>/all</span></h1>
-            <p>Every question in the bank, one row each.</p>
         </div>
     </section>
 
@@ -129,6 +125,12 @@ const questionTypes: QuizQuestion["question_type"][] = [
                     <path d="m18 14 4 4-4 4" />
                 </svg>
             </button>
+            <button
+                class="bank-help"
+                type="button"
+                aria-label="Keyboard shortcuts"
+                data-kbd-open>?</button
+            >
         </div>
         <ul class="bank-applied" role="list" data-bank-applied hidden></ul>
     </div>
@@ -153,15 +155,6 @@ const questionTypes: QuizQuestion["question_type"][] = [
                     ><span class="visually-hidden" data-bank-note></span>
                 </button>
             </span>
-            <span class="qdom">
-                <button type="button" class="qsort" data-bank-sort="domain">
-                    <span class="visually-hidden">sort by </span>domain<span
-                        class="qsort-arrow"
-                        aria-hidden="true"
-                        data-bank-arrow>↕</span
-                    ><span class="visually-hidden" data-bank-note></span>
-                </button>
-            </span>
             <span class="qtopic">topic</span>
             <span class="qtype">
                 <button type="button" class="qsort" data-bank-sort="type">
@@ -179,6 +172,8 @@ const questionTypes: QuizQuestion["question_type"][] = [
         <div class="bank-sentinel" data-bank-sentinel></div>
     </div>
 </div>
+
+<ShortcutHelp />
 
 <script>
     import { fetchBankQuestions } from "../../data/bank-client";
@@ -334,9 +329,6 @@ const questionTypes: QuizQuestion["question_type"][] = [
         const stem = buildCell("qstem");
         appendHighlighted(stem, question.stem, true);
 
-        const dom = buildCell("qdom");
-        dom.textContent = question.topic_id;
-
         const topic = buildCell("qtopic");
         const title = topicTitles.get(question.sub_topic_id) ?? "";
         topic.title = title;
@@ -353,7 +345,7 @@ const questionTypes: QuizQuestion["question_type"][] = [
         const type = buildCell("qtype");
         type.textContent = questionTypeShort(question.question_type);
 
-        row.append(num, stem, dom, topic, type);
+        row.append(num, stem, topic, type);
         return row;
     }
 
@@ -571,7 +563,6 @@ const questionTypes: QuizQuestion["question_type"][] = [
     const SORT_LABELS: Record<BankSortKey, string> = {
         id: "catalog #",
         stem: "question",
-        domain: "domain",
         type: "type",
     };
 

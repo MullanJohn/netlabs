@@ -1,0 +1,48 @@
+---
+import { LAB_VENDORS } from "../../labs/taxonomy";
+
+interface Props {
+    currentVendor?: string;
+    isActive?: boolean;
+}
+
+const { currentVendor, isActive = false } = Astro.props;
+
+const vendors = Object.values(LAB_VENDORS);
+---
+
+<div class="track-nav" data-track-nav>
+    <button
+        type="button"
+        class="track-btn"
+        aria-expanded="false"
+        aria-controls="labs-menu"
+        data-active={isActive ? "" : undefined}
+    >
+        Labs
+        {isActive && <span class="visually-hidden"> (current section)</span>}
+        <span class="track-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="track-menu" id="labs-menu" hidden>
+        <div class="track-menu-h" id="labs-group-containerlab">containerlab</div>
+        <ul aria-labelledby="labs-group-containerlab">
+            {
+                vendors.map((vendor) => (
+                    <li>
+                        <a
+                            href={`/labs/${vendor.slug}/`}
+                            aria-current={
+                                isActive && vendor.slug === currentVendor
+                                    ? "page"
+                                    : undefined
+                            }
+                        >
+                            <span>{vendor.name}</span>
+                            <span class="meta">{vendor.platform}</span>
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,641 @@
+.lhead,
+.lrow {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) 118px 70px;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 12px;
+}
+
+.lhead {
+    border-bottom: 1px solid var(--line-2);
+    color: var(--fg-4);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.lrow {
+    border-bottom: 1px solid var(--line);
+    color: inherit;
+    font-size: 12.5px;
+    text-decoration: none;
+    transition: background 120ms;
+}
+
+@media (hover: hover) {
+    .lrow:hover {
+        background: color-mix(in srgb, var(--bg-2) 80%, var(--accent-bg));
+    }
+}
+
+.lrow:focus {
+    background: var(--accent-bg);
+    box-shadow: inset 2px 0 0 var(--accent);
+    outline: none;
+}
+
+.lrow > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lrow .lnum {
+    color: var(--fg-4);
+    font-family: var(--font-code);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.lrow:hover .lnum,
+.lrow:focus .lnum {
+    color: var(--accent);
+}
+
+.lrow .lname {
+    color: var(--fg-2);
+}
+
+.lrow .lname small {
+    margin-left: 10px;
+    color: var(--fg-4);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+}
+
+.lrow .ltime {
+    color: var(--fg-3);
+    font-family: var(--font-code);
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+}
+
+.lrow mark {
+    background: var(--accent-bg);
+    color: inherit;
+    border-radius: 2px;
+}
+
+.lab-badge {
+    --meter-dim: color-mix(in srgb, currentColor 25%, transparent);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 3px 9px;
+    border: 1px solid;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    font-style: normal;
+    letter-spacing: 0.02em;
+}
+
+.lab-badge::before {
+    content: "";
+    flex: none;
+    width: 14px;
+    height: 8px;
+    background-repeat: no-repeat;
+    background-size: 4px 8px;
+    background-position:
+        0 50%,
+        5px 50%,
+        10px 50%;
+}
+
+.lab-badge.foundation::before {
+    background-image:
+        linear-gradient(currentColor, currentColor),
+        linear-gradient(var(--meter-dim), var(--meter-dim)),
+        linear-gradient(var(--meter-dim), var(--meter-dim));
+}
+
+.lab-badge.advanced::before {
+    background-image:
+        linear-gradient(currentColor, currentColor),
+        linear-gradient(currentColor, currentColor),
+        linear-gradient(var(--meter-dim), var(--meter-dim));
+}
+
+.lab-badge.expert::before {
+    background-image:
+        linear-gradient(currentColor, currentColor),
+        linear-gradient(currentColor, currentColor),
+        linear-gradient(currentColor, currentColor);
+}
+
+.lab-badge.foundation {
+    color: var(--diff-1);
+    border-color: color-mix(in srgb, var(--diff-1) 35%, transparent);
+    background: color-mix(in srgb, var(--diff-1) 9%, transparent);
+}
+
+.lab-badge.advanced {
+    color: var(--diff-2);
+    border-color: color-mix(in srgb, var(--diff-2) 35%, transparent);
+    background: color-mix(in srgb, var(--diff-2) 9%, transparent);
+}
+
+.lab-badge.expert {
+    color: var(--fg);
+    border-color: color-mix(in srgb, var(--fg) 30%, transparent);
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+}
+
+.labs-guides {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+    color: var(--fg-4);
+    font-size: 12px;
+}
+
+.labs-guides a {
+    padding-bottom: 1px;
+    border-bottom: 1px dashed var(--accent-ln);
+    color: var(--accent);
+}
+
+@media (hover: hover) {
+    .labs-guides a:hover {
+        border-bottom-color: var(--fg);
+        color: var(--fg);
+    }
+}
+
+@media (max-width: 640px) {
+    .lhead,
+    .lrow {
+        grid-template-columns: 44px minmax(0, 1fr) 100px;
+    }
+
+    .lhead .ltime,
+    .lrow .ltime {
+        display: none;
+    }
+
+    .lrow .lab-badge::before {
+        display: none;
+    }
+}
+
+.lab-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    color: var(--fg-3);
+    font-family: var(--font-code);
+    font-size: 11.5px;
+}
+
+.lab-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.lab-actions a:not(.btn) {
+    padding-bottom: 1px;
+    border-bottom: 1px dashed var(--accent-ln);
+    color: var(--accent);
+    font-size: 12px;
+}
+
+@media (hover: hover) {
+    .lab-actions a:not(.btn):hover {
+        border-bottom-color: var(--fg);
+        color: var(--fg);
+    }
+}
+
+.lab-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px 32px;
+}
+
+.lab-head > :first-child {
+    flex: 1 1 340px;
+    min-width: 0;
+}
+
+.lab-head h1 {
+    margin-bottom: 12px;
+    text-wrap: balance;
+}
+
+.lab-cta {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding-top: 6px;
+}
+
+.lab-cta-links {
+    display: flex;
+    gap: 14px;
+    font-size: 12px;
+}
+
+.lab-cta-links a {
+    padding-bottom: 1px;
+    border-bottom: 1px dashed var(--accent-ln);
+    color: var(--accent);
+}
+
+@media (hover: hover) {
+    .lab-cta-links a:hover {
+        border-bottom-color: var(--fg);
+        color: var(--fg);
+    }
+}
+
+.lab-toc {
+    padding: 12px 16px 13px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--bg-2);
+}
+
+.lab-toc .toc-label {
+    display: block;
+    margin-bottom: 9px;
+    color: var(--fg-5);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.lab-toc .toc-label::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 1px;
+    margin: 0 10px 3px 0;
+    background: var(--accent);
+    vertical-align: middle;
+}
+
+.lab-toc .toc-links {
+    display: grid;
+    justify-items: start;
+    gap: 4px;
+    counter-reset: toc;
+}
+
+.lab-toc a {
+    counter-increment: toc;
+    color: var(--fg-3);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1.7;
+}
+
+.lab-toc a::before {
+    content: counter(toc, decimal-leading-zero);
+    margin-right: 9px;
+    color: var(--fg-5);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (hover: hover) {
+    .lab-toc a:hover {
+        color: var(--accent);
+    }
+
+    .lab-toc a:hover::before {
+        color: var(--accent);
+    }
+}
+
+.lab-refs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    color: var(--fg-4);
+    font-family: var(--font-code);
+    font-size: 11.5px;
+}
+
+.lab-doc > :first-child {
+    margin-top: 0;
+}
+
+.lab-doc h2 {
+    margin: 44px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+    color: var(--fg);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.lab-doc h2::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 1px;
+    margin: 0 12px 3px 0;
+    background: var(--accent);
+    vertical-align: middle;
+}
+
+.lab-doc h3 {
+    margin: 32px 0 12px;
+    color: var(--fg);
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.lab-doc h4 {
+    margin: 24px 0 8px;
+    color: var(--fg);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.lab-doc p,
+.lab-doc li {
+    max-width: var(--measure);
+    color: var(--fg-2);
+    font-family: var(--font-prose);
+    font-size: 16px;
+    line-height: 1.65;
+}
+
+.lab-doc p {
+    margin: 0 0 12px;
+}
+
+.lab-doc ul,
+.lab-doc ol {
+    margin: 0 0 14px;
+    padding-left: 24px;
+}
+
+.lab-doc li {
+    margin-bottom: 4px;
+}
+
+.lab-doc input[type="checkbox"] {
+    margin-right: 7px;
+    accent-color: var(--accent);
+}
+
+.lab-doc .contains-task-list {
+    padding-left: 2px;
+    list-style: none;
+}
+
+.lab-doc a {
+    padding-bottom: 1px;
+    border-bottom: 1px dashed var(--accent-ln);
+    color: var(--accent);
+}
+
+@media (hover: hover) {
+    .lab-doc a:hover {
+        border-bottom-color: var(--fg);
+        color: var(--fg);
+    }
+}
+
+.lab-doc strong {
+    color: var(--fg);
+}
+
+.lab-doc code {
+    font-family: var(--font-code);
+    font-size: 0.9em;
+}
+
+.lab-doc :not(pre) > code {
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--surface) 60%, transparent);
+    color: var(--fg);
+}
+
+.lab-doc blockquote {
+    margin: 0 0 14px;
+    padding: 10px 18px;
+    border-left: 2px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+    background: var(--bg-2);
+}
+
+.lab-doc blockquote p {
+    margin: 0 0 6px;
+    color: var(--fg-2);
+    font-size: 15px;
+}
+
+.lab-doc blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+.lab-doc blockquote strong {
+    color: var(--accent);
+}
+
+.lab-doc details {
+    margin: 0 0 12px;
+    padding: 0 16px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--bg-2);
+}
+
+.lab-doc details summary {
+    margin: 0 -16px;
+    padding: 10px 16px;
+    color: var(--fg-2);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@media (hover: hover) {
+    .lab-doc details summary:hover {
+        color: var(--fg);
+    }
+}
+
+.lab-doc details[open] {
+    padding-bottom: 6px;
+}
+
+.lab-doc details[open] summary {
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    color: var(--accent);
+}
+
+.lab-doc hr {
+    border: 0;
+    border-top: 1px dashed var(--line-2);
+    margin: 32px 0;
+}
+
+.lab-doc img {
+    display: block;
+    max-width: min(100%, 720px);
+    margin: 6px 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: #fff;
+}
+
+.lab-doc table {
+    display: block;
+    max-width: 100%;
+    margin: 0 0 16px;
+    border-collapse: collapse;
+    overflow-x: auto;
+    font-variant-numeric: tabular-nums;
+}
+
+.lab-doc th {
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--line-2);
+    color: var(--fg-4);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.lab-doc td {
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--line);
+    color: var(--fg-2);
+    font-family: var(--font-code);
+    font-size: 12px;
+}
+
+@media (hover: hover) {
+    .lab-doc tbody tr:hover td {
+        background: color-mix(in srgb, var(--surface) 60%, transparent);
+    }
+}
+
+.lab-doc pre {
+    margin: 0 0 14px;
+    padding: 13px 16px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 12.5px;
+    line-height: 1.45;
+}
+
+.lab-doc pre.lab-ticket {
+    max-width: var(--measure);
+    padding: 14px 18px;
+    border-left: 2px solid var(--err);
+    background: var(--bg-2);
+    color: var(--fg-2);
+    font-family: var(--font-prose);
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.lab-check {
+    padding-left: 18px;
+    border-left: 2px solid color-mix(in srgb, var(--ok) 55%, transparent);
+}
+
+.lab-check input[type="checkbox"] {
+    accent-color: var(--ok);
+}
+
+.lab-doc .astro-code {
+    background: var(--bg-2) !important;
+}
+
+.astro-code span {
+    color: var(--shiki-dark);
+}
+
+[data-theme="light"] .astro-code span {
+    color: var(--shiki-light);
+}
+
+.lab-code {
+    position: relative;
+}
+
+.lab-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 3px 9px;
+    border: 1px solid var(--line-2);
+    border-radius: 3px;
+    background: var(--surface);
+    color: var(--fg-3);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    opacity: 0;
+    transition:
+        opacity 120ms,
+        color 120ms,
+        border-color 120ms;
+}
+
+.lab-code:hover .lab-copy,
+.lab-copy:focus-visible {
+    opacity: 1;
+}
+
+.lab-copy.done {
+    border-color: var(--ok);
+    color: var(--ok);
+}
+
+.lab-prevnext {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 8px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+}
+
+.lab-prevnext .next {
+    margin-left: auto;
+}
+
+.lab-prevnext a {
+    color: var(--fg-3);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (hover: hover) {
+    .lab-prevnext a:hover {
+        color: var(--accent);
+    }
+}
+

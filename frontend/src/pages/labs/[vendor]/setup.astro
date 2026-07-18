@@ -1,0 +1,36 @@
+---
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import LabDocPage from "../../../components/labs/LabDocPage.astro";
+
+export async function getStaticPaths() {
+    const guides = await getCollection("labGuides");
+    return guides.map((guide) => ({
+        params: { vendor: guide.id },
+        props: { guide },
+    }));
+}
+
+interface Props {
+    guide: CollectionEntry<"labGuides">;
+}
+
+const { guide } = Astro.props;
+---
+
+<LabDocPage
+    entry={guide}
+    heroTitle={guide.data.title}
+    tabTitle={`${guide.id} labs setup`}
+    description={`Prerequisites, access and lifecycle guide for the ${guide.id} labs.`}
+    branch={`labs/${guide.id}/setup`}
+    crumbs={[
+        { href: "/labs/", label: "labs" },
+        { href: `/labs/${guide.id}/`, label: guide.id },
+        { label: "setup" },
+    ]}
+>
+    <div slot="actions" class="lab-actions">
+        <a href={`/labs/${guide.id}/`}>← browse {guide.id} labs</a>
+    </div>
+</LabDocPage>

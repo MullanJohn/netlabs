@@ -1,0 +1,92 @@
+---
+import { render } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import AppShell from "../../layouts/AppShell.astro";
+import TopNav from "../nav/TopNav.astro";
+import StatusBar from "../shell/StatusBar.astro";
+import ThemeInit from "../shell/ThemeInit.astro";
+import LabDoc from "./LabDoc.astro";
+import LabToc from "./LabToc.astro";
+
+interface Crumb {
+    href?: string;
+    label: string;
+}
+
+interface Props {
+    entry:
+        | CollectionEntry<"labSolutions">
+        | CollectionEntry<"labExtras">
+        | CollectionEntry<"labGuides">;
+    heroTitle: string;
+    tabTitle: string;
+    description: string;
+    branch: string;
+    crumbs: Crumb[];
+}
+
+const { entry, heroTitle, tabTitle, description, branch, crumbs } = Astro.props;
+const { Content, headings } = await render(entry);
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content={description} />
+        <meta name="generator" content={Astro.generator} />
+        <ThemeInit />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <link
+            rel="preload"
+            href="/fonts/jetbrains-mono-latin-wght-normal.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <title>netlabs · {tabTitle}</title>
+    </head>
+    <body>
+        <AppShell>
+            <TopNav slot="nav" />
+
+            <div class="top-bar">
+                <div class="breadcrumb">
+                    netlabs
+                    {
+                        crumbs.map((crumb) => (
+                            <>
+                                <span class="chev">/</span>
+                                {crumb.href ? (
+                                    <a href={crumb.href}>{crumb.label}</a>
+                                ) : (
+                                    <b>{crumb.label}</b>
+                                )}
+                            </>
+                        ))
+                    }
+                </div>
+            </div>
+
+            <div class="editor-body inner-page page-col">
+                <section class="inner-hero">
+                    <div>
+                        <h1>{heroTitle}</h1>
+                    </div>
+                </section>
+
+                <slot name="actions" />
+
+                <LabToc headings={headings} />
+
+                <LabDoc>
+                    <Content />
+                </LabDoc>
+            </div>
+
+            <StatusBar slot="status" branch={branch} />
+        </AppShell>
+    </body>
+</html>

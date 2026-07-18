@@ -1,6 +1,7 @@
 ---
 import BrandLogo from "./BrandLogo.astro";
 import GitHubStarButton from "./GitHubStarButton.astro";
+import LabsDropdown from "./LabsDropdown.astro";
 import ThemeSwitch from "./ThemeSwitch.astro";
 import TrackDropdown from "./TrackDropdown.astro";
 import { trackSelectors } from "../../data/track-selectors";
@@ -9,7 +10,14 @@ const tracks = Object.values(trackSelectors);
 const pathname = Astro.url.pathname.replace(/\/+$/, "");
 const [, firstSegment, secondSegment] = pathname.split("/");
 const current = tracks.find((track) => track.slug === firstSegment);
-const area = !current ? null : secondSegment === "bank" ? "bank" : "quizzes";
+const area =
+    firstSegment === "labs"
+        ? "labs"
+        : !current
+          ? null
+          : secondSegment === "bank"
+            ? "bank"
+            : "quizzes";
 ---
 
 <div class="nav-row">
@@ -30,7 +38,10 @@ const area = !current ? null : secondSegment === "bank" ? "bank" : "quizzes";
             currentSlug={current?.slug}
             isActive={area === "bank"}
         />
-        <span class="nav-soon">Labs <small>soon</small></span>
+        <LabsDropdown
+            currentVendor={secondSegment}
+            isActive={area === "labs"}
+        />
     </div>
 
     <div class="nav-cta">

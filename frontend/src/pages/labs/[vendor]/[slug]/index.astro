@@ -1,0 +1,161 @@
+---
+import { getCollection, render } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import AppShell from "../../../../layouts/AppShell.astro";
+import TopNav from "../../../../components/nav/TopNav.astro";
+import StatusBar from "../../../../components/shell/StatusBar.astro";
+import ThemeInit from "../../../../components/shell/ThemeInit.astro";
+import LabDoc from "../../../../components/labs/LabDoc.astro";
+import LabToc from "../../../../components/labs/LabToc.astro";
+
+export async function getStaticPaths() {
+    const labs = (await getCollection("labs")).sort(
+        (a, b) =>
+            a.data.vendor.localeCompare(b.data.vendor) ||
+            a.data.number - b.data.number,
+    );
+    return labs.map((lab, index) => {
+        const prev = labs[index - 1];
+        const next = labs[index + 1];
+        return {
+            params: { vendor: lab.data.vendor, slug: lab.data.slug },
+            props: {
+                lab,
+                prev: prev?.data.vendor === lab.data.vendor ? prev : null,
+                next: next?.data.vendor === lab.data.vendor ? next : null,
+            },
+        };
+    });
+}
+
+interface Props {
+    lab: CollectionEntry<"labs">;
+    prev: CollectionEntry<"labs"> | null;
+    next: CollectionEntry<"labs"> | null;
+}
+
+const { lab, prev, next } = Astro.props;
+const { data } = lab;
+const { Content, headings } = await render(lab);
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content={data.topologySummary || data.title} />
+        <meta name="generator" content={Astro.generator} />
+        <ThemeInit />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <link
+            rel="preload"
+            href="/fonts/jetbrains-mono-latin-wght-normal.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <title>netlabs · {data.title}</title>
+    </head>
+    <body>
+        <AppShell>
+            <TopNav slot="nav" />
+
+            <div class="top-bar">
+                <div class="breadcrumb">
+                    netlabs <span class="chev">/</span>
+                    <a href="/labs/">labs</a>
+                    <span class="chev">/</span>
+                    <a href={`/labs/${data.vendor}/`}>{data.vendor}</a>
+                    <span class="chev">/</span>
+                    <b>{data.slug}</b>
+                </div>
+            </div>
+
+            <div class="editor-body inner-page page-col">
+                <section class="inner-hero">
+                    <div class="lab-head">
+                        <div>
+                            <h1>{data.title}</h1>
+                            <div class="lab-facts">
+                                <i class={`lab-badge ${data.difficulty.toLowerCase()}`}>
+                                    {data.difficulty.toLowerCase()}
+                                </i>
+                                {data.estTime && <span>{data.estTime}</span>}
+                                <span>{data.deviceCount} devices</span>
+                            </div>
+                        </div>
+                        <div class="lab-cta">
+                            <a class="btn primary" href={data.zipUrl} download>
+                                download lab bundle
+                            </a>
+                            <div class="lab-cta-links">
+                                <a href={`/labs/${data.vendor}/setup/`}>
+                                    setup guide
+                                </a>
+                                {
+                                    data.hasAnswer && (
+                                        <a href={`/labs/${lab.id}/solutions/`}>
+                                            solutions →
+                                        </a>
+                                    )
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <LabToc headings={headings} />
+
+                <LabDoc>
+                    <Content />
+                </LabDoc>
+
+                {
+                    (data.examMapping || data.references) && (
+                        <p class="lab-refs">
+                            {data.examMapping && (
+                                <span>exam mapping: {data.examMapping}</span>
+                            )}
+                            {data.references && (
+                                <span>references: {data.references}</span>
+                            )}
+                        </p>
+                    )
+                }
+
+                {
+                    data.hasExtra && (
+                        <div class="lab-actions">
+                            <a href={`/labs/${lab.id}/extra/`}>
+                                extra exercises →
+                            </a>
+                        </div>
+                    )
+                }
+
+                <nav class="lab-prevnext" aria-label="Adjacent labs">
+                    {
+                        prev && (
+                            <a href={`/labs/${prev.id}/`}>
+                                ← {String(prev.data.number).padStart(3, "0")}{" "}
+                                {prev.data.title}
+                            </a>
+                        )
+                    }
+                    {
+                        next && (
+                            <a class="next" href={`/labs/${next.id}/`}>
+                                {String(next.data.number).padStart(3, "0")}{" "}
+                                {next.data.title} →
+                            </a>
+                        )
+                    }
+                </nav>
+            </div>
+
+            <StatusBar slot="status" branch={`labs/${lab.id}`} />
+        </AppShell>
+    </body>
+</html>

@@ -1,0 +1,24 @@
+---
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+    headings: MarkdownHeading[];
+}
+
+const headings = Astro.props.headings.filter((heading) => heading.depth === 2);
+---
+
+{
+    headings.length > 0 && (
+        <nav class="lab-toc" aria-label="On this page">
+            <span class="toc-label">on this page</span>
+            <div class="toc-links">
+                {headings.map((heading) => (
+                    <a href={`#${heading.slug}`}>
+                        {heading.text.replace(/\s*\(optional\)$/i, "")}
+                    </a>
+                ))}
+            </div>
+        </nav>
+    )
+}
