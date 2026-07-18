@@ -19,11 +19,9 @@ const ResultOption = ({ letter, text, isCorrect, isSelected }: Props) => {
             <span className="k">{letter}</span>
             <span className="txt">{text}</span>
             {srLabel && <span className="visually-hidden">{srLabel}</span>}
-            {mark && (
-                <span className="verdict-mark" aria-hidden="true">
-                    {mark}
-                </span>
-            )}
+            <span className="verdict-mark" aria-hidden="true">
+                {mark}
+            </span>
         </div>
     );
 };

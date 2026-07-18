@@ -1,14 +1,16 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import QuestionRenderer from "../QuestionRenderer";
 import AnswerResultRenderer from "../AnswerResultRenderer";
 import QuizStatus from "../QuizStatus";
-import { useQuizState } from "../quiz-hook";
+import QuestionInfo from "../QuestionInfo";
+import CheckButton from "../CheckButton";
+import { useQuizState } from "../useQuizState";
+import { useCheckFeedback } from "../useCheckFeedback";
 import { useKeyboardShortcuts } from "../session/useKeyboardShortcuts";
-import { questionTypeLabel } from "../session/labels";
 import { canCheckAnswer } from "../answer";
 import { fetchQuestion } from "../../data/quiz-client";
 import { fetchBankQuestions } from "../../data/bank-client";
-import { ApiError, transportErrorMessage } from "../../data/api-client";
+import { loadErrorMessage } from "../../data/api-client";
 import { blueprintTopics } from "../../data/blueprint-topics";
 import {
     BANK_SORTS,
@@ -53,7 +55,13 @@ const PracticeQuestionPage = ({ questionId }: { questionId: string }) => {
             .then(setQuestion)
             .catch((err: unknown) => {
                 if (controller.signal.aborted) return; // unmounted
-                setError(loadErrorMessage(err));
+                setError(
+                    loadErrorMessage(
+                        err,
+                        "Question not found.",
+                        "Something went wrong loading this question.",
+                    ),
+                );
             });
 
         return () => controller.abort();
@@ -114,8 +122,6 @@ const PracticeQuestionPage = ({ questionId }: { questionId: string }) => {
             : undefined;
 
     const quiz = useQuizState(null);
-    const pendingAnnounce = useRef(false);
-    const [liveMessage, setLiveMessage] = useState("");
 
     const answer = question ? quiz.answers[question.id] : undefined;
     const result = question ? quiz.results[question.id] : undefined;
@@ -124,19 +130,11 @@ const PracticeQuestionPage = ({ questionId }: { questionId: string }) => {
     const canCheck = question
         ? canCheckAnswer(question, answer, result, quiz.checkingId !== null)
         : false;
-
-    useEffect(() => {
-        if (pendingAnnounce.current && (result || checkError)) {
-            pendingAnnounce.current = false;
-            setLiveMessage(
-                result ? (result.isCorrect ? "Correct" : "Incorrect") : "",
-            );
-        }
-    }, [result, checkError]);
+    const feedback = useCheckFeedback(question?.id, result, checkError);
 
     function check() {
         if (!question || !canCheck) return;
-        pendingAnnounce.current = true;
+        feedback.armCheck(question.id);
         quiz.checkAnswer(question);
     }
 
@@ -211,18 +209,7 @@ const PracticeQuestionPage = ({ questionId }: { questionId: string }) => {
                     <div className="sb-h">
                         <span>This question</span>
                     </div>
-                    <div className="q-info">
-                        <div className="cell">
-                            <div className="lab">type</div>
-                            <div className="val accent">
-                                {questionTypeLabel(question.question_type)}
-                            </div>
-                        </div>
-                        <div className="cell">
-                            <div className="lab">topic</div>
-                            <div className="val">{question.sub_topic_id}</div>
-                        </div>
-                    </div>
+                    <QuestionInfo question={question} />
                 </div>
 
                 <div className="sb-bottom">
@@ -234,7 +221,7 @@ const PracticeQuestionPage = ({ questionId }: { questionId: string }) => {
 
             <section className="pane editor">
                 <p className="visually-hidden" role="status">
-                    {liveMessage}
+                    {feedback.liveMessage}
                 </p>
                 <div className="top-bar">
                     <div className="breadcrumb">
@@ -305,19 +292,12 @@ const PracticeQuestionPage = ({ questionId }: { questionId: string }) => {
                                 ← Prev
                             </span>
                         )}
-                        <button
-                            className="btn primary"
-                            type="button"
-                            onClick={check}
+                        <CheckButton
+                            hasResult={result !== undefined}
+                            checking={checking}
                             disabled={!canCheck}
-                            aria-keyshortcuts="Enter"
-                        >
-                            {result
-                                ? "Checked"
-                                : checking
-                                  ? "Checking…"
-                                  : "Check answer"}
-                        </button>
+                            onClick={check}
+                        />
                         {next ? (
                             <a
                                 className="btn"
@@ -395,16 +375,6 @@ function bankHref(context: PracticeContext): string {
     params.delete("track");
     const encoded = params.toString();
     return `/${context.track}/bank${encoded ? `?${encoded}` : ""}`;
-}
-
-function loadErrorMessage(error: unknown): string {
-    if (error instanceof ApiError && error.kind === "notFound") {
-        return "Question not found.";
-    }
-    return (
-        transportErrorMessage(error) ??
-        "Something went wrong loading this question."
-    );
 }
 
 export default PracticeQuestionPage;

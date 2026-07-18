@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchQuizQuestions } from "../../data/quiz-client";
 import { canCheckAnswer } from "../answer";
-import { useQuizState } from "../quiz-hook";
-import SampleQuestion from "./SampleQuestion";
+import { useQuizState } from "../useQuizState";
+import { useCheckFeedback } from "../useCheckFeedback";
+import { BasicQuestionView, BasicResultView } from "../BasicFormats";
 import type { QuizQuestion } from "../types/quiz-types";
 
 const SAMPLE_TYPES = ["mcq-single", "mcq-multi", "multi-tf", "fill-blank"];
@@ -60,6 +61,13 @@ const SampleQuiz = ({
         [pool, count, round],
     );
 
+    const question =
+        questions && index < questions.length ? questions[index] : undefined;
+    const answer = question ? quiz.answers[question.id] : undefined;
+    const result = question ? quiz.results[question.id] : undefined;
+    const error = question ? quiz.errors[question.id] : undefined;
+    const feedback = useCheckFeedback(question?.id, result, error);
+
     if (failed || questions?.length === 0) {
         return (
             <div className="sample-quiz">
@@ -80,9 +88,9 @@ const SampleQuiz = ({
         );
     }
 
-    if (index >= questions.length) {
+    if (!question) {
         const score = questions.filter(
-            (question) => quiz.results[question.id]?.isCorrect,
+            (entry) => quiz.results[entry.id]?.isCorrect,
         ).length;
 
         return (
@@ -111,11 +119,7 @@ const SampleQuiz = ({
         );
     }
 
-    const question = questions[index];
-    const answer = quiz.answers[question.id];
-    const result = quiz.results[question.id];
     const checking = quiz.checkingId === question.id;
-    const error = quiz.errors[question.id];
     const canCheck = canCheckAnswer(
         question,
         answer,
@@ -124,15 +128,31 @@ const SampleQuiz = ({
     );
     const isLast = index === questions.length - 1;
 
+    function check() {
+        if (!question || !canCheck) return;
+        feedback.armCheck(question.id);
+        quiz.checkAnswer(question);
+    }
+
     return (
         <div className="sample-quiz">
-            <SampleQuestion
-                question={question}
-                answer={answer}
-                result={result}
-                onAnswer={(next) => quiz.setAnswer(question.id, next)}
-                onCheck={() => quiz.checkAnswer(question)}
-            />
+            <p className="visually-hidden" role="status">
+                {feedback.liveMessage}
+            </p>
+            {result && answer ? (
+                <BasicResultView
+                    question={question}
+                    answer={answer}
+                    result={result}
+                />
+            ) : (
+                <BasicQuestionView
+                    question={question}
+                    answer={answer}
+                    onAnswer={(next) => quiz.setAnswer(question.id, next)}
+                    onCheck={check}
+                />
+            )}
 
             {error && (
                 <p className="check-error" role="alert">
@@ -157,7 +177,7 @@ const SampleQuiz = ({
                     <button
                         className="btn primary"
                         type="button"
-                        onClick={() => quiz.checkAnswer(question)}
+                        onClick={check}
                         disabled={!canCheck}
                     >
                         {checking ? "Checking…" : "Check answer"}

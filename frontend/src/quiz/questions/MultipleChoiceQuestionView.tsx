@@ -33,6 +33,7 @@ const MultipleChoiceQuestionView = ({
                         />
                         <span className="k">{optionLetter(index)}</span>
                         <span className="txt">{option.text}</span>
+                        <span className="verdict-mark" aria-hidden="true" />
                     </label>
                 );
             })}

@@ -1,6 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type { QuizQuestion, SubmissionResult } from "../types/quiz-types";
-import { buildDrillSummary, type DrillSummary } from "./drill-summary";
+import { buildDrillSummary } from "./drill-summary";
+import type { DrillSummary } from "./drill-summary";
 import SummaryPhase from "./SummaryPhase";
 import ConfirmPhase from "./ConfirmPhase";
 

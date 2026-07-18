@@ -6,6 +6,15 @@ import ThemeInit from "../../components/shell/ThemeInit.astro";
 import CategoryDrillListContent from "../../components/drills/CategoryDrillListContent.astro";
 import CategoryDrillSidebar from "../../components/drills/CategoryDrillSidebar.astro";
 import { selectorCategories, trackSelectors } from "../../data/track-selectors";
+import type {
+    SelectorCategory,
+    TrackSelector,
+} from "../../data/track-selectors";
+
+interface Props {
+    track: TrackSelector;
+    category: SelectorCategory;
+}
 
 export function getStaticPaths() {
     return Object.values(trackSelectors).flatMap((track) =>

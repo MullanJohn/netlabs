@@ -1,6 +1,7 @@
 import type { QuizSessionApi } from "./useQuizSession";
 import QuestionRenderer from "../QuestionRenderer";
 import AnswerResultRenderer from "../AnswerResultRenderer";
+import CheckButton from "../CheckButton";
 import { canCheckAnswer } from "../answer";
 
 type Props = {
@@ -86,7 +87,7 @@ const EditorPane = ({
 
             <div className="qfoot">
                 <div className="spacer" />
-                <div className="nav-btns">
+                <nav className="nav-btns" aria-label="Question navigation">
                     <button
                         className="btn"
                         type="button"
@@ -96,19 +97,12 @@ const EditorPane = ({
                     >
                         ← Prev
                     </button>
-                    <button
-                        className="btn primary"
-                        type="button"
-                        onClick={onCheck}
+                    <CheckButton
+                        hasResult={result !== undefined}
+                        checking={checking}
                         disabled={!canCheck}
-                        aria-keyshortcuts="Enter"
-                    >
-                        {result
-                            ? "Checked"
-                            : checking
-                              ? "Checking…"
-                              : "Check answer"}
-                    </button>
+                        onClick={onCheck}
+                    />
                     <button
                         className="btn"
                         type="button"
@@ -118,7 +112,7 @@ const EditorPane = ({
                     >
                         Next →
                     </button>
-                </div>
+                </nav>
             </div>
         </section>
     );
